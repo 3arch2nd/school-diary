@@ -325,34 +325,49 @@
     </div>
 
    <script>
-        // 🚀 선생님의 GAS 서버 주소 (절대 수정 금지!)
+        // 🚀 선생님의 GAS 주소 (그대로 두세요)
         const APP_URL = "https://script.google.com/macros/s/AKfycbxn2nB0ZNXwXSdfx4-XVUWTD3Z_GCb_L2_SkhLyiKu5qrZrpwGTLM9Y4BhQRbveIk4o8Q/exec";
 
         let currentMode = 'subject';
-        let selectedStudentId = null;
+        let selectedStudentName = null; // ID 대신 이름으로 관리 (시트 연동 편의상)
         let viewTabMode = 'subject';
-
-        const students = [
-            { id: 1, name: "김철수", sub: [], beh: [] },
-            { id: 2, name: "이영희", sub: [], beh: [] },
-            { id: 3, name: "박민수", sub: [], beh: [] },
-            { id: 4, name: "최수진", sub: [], beh: [] },
-            { id: 5, name: "정다은", sub: [], beh: [] }
-        ];
+        let studentList = []; // 서버에서 받아올 명단
 
         window.onload = () => {
             document.getElementById('rDate').valueAsDate = new Date();
-            renderRecordList();
-            renderStudentNav();
+            loadStudents(); // 시작하자마자 명단 불러오기
         };
 
-        function showSection(id) {
-            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+        // --- 1. 통신 함수 (서버와 대화하는 공통 함수) ---
+        async function sendRequest(action, payload = {}) {
+            payload.action = action;
+            try {
+                const res = await fetch(APP_URL, {
+                    method: 'POST',
+                    mode: 'cors', // CORS 필수
+                    body: JSON.stringify(payload)
+                });
+                const json = await res.json();
+                if (json.result === 'error') throw new Error(json.msg);
+                return json.data;
+            } catch (err) {
+                console.error(err);
+                alert("오류 발생: " + err.message);
+                return null;
+            }
         }
 
+        // --- 2. 초기 세팅 & 학생 명단 로드 ---
+        async function loadStudents() {
+            const data = await sendRequest('get_students');
+            if (data) {
+                studentList = data;
+                renderRecordList();     // 기록하기 탭 명단 갱신
+                renderStudentNav();     // 학생관리 탭 명단 갱신
+            }
+        }
+
+        // --- 3. 기록하기 기능 ---
         function setMode(mode) {
             currentMode = mode;
             document.getElementById('btnSubject').className = mode === 'subject' ? 'btn-sm active' : 'btn-sm inactive';
@@ -362,97 +377,10 @@
             renderRecordList();
         }
 
-        // --- [핵심] 데이터 저장 기능 (GAS와 통신) ---
-        function saveData() {
-            const date = document.getElementById('rDate').value;
-            const period = document.getElementById('rPeriod').value;
-            const inputs = document.querySelectorAll('.st-input');
-            let dataToSend = [];
-
-            // 1. 입력된 칸만 찾아내기
-            inputs.forEach(input => {
-                const text = input.value.trim();
-                if (text.length > 0) {
-                    const row = input.closest('.student-row');
-                    const nameRaw = row.querySelector('.st-name').innerText; // "1. 김철수"
-                    const name = nameRaw.split('.')[1].trim(); // "김철수"
-                    
-                    // 체크박스 값 가져오기
-                    let checkVal = "없음";
-                    if(currentMode === 'subject') {
-                        const checks = row.querySelectorAll('.check-circle');
-                        if(checks[0].classList.contains('checked')) checkVal = "매우잘함";
-                        else if(checks[1].classList.contains('checked')) checkVal = "잘함";
-                        else if(checks[2].classList.contains('checked')) checkVal = "보통";
-                        else if(checks[3].classList.contains('checked')) checkVal = "노력요함";
-                    }
-
-                    // 전송할 데이터 포장
-                    dataToSend.push({
-                        date: date,
-                        name: name,
-                        type: currentMode,
-                        text: `[${period}] ${text}`, // 교시 포함
-                        check: checkVal
-                    });
-                }
-            });
-
-            if (dataToSend.length === 0) {
-                alert("기록할 내용이 없습니다. 내용을 입력해주세요!");
-                return;
-            }
-
-            // 2. 서버로 비행기 날리기 (전송)
-            // 여러 명을 한 번에 보내기 위해 하나씩 순서대로 보냅니다.
-            let successCount = 0;
-            const btn = document.querySelector('.btn-primary');
-            const orgBtnText = btn.innerText;
-            btn.innerText = "저장 중... ⏳";
-            btn.disabled = true;
-
-            // 비동기 처리를 위한 재귀 함수
-            const sendNext = (index) => {
-                if (index >= dataToSend.length) {
-                    alert(`${successCount}명의 기록이 저장되었습니다! 🎉`);
-                    btn.innerText = orgBtnText;
-                    btn.disabled = false;
-                    // 입력창 초기화
-                    document.querySelectorAll('.st-input').forEach(el => el.value = '');
-                    document.querySelectorAll('.check-circle').forEach(el => el.classList.remove('checked'));
-                    return;
-                }
-
-                const item = dataToSend[index];
-                
-                // fetch: GAS 주소로 데이터를 던지는 명령어
-                fetch(APP_URL, {
-                    method: 'POST',
-                    mode: 'cors', // 중요: 주소가 달라도 통신 허용
-                    headers: { 'Content-Type': 'text/plain' }, // GAS는 text/plain을 좋아함
-                    body: JSON.stringify(item)
-                })
-                .then(res => res.json())
-                .then(json => {
-                    if(json.result === 'success') successCount++;
-                    sendNext(index + 1); // 다음 학생 전송
-                })
-                .catch(err => {
-                    console.error('Error:', err);
-                    alert("저장 중 오류가 발생했습니다 ㅠㅠ");
-                    btn.innerText = orgBtnText;
-                    btn.disabled = false;
-                });
-            };
-
-            sendNext(0); // 첫 번째 학생부터 전송 시작
-        }
-
-        // --- UI 렌더링 관련 함수들 (기존 유지) ---
         function renderRecordList() {
             const list = document.getElementById('recordList');
             list.innerHTML = '';
-            students.forEach(st => {
+            studentList.forEach(st => {
                 const row = document.createElement('div');
                 row.className = 'student-row';
                 let checkHtml = '';
@@ -465,65 +393,224 @@
                             <div class="check-circle" onclick="toggleCheck(this)"></div>
                         </div>`;
                 }
+                // AI 스위치가 켜져있으면 입력창 옆에 마법봉 표시
                 row.innerHTML = `
                     <div class="st-name">${st.id}. ${st.name}</div>
-                    <input type="text" class="st-input" placeholder="${currentMode==='subject'?'특기사항':'관찰내용'}">
+                    <div style="flex-grow:1; position:relative;">
+                        <input type="text" class="st-input" id="input_${st.id}" placeholder="${currentMode==='subject'?'특기사항':'관찰내용'}">
+                        <span onclick="runAI('${st.id}')" style="position:absolute; right:10px; top:10px; cursor:pointer; display:none;" class="ai-magic">✨</span>
+                    </div>
                     ${checkHtml}`;
                 list.appendChild(row);
             });
+            // AI 토글 상태 반영
+            toggleAIMode(); 
         }
 
+        async function saveData() {
+            const date = document.getElementById('rDate').value;
+            const period = document.getElementById('rPeriod').value;
+            const inputs = document.querySelectorAll('.st-input');
+            let promises = [];
+
+            const btn = document.querySelector('.btn-primary');
+            btn.innerText = "저장 중... ⏳";
+            btn.disabled = true;
+
+            inputs.forEach(input => {
+                const text = input.value.trim();
+                if (text.length > 0) {
+                    const row = input.closest('.student-row');
+                    const nameRaw = row.querySelector('.st-name').innerText; 
+                    const name = nameRaw.split('.')[1].trim(); 
+                    
+                    let checkVal = "없음";
+                    if(currentMode === 'subject') {
+                        const checks = row.querySelectorAll('.check-circle');
+                        if(checks[0].classList.contains('checked')) checkVal = "매우잘함";
+                        else if(checks[1].classList.contains('checked')) checkVal = "잘함";
+                        else if(checks[2].classList.contains('checked')) checkVal = "보통";
+                        else if(checks[3].classList.contains('checked')) checkVal = "노력요함";
+                    }
+
+                    // 전송 약속(Promise) 모으기
+                    promises.push(sendRequest('save_record', {
+                        date: date, name: name, type: currentMode,
+                        text: `[${period}] ${text}`, check: checkVal
+                    }));
+                }
+            });
+
+            if (promises.length === 0) {
+                alert("저장할 내용이 없습니다.");
+                btn.innerText = "저장하기";
+                btn.disabled = false;
+                return;
+            }
+
+            await Promise.all(promises); // 병렬 전송
+            alert("모두 저장되었습니다! 🎉");
+            btn.innerText = "저장하기";
+            btn.disabled = false;
+            // 초기화
+            document.querySelectorAll('.st-input').forEach(el => el.value = '');
+            document.querySelectorAll('.check-circle').forEach(el => el.classList.remove('checked'));
+        }
+
+        // --- 4. 학생관리 & 기록 조회 (History) ---
+        function renderStudentNav() {
+            const list = document.getElementById('studentNavList');
+            list.innerHTML = '';
+            studentList.forEach(st => {
+                const item = document.createElement('div');
+                item.className = 'student-list-item';
+                item.onclick = () => selectStudent(st.name, item); // 이름으로 조회
+                item.innerHTML = `<span>${st.id}번 <b>${st.name}</b></span> <span>></span>`;
+                list.appendChild(item);
+            });
+        }
+
+        async function selectStudent(name, el) {
+            selectedStudentName = name;
+            document.querySelectorAll('.student-list-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            loadHistory(); // 기록 불러오기
+        }
+
+        function viewTab(mode) {
+            viewTabMode = mode;
+            document.getElementById('viewSubBtn').className = mode === 'subject' ? 'btn-sm active' : 'btn-sm inactive';
+            document.getElementById('viewBehBtn').className = mode === 'behavior' ? 'btn-sm active' : 'btn-sm inactive';
+            loadHistory();
+        }
+
+        async function loadHistory() {
+            if(!selectedStudentName) return;
+            document.getElementById('viewerTitle').innerText = `${selectedStudentName} 학생의 기록 불러오는 중...`;
+            
+            const history = await sendRequest('get_history', { name: selectedStudentName, type: viewTabMode });
+            
+            document.getElementById('viewerTitle').innerText = `${selectedStudentName} 학생의 기록`;
+            const container = document.getElementById('historyViewer');
+            container.innerHTML = '';
+
+            if(!history || history.length === 0) {
+                container.innerHTML = `<div style="text-align:center; color:var(--text-sub); padding:50px 0;">기록이 없습니다.</div>`;
+                return;
+            }
+
+            history.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'history-card';
+                const inputId = `hist_${index}`;
+                card.innerHTML = `
+                    <div class="h-date">${item.date}</div>
+                    <textarea id="${inputId}" class="h-textarea">${item.txt}</textarea>
+                    <div class="h-btn-area">
+                        <button class="btn-copy" onclick="quietCopy(this, document.getElementById('${inputId}').value)">복사</button>
+                    </div>`;
+                container.appendChild(card);
+            });
+        }
+
+        // --- 5. AI 기능 (Gemini) ---
+        // (1) 기록하기 화면에서 'AI 보완' 스위치
+        document.getElementById('aiToggle').addEventListener('change', toggleAIMode);
+
+        function toggleAIMode() {
+            const isOn = document.getElementById('aiToggle').checked;
+            const magics = document.querySelectorAll('.ai-magic');
+            magics.forEach(el => el.style.display = isOn ? 'block' : 'none');
+        }
+
+        async function runAI(studentId) {
+            const input = document.getElementById(`input_${studentId}`);
+            const originalText = input.value;
+            if(!originalText) { alert("내용을 먼저 입력해주세요."); return; }
+
+            // 로딩 표시
+            const originalPlaceholder = input.placeholder;
+            input.value = "AI가 문장을 다듬는 중... 🤖";
+            input.disabled = true;
+
+            const prompt = `다음 학생 생활기록부 문장을 선생님 말투로 자연스럽고 구체적으로 다듬어줘(30자 내외). 문장만 출력해: "${originalText}"`;
+            
+            const data = await sendRequest('call_ai', { prompt: prompt });
+            
+            input.disabled = false;
+            if(data && data.text) {
+                input.value = data.text;
+            } else {
+                input.value = originalText; // 실패 시 원복
+                alert("AI 요청 실패");
+            }
+        }
+
+        // (2) NEIS 생성 기능
+        function toggleNeisType() {
+            const t = document.getElementById('neisType').value;
+            document.getElementById('neisSubOption').style.display = t==='subject'?'block':'none';
+            document.getElementById('neisBehOption').style.display = t==='behavior'?'block':'none';
+        }
+
+        async function generateNeisCards() {
+            const type = document.getElementById('neisType').value;
+            const container = document.getElementById('neisResultList');
+            container.innerHTML = '<div style="text-align:center; padding:50px;">AI가 모든 학생의 기록을 분석하고 생성 중입니다...<br>(시간이 좀 걸립니다) ☕️</div>';
+
+            // 모든 학생 순회하며 AI 요청 (실전에서는 서버 부하 고려해야 하나 프로토타입이므로 루프 사용)
+            // 편의상 첫 3명만 예시로 생성하거나, 서버에서 학생별 기록을 먼저 다 가져와야 함.
+            // 여기서는 '예시'로 현재 로드된 학생 명단에 대해 간단한 문구를 생성 요청해봅니다.
+            
+            let html = '';
+            for(const st of studentList) {
+                // 실제로는 서버에서 이 학생의 모든 기록을 가져와서 프롬프트에 넣어야 함.
+                // 여기서는 간단히 이름만 넣어서 테스트.
+                const keyword = type === 'subject' ? '수학 수업 참여도 우수' : '배려심 깊음'; 
+                const prompt = `초등학생 ${st.name}의 ${type==='subject'?'과목 세부능력':'행동특성'} NEIS 입력용 문구를 작성해줘. 키워드: ${keyword}. (100자 이내)`;
+                
+                // 순차 처리 (병렬로 하면 API 제한 걸릴 수 있음)
+                const data = await sendRequest('call_ai', { prompt: prompt });
+                
+                html += `
+                <div class="neis-result-card">
+                    <div class="n-name">${st.name}</div>
+                    <textarea id="txt_${st.id}" class="n-textarea">${data ? data.text : '생성 실패'}</textarea>
+                    <div class="n-btn-area">
+                        <button class="btn-copy" onclick="quietCopy(this, document.getElementById('txt_${st.id}').value)">복사</button>
+                    </div>
+                </div>`;
+                container.innerHTML = html; // 한 명씩 추가되는 것 보여주기
+            }
+        }
+
+        // 기타 UI 함수
+        function quietCopy(btn, text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const org = btn.innerText;
+                btn.innerText = "복사됨";
+                btn.classList.add('copied');
+                setTimeout(()=> { btn.innerText = org; btn.classList.remove('copied'); }, 1000);
+            });
+        }
         function toggleCheck(el) {
             const p = el.parentElement;
             const wasChecked = el.classList.contains('checked');
             p.querySelectorAll('.check-circle').forEach(c => c.classList.remove('checked'));
             if(!wasChecked) el.classList.add('checked');
         }
-
-        function openSubjectModal() {
-            document.getElementById('newSubjectName').value = '';
-            document.getElementById('subjectModal').classList.add('open');
-            document.getElementById('newSubjectName').focus();
-        }
-        function closeSubjectModal() { document.getElementById('subjectModal').classList.remove('open'); }
-        function confirmAddSubject() {
-            const name = document.getElementById('newSubjectName').value;
-            if(name) {
-                const container = document.getElementById('subjectTags');
-                const addBtn = container.querySelector('.tag-add');
-                const newTag = document.createElement('div');
-                newTag.className = 'tag selected';
-                newTag.innerText = name;
-                newTag.onclick = function() { selSub(this); };
-                container.querySelectorAll('.tag').forEach(t => t.classList.remove('selected'));
-                container.insertBefore(newTag, addBtn);
-            }
-            closeSubjectModal();
-        }
-        document.getElementById('newSubjectName').addEventListener('keyup', function(e) { if(e.key === 'Enter') confirmAddSubject(); });
         function selSub(el) { document.querySelectorAll('.tag').forEach(t => t.classList.remove('selected')); el.classList.add('selected'); }
-        
-        // 학생 목록 네비게이션 (Dummy)
-        function renderStudentNav() {
-            const list = document.getElementById('studentNavList');
-            list.innerHTML = '';
-            students.forEach(st => {
-                const item = document.createElement('div');
-                item.className = 'student-list-item';
-                item.innerHTML = `<span>${st.id}번 <b>${st.name}</b></span> <span>></span>`;
-                list.appendChild(item);
-            });
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
         }
-        
-        // 기타 기능들 (NEIS, 자료 등 - 기존과 동일)
-        function toggleNeisType() {
-            const t = document.getElementById('neisType').value;
-            document.getElementById('neisSubOption').style.display = t==='subject'?'block':'none';
-            document.getElementById('neisBehOption').style.display = t==='behavior'?'block':'none';
-        }
-        function generateNeisCards() { /* 기존 코드 유지 (복잡해서 생략 - 필요하면 다시 요청해주세요!) */ }
-        function quietCopy(btn, text) { /* 기존 코드 유지 */ }
-        function viewTab(mode) { /* 기존 코드 유지 */ }
+        function openSubjectModal() { document.getElementById('newSubjectName').value = ''; document.getElementById('subjectModal').classList.add('open'); document.getElementById('newSubjectName').focus(); }
+        function closeSubjectModal() { document.getElementById('subjectModal').classList.remove('open'); }
+        function confirmAddSubject() { /* 기존 동일 */ const name = document.getElementById('newSubjectName').value; if(name) { const container = document.getElementById('subjectTags'); const addBtn = container.querySelector('.tag-add'); const newTag = document.createElement('div'); newTag.className = 'tag selected'; newTag.innerText = name; newTag.onclick = function() { selSub(this); }; container.querySelectorAll('.tag').forEach(t => t.classList.remove('selected')); container.insertBefore(newTag, addBtn); } closeSubjectModal(); }
+        document.getElementById('newSubjectName').addEventListener('keyup', function(e) { if(e.key === 'Enter') confirmAddSubject(); });
+
     </script>
 </body>
 </html>
