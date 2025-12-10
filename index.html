@@ -4,93 +4,124 @@
     <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>쫑알수첩 v7.1 (Fix)</title>
+    <title>쫑알수첩 v7.2 (Style Fixed)</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
     <style>
+        /* [수정됨] 변수 선언 문법 오류 수정 완료 */
         :root {
-            var(--bg-main: #f2f8fc); var(--card-bg: #FFFFFF);
-            var(--primary-light: #9fcde8; var(--primary: #6ab0cf; var(--primary-dark: #35667a;
-            var(--text-main: #2c3e50; var(--text-sub: #7f8c8d; var(--border-color: #e3eff5;
-            var(--success: #35667a; var(--danger: #e74c3c;
+            --bg-main: #f2f8fc; 
+            --card-bg: #FFFFFF;
+            --primary-light: #9fcde8; 
+            --primary: #6ab0cf; 
+            --primary-dark: #35667a;
+            --text-main: #2c3e50; 
+            --text-sub: #7f8c8d; 
+            --border-color: #e3eff5;
+            --success: #35667a; 
+            --danger: #e74c3c;
         }
-        /* 스타일은 기존과 동일하므로 핵심만 유지 */
+
+        /* 기본 초기화 */
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Gowun Dodum', sans-serif; }
-        body { background-color: #f2f8fc; color: #2c3e50; font-size: 16px; line-height: 1.5; }
+        body { background-color: var(--bg-main); color: var(--text-main); font-size: 16px; line-height: 1.5; }
+
         .container { max-width: 1400px; margin: 0 auto; padding: 20px; padding-bottom: 80px; }
         header { text-align: center; margin-bottom: 20px; }
-        h1 { color: #35667a; font-size: 1.6rem; font-weight: bold; letter-spacing: -0.5px; }
+        h1 { color: var(--primary-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: -0.5px; }
 
-        .nav-tabs { display: flex; background: #fff; border-radius: 8px; margin-bottom: 20px; padding: 4px; border: 1px solid #e3eff5; }
-        .nav-item { flex: 1; text-align: center; padding: 12px; cursor: pointer; color: #7f8c8d; border-radius: 6px; font-weight: bold; transition: 0.2s; }
-        .nav-item.active { color: #35667a; background-color: #eaf6fc; }
+        /* 탭 메뉴 */
+        .nav-tabs { display: flex; background: var(--card-bg); border-radius: 8px; margin-bottom: 20px; padding: 4px; border: 1px solid var(--border-color); }
+        .nav-item { flex: 1; text-align: center; padding: 12px; cursor: pointer; color: var(--text-sub); border-radius: 6px; font-weight: bold; transition: 0.2s; }
+        .nav-item.active { color: var(--primary-dark); background-color: #eaf6fc; }
 
+        /* 레이아웃 */
         .split-container { display: flex; gap: 20px; align-items: flex-start; }
         .split-left { width: 380px; flex-shrink: 0; display: flex; flex-direction: column; gap: 15px; }
         .split-right { flex-grow: 1; display: flex; flex-direction: column; gap: 15px; min-width: 0; }
         @media (max-width: 900px) { .split-container { flex-direction: column; } .split-left, .split-right { width: 100%; } }
 
-        .card { background: #fff; border-radius: 8px; padding: 20px; border: 1px solid #e3eff5; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+        /* 카드 및 폼 요소 */
+        .card { background: var(--card-bg); border-radius: 8px; padding: 20px; border: 1px solid var(--border-color); box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
         .card.full-height { height: 100%; min-height: 500px; }
-        .card-header { font-size: 1.1rem; color: #35667a; font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #f2f8fc; display: flex; justify-content: space-between; align-items: center; }
+        .card-header { font-size: 1.1rem; color: var(--primary-dark); font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid var(--bg-main); display: flex; justify-content: space-between; align-items: center; }
         
-        label { display: block; margin-bottom: 6px; color: #7f8c8d; font-size: 0.9rem; font-weight: bold; }
-        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #e3eff5; border-radius: 6px; font-size: 1rem; background: #fcfdfd; }
-        input:focus, select:focus, textarea:focus { outline: none; border-color: #6ab0cf; background: white; }
+        label { display: block; margin-bottom: 6px; color: var(--text-sub); font-size: 0.9rem; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; background: #fcfdfd; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); background: white; }
 
+        /* 버튼 스타일 */
         .btn { display: inline-flex; justify-content: center; align-items: center; height: 42px; min-width: 80px; padding: 0 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 1rem; font-weight: bold; transition: 0.2s; }
-        .btn-primary { background: #6ab0cf; color: white; width: 100%; }
-        .btn-primary:hover { background: #35667a; }
-        .btn-primary:disabled { background: #7f8c8d; cursor: not-allowed; }
-        .btn-outline { background: white; border: 1px solid #e3eff5; color: #2c3e50; }
-        .btn-danger { background: #e74c3c; color: white; }
+        .btn-primary { background: var(--primary); color: white; width: 100%; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-primary:disabled { background: var(--text-sub); cursor: not-allowed; }
+        .btn-outline { background: white; border: 1px solid var(--border-color); color: var(--text-main); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-danger:hover { background: #c0392b; }
         .btn-sm { height: 34px; min-width: 60px; padding: 0 12px; font-size: 0.9rem; border-radius: 6px; border: 1px solid; cursor: pointer; transition: 0.2s; }
-        .btn-sm.active { background: #6ab0cf; color: white; border-color: #6ab0cf; }
-        .btn-sm.inactive { background: white; color: #7f8c8d; border-color: #e3eff5; }
-        .btn-copy { height: 42px; min-width: 60px; padding: 0 10px; font-size: 0.85rem; background: #f2f8fc; border: 1px solid #e3eff5; border-radius: 4px; cursor: pointer; }
-        .btn-copy.copied { background: #35667a; color: white; }
-        .btn-icon { font-size: 0.8rem; background: none; border: 1px solid #e3eff5; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-left: 5px; }
-        .btn-edit { color: #6ab0cf; border-color: #9fcde8; }
-        .btn-del { color: #e74c3c; }
+        .btn-sm.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .btn-sm.inactive { background: white; color: var(--text-sub); border-color: var(--border-color); }
+        
+        .btn-icon { font-size: 0.8rem; background: none; border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-left: 5px; }
+        .btn-edit { color: var(--primary); border-color: var(--primary-light); }
+        .btn-del { color: var(--danger); }
+        .btn-copy { height: 42px; min-width: 60px; padding: 0 10px; font-size: 0.85rem; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; }
+        .btn-copy.copied { background: var(--success); color: white; }
 
+        /* 과목 태그 */
         .tag-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
-        .tag { position: relative; padding: 8px 30px 8px 16px; background: #f2f8fc; border-radius: 20px; font-size: 0.95rem; cursor: pointer; border: 1px solid #e3eff5; transition: 0.2s; }
-        .tag.selected { background: #6ab0cf; color: white; border-color: #6ab0cf; }
-        .tag-add { padding: 8px 16px; border: 1px dashed #6ab0cf; background: white; color: #6ab0cf; text-align:center;}
+        .tag { position: relative; padding: 8px 30px 8px 16px; background: var(--bg-main); border-radius: 20px; font-size: 0.95rem; cursor: pointer; border: 1px solid var(--border-color); transition: 0.2s; }
+        .tag.selected { background: var(--primary); color: white; border-color: var(--primary); }
+        .tag-add { padding: 8px 16px; border: 1px dashed var(--primary); background: white; color: var(--primary); text-align:center;}
         .tag .x-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; line-height: 16px; text-align: center; border-radius: 50%; font-size: 0.8rem; background: rgba(0,0,0,0.1); color: inherit; display: none; }
         .tag:hover .x-btn { display: block; }
+        .tag.selected .x-btn { background: rgba(255,255,255,0.3); color: white; }
 
-        .student-row { display: flex; align-items: center; gap: 15px; padding: 12px 10px; border-bottom: 1px solid #f2f8fc; background: white; }
-        .st-name { width: 90px; font-weight: bold; color: #35667a; flex-shrink: 0; }
+        /* 학생 리스트 행 */
+        .student-row { display: flex; align-items: center; gap: 15px; padding: 12px 10px; border-bottom: 1px solid var(--bg-main); background: white; }
+        .st-name { width: 90px; font-weight: bold; color: var(--primary-dark); flex-shrink: 0; }
         .st-input { flex-grow: 1; margin-bottom: 0 !important; height: 40px; }
         .st-check-group { display: flex; gap: 8px; width: 220px; flex-shrink: 0; justify-content: space-between; }
-        .check-circle { width: 28px; height: 28px; border: 2px solid #e3eff5; border-radius: 50%; cursor: pointer; position: relative; background: #f2f8fc; }
-        .check-circle.checked { border-color: #6ab0cf; background: #6ab0cf; }
+        .check-circle { width: 28px; height: 28px; border: 2px solid var(--border-color); border-radius: 50%; cursor: pointer; position: relative; background: var(--bg-main); }
+        .check-circle.checked { border-color: var(--primary); background: var(--primary); }
         .check-circle.checked::after { content: '✔'; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; }
         
+        /* AI 매직봉 */
         .ai-magic { position: absolute; right: 10px; top: 10px; cursor: pointer; display: none; font-size: 1.2rem; }
-        
-        .history-card { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; border-bottom: 1px solid #f2f8fc; padding-bottom: 10px; }
+        .ai-magic:hover { transform: scale(1.2); }
+
+        .student-list-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 15px; border-bottom: 1px solid var(--bg-main); cursor: pointer; border-radius: 6px; transition: 0.2s; }
+        .student-list-item:hover { background: #eaf6fc; }
+        .student-list-item.active { background: #eaf6fc; border: 1px solid var(--primary-light); color: var(--primary-dark); font-weight: bold;}
+
+        /* 기록 뷰어 카드 */
+        .history-card { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; border-bottom: 1px solid var(--bg-main); padding-bottom: 10px; }
         .h-info { width: 90px; flex-shrink: 0; text-align: center; }
-        .h-date { font-size: 0.85rem; color: #7f8c8d; }
-        .h-badge { font-size: 0.8rem; background: #eaf6fc; color: #35667a; padding: 2px 6px; border-radius: 4px; font-weight: bold; display: inline-block; margin-top: 4px;}
-        .h-textarea { flex-grow: 1; margin-bottom: 0 !important; height: 60px; resize: vertical; padding: 8px 12px; font-size: 0.95rem; background: #fff; border: 1px solid #e3eff5; border-radius: 4px; }
+        .h-date { font-size: 0.85rem; color: var(--text-sub); }
+        .h-badge { font-size: 0.8rem; background: #eaf6fc; color: var(--primary-dark); padding: 2px 6px; border-radius: 4px; font-weight: bold; display: inline-block; margin-top: 4px;}
+        .h-textarea { flex-grow: 1; margin-bottom: 0 !important; height: 60px; resize: vertical; padding: 8px 12px; font-size: 0.95rem; background: #fff; border: 1px solid var(--border-color); border-radius: 4px; }
+        .h-textarea:focus { border-color: var(--primary); }
         .h-btn-area { width: 60px; flex-shrink: 0; display:flex; flex-direction: column; gap: 5px; }
 
-        .neis-result-card { background: white; border: 1px solid #e3eff5; border-radius: 8px; padding: 15px; margin-bottom: 10px; display: flex; gap:15px; }
-        .n-name { width: 80px; font-weight: bold; color: #35667a; flex-shrink: 0; padding-top:10px; }
-        .n-textarea { flex-grow: 1; height: 120px; resize: vertical; width:100%; padding:10px; border:1px solid #e3eff5; border-radius:4px;}
+        /* NEIS 결과 카드 */
+        .neis-result-card { background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; margin-bottom: 10px; display: flex; gap:15px; }
+        .n-name { width: 80px; font-weight: bold; color: var(--primary-dark); flex-shrink: 0; padding-top:10px; }
+        .n-textarea { flex-grow: 1; height: 120px; resize: vertical; width:100%; padding:10px; border:1px solid var(--border-color); border-radius:4px;}
         .n-btn-area { width: 60px; text-align: right; flex-shrink: 0; }
+        @media (max-width: 768px) { .neis-result-card { flex-direction: column; } .n-name { width: 100%; } .n-btn-area { width: 100%; text-align: right; } }
 
+        /* 모달 공통 */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 2000; display: none; align-items: center; justify-content: center; }
-        .modal-card { background: white; padding: 25px; border-radius: 12px; width: 320px; }
-        .modal-title { font-size: 1.1rem; font-weight: bold; color: #35667a; margin-bottom: 15px; }
+        .modal-overlay.open { display: flex; animation: fadeIn 0.2s; }
+        .modal-card { background: white; padding: 25px; border-radius: 12px; width: 320px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--border-color); }
+        .modal-title { font-size: 1.1rem; font-weight: bold; color: var(--primary-dark); margin-bottom: 15px; }
         
-        .switch-container { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: #7f8c8d; }
+        /* 스위치 */
+        .switch-container { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text-sub); }
         .switch { position: relative; display: inline-block; width: 36px; height: 20px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e3eff5; transition: .3s; border-radius: 34px; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); transition: .3s; border-radius: 34px; }
         .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
-        input:checked + .slider { background-color: #6ab0cf; }
+        input:checked + .slider { background-color: var(--primary); }
         input:checked + .slider:before { transform: translateX(16px); }
 
         .section { display: none; }
@@ -100,7 +131,7 @@
 </head>
 <body>
     <div class="container">
-        <header><h1>쫑알수첩 v7.1</h1></header>
+        <header><h1>쫑알수첩 v7.2</h1></header>
         <nav class="nav-tabs">
             <div class="nav-item active" onclick="showSection('record')">기록하기</div>
             <div class="nav-item" onclick="showSection('students')">학생관리</div>
@@ -147,7 +178,7 @@
                             </div>
                             <button class="btn btn-primary" style="width: auto;" onclick="saveData()">저장하기</button>
                         </div>
-                        <div style="display: flex; padding: 0 10px 10px; border-bottom: 2px solid #f2f8fc; font-weight: bold; color: #7f8c8d; font-size: 0.9rem;">
+                        <div style="display: flex; padding: 0 10px 10px; border-bottom: 2px solid var(--bg-main); font-weight: bold; color: var(--text-sub); font-size: 0.9rem;">
                             <div style="width: 90px;">이름</div>
                             <div style="flex-grow: 1; text-align: center;">관찰/특기사항</div>
                             <div id="checkHeader" style="width: 220px; display: flex; justify-content: space-between; font-size: 0.8rem;">
@@ -187,7 +218,7 @@
                              <button class="btn btn-sm btn-del" onclick="openDeleteStudentModal()">🗑️ 학생 삭제</button>
                         </div>
                         <div id="historyViewer" style="overflow-y: auto; max-height: 550px;">
-                            <div style="text-align: center; color: #7f8c8d; padding: 50px 0;">학생을 선택해주세요.</div>
+                            <div style="text-align: center; color: var(--text-sub); padding: 50px 0;">학생을 선택해주세요.</div>
                         </div>
                     </div>
                 </div>
@@ -214,7 +245,7 @@
                         <label style="margin-top:15px;">생성 분량 (글자수)</label>
                         <div style="display:flex; align-items:center; gap:10px;">
                             <input type="range" id="neisLen" min="100" max="1000" step="50" value="300" oninput="document.getElementById('lenVal').innerText=this.value">
-                            <span style="width:50px; text-align:right; font-weight:bold; color:#6ab0cf;"><span id="lenVal">300</span>자</span>
+                            <span style="width:50px; text-align:right; font-weight:bold; color:var(--primary);"><span id="lenVal">300</span>자</span>
                         </div>
                         <button class="btn btn-primary" style="margin-top:15px;" onclick="generateNeisCards()">자료 생성하기</button>
                     </div>
@@ -223,7 +254,7 @@
                     <div class="card full-height">
                         <div class="card-header">생성 결과</div>
                         <div id="neisResultList" style="padding:15px;">
-                            <div style="text-align:center;color:#7f8c8d;margin-top:20px;">옵션 선택 후 생성하기 버튼을 눌러주세요.</div>
+                            <div style="text-align:center;color:var(--text-sub);margin-top:20px;">옵션 선택 후 생성하기 버튼을 눌러주세요.</div>
                         </div>
                     </div>
                 </div>
@@ -235,7 +266,7 @@
                 <div class="split-left">
                     <div class="card full-height">
                         <div class="card-header">참고 자료</div>
-                        <div style="padding:20px; text-align:center; color:#7f8c8d;">준비 중</div>
+                        <div style="padding:20px; text-align:center; color:var(--text-sub);">준비 중</div>
                     </div>
                 </div>
                 <div class="split-right">
@@ -258,10 +289,9 @@
             </div>
         </div>
     </div>
-    
     <div id="deleteSubjectModal" class="modal-overlay">
         <div class="modal-card">
-            <div class="modal-title" style="color:#e74c3c">⚠️ 과목 삭제</div>
+            <div class="modal-title" style="color:var(--danger)">⚠️ 과목 삭제</div>
             <p style="margin-bottom:20px;">기록이 삭제됩니다. 진행합니까?</p>
             <div style="text-align:right;">
                 <button class="btn btn-outline" onclick="closeDeleteSubjectModal()">취소</button>
@@ -269,7 +299,6 @@
             </div>
         </div>
     </div>
-    
     <div id="addStudentModal" class="modal-overlay">
         <div class="modal-card">
             <div class="modal-title">학생 추가</div>
@@ -281,10 +310,9 @@
             </div>
         </div>
     </div>
-    
     <div id="deleteStudentModal" class="modal-overlay">
         <div class="modal-card">
-            <div class="modal-title" style="color:#e74c3c">⚠️ 학생 삭제</div>
+            <div class="modal-title" style="color:var(--danger)">⚠️ 학생 삭제</div>
             <p style="margin-bottom:20px;">명단에서 삭제됩니다.</p>
             <div style="text-align:right;">
                 <button class="btn btn-outline" onclick="closeDeleteStudentModal()">취소</button>
@@ -294,9 +322,9 @@
     </div>
 
     <script>
-        // ▼▼▼ GAS 주소 ▼▼▼
+        // ▼▼▼ 선생님의 GAS 배포 주소 ▼▼▼
         const APP_URL = "https://script.google.com/macros/s/AKfycbxn2nB0ZNXwXSdfx4-XVUWTD3Z_GCb_L2_SkhLyiKu5qrZrpwGTLM9Y4BhQRbveIk4o8Q/exec";
-        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
         let currentMode = 'subject';
         let selectedStudentName = null;
@@ -319,12 +347,10 @@
                 const json = await res.json();
                 if (json.result === 'error') throw new Error(json.msg);
                 return json.data;
-            } catch (err) {
-                alert("통신 오류: " + err.message);
-                return null;
-            }
+            } catch (err) { alert("통신 오류: " + err.message); return null; }
         }
 
+        // --- 과목 ---
         function renderSubjectTags() {
             const container = document.getElementById('subjectTags');
             const addBtn = container.querySelector('.tag-add');
@@ -343,22 +369,17 @@
         function openSubjectModal() { document.getElementById('newSubjectName').value=''; document.getElementById('subjectModal').classList.add('open'); document.getElementById('newSubjectName').focus(); }
         function closeSubjectModal() { document.getElementById('subjectModal').classList.remove('open'); }
         
-        // [수정] 과목 추가 버튼 로직 강화
+        // 과목 추가 로직
         async function confirmAddSubject() {
             const name = document.getElementById('newSubjectName').value.trim();
             if(!name) { alert("과목명을 입력해주세요"); return; }
             if(subjectList.includes(name)) { alert("이미 있는 과목입니다."); return; }
-            
-            const btn = document.getElementById('confirmSubjectBtn'); // ID로 명확하게 선택
+            const btn = document.getElementById('confirmSubjectBtn');
             if(btn) { btn.innerText = "..."; btn.disabled = true; }
             
             const res = await sendRequest('add_subject', {subject:name});
-            
             if(res) {
-                subjectList.push(name);
-                renderSubjectTags();
-                closeSubjectModal();
-                alert("과목이 추가되었습니다.");
+                subjectList.push(name); renderSubjectTags(); closeSubjectModal(); alert("과목이 추가되었습니다.");
             }
             if(btn) { btn.innerText = "추가"; btn.disabled = false; }
         }
@@ -367,18 +388,18 @@
         function closeDeleteSubjectModal() { document.getElementById('deleteSubjectModal').classList.remove('open'); }
         async function confirmDeleteSubject() { if(!targetSubjectToDelete) return; await sendRequest('delete_subject', {subject:targetSubjectToDelete}); subjectList=subjectList.filter(s=>s!==targetSubjectToDelete); renderSubjectTags(); closeDeleteSubjectModal(); alert("삭제 완료"); }
 
+        // --- 학생 ---
         async function loadStudents() { const data=await sendRequest('get_students'); if(data){ studentList=data; renderRecordList(); renderStudentNav(); } }
         function renderStudentNav() { const list=document.getElementById('studentNavList'); list.innerHTML=''; studentList.forEach(st=>{ const item=document.createElement('div'); item.className='student-list-item'; item.innerHTML=`${st.id}번 <b>${st.name}</b>`; item.onclick=()=>selectStudent(st.name, item); list.appendChild(item); }); }
         function selectStudent(name, el) { selectedStudentName=name; document.querySelectorAll('.student-list-item').forEach(i=>i.classList.remove('active')); el.classList.add('active'); loadHistory(); }
-        
         function openAddStudentModal() { document.getElementById('newStId').value=''; document.getElementById('newStName').value=''; document.getElementById('addStudentModal').classList.add('open'); document.getElementById('newStId').focus(); }
         function closeAddStudentModal() { document.getElementById('addStudentModal').classList.remove('open'); }
         async function confirmAddStudent() { const id=document.getElementById('newStId').value; const name=document.getElementById('newStName').value; if(!id || !name) return; await sendRequest('add_student', {id, name}); closeAddStudentModal(); loadStudents(); alert("추가 완료"); }
-        
         function openDeleteStudentModal() { if(!selectedStudentName) {alert("학생 선택 필요"); return;} document.getElementById('deleteStudentModal').classList.add('open'); }
         function closeDeleteStudentModal() { document.getElementById('deleteStudentModal').classList.remove('open'); }
         async function confirmDeleteStudent() { await sendRequest('delete_student', {name:selectedStudentName}); closeDeleteStudentModal(); selectedStudentName=null; document.getElementById('historyViewer').innerHTML=''; loadStudents(); alert("삭제 완료"); }
 
+        // --- 기록하기 ---
         function setMode(mode) {
             currentMode = mode;
             document.getElementById('btnSubject').className = mode === 'subject' ? 'btn-sm active' : 'btn-sm inactive';
@@ -439,6 +460,7 @@
             alert("저장 완료");
         }
 
+        // AI
         document.getElementById('aiToggle').addEventListener('change', toggleAIMode);
         function toggleAIMode() { const on = document.getElementById('aiToggle').checked; document.querySelectorAll('.ai-magic').forEach(e => e.style.display = on ? 'block' : 'none'); }
         async function runAI(studentId) {
@@ -454,6 +476,7 @@
             if(data && data.text) input.value = data.text; else { input.value = text; alert("AI 호출 실패 (권한을 확인하세요)"); }
         }
 
+        // --- 조회 ---
         function viewTab(mode) {
             viewTabMode = mode;
             document.getElementById('viewSubBtn').className = mode === 'subject' ? 'btn-sm active' : 'btn-sm inactive';
@@ -491,6 +514,7 @@
         }
         async function deleteRecord(sheetName, rowNum) { if(confirm("삭제?")) { await sendRequest('delete_record_row', { type: sheetName, rowNum: rowNum }); loadHistory(); } }
 
+        // --- NEIS ---
         function toggleNeisType() {
             const t = document.getElementById('neisType').value;
             document.getElementById('neisSubOption').style.display = t==='subject'?'block':'none';
