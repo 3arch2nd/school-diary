@@ -323,51 +323,94 @@
             </div>
         </div>
     </div>
+    <div id="addStudentModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-title">학생 추가</div>
+            <input type="number" id="newStId" placeholder="번호 (예: 1)" style="margin-bottom: 10px;">
+            <input type="text" id="newStName" placeholder="이름 (예: 홍길동)" style="margin-bottom: 20px;">
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button class="btn btn-outline" style="width: auto;" onclick="closeAddStudentModal()">취소</button>
+                <button class="btn btn-primary" style="width: auto;" onclick="confirmAddStudent()">등록</button>
+            </div>
+        </div>
+    </div>
 
    <script>
-        // 🚀 선생님의 GAS 주소 (그대로 두세요)
+        // 🚀 선생님의 GAS 주소 (그대로 유지)
         const APP_URL = "https://script.google.com/macros/s/AKfycbxn2nB0ZNXwXSdfx4-XVUWTD3Z_GCb_L2_SkhLyiKu5qrZrpwGTLM9Y4BhQRbveIk4o8Q/exec";
 
         let currentMode = 'subject';
-        let selectedStudentName = null; // ID 대신 이름으로 관리 (시트 연동 편의상)
+        let selectedStudentName = null;
         let viewTabMode = 'subject';
-        let studentList = []; // 서버에서 받아올 명단
+        let studentList = [];
 
         window.onload = () => {
             document.getElementById('rDate').valueAsDate = new Date();
-            loadStudents(); // 시작하자마자 명단 불러오기
+            loadStudents(); 
+            
+            // 학생관리 탭의 [추가] 버튼에 기능 연결
+            // (버튼을 찾아서 onclick 이벤트를 심어줍니다)
+            const studentBtns = document.querySelector('#students .split-left .card-header').nextElementSibling.querySelectorAll('button');
+            if(studentBtns.length >= 2) {
+                studentBtns[0].onclick = () => alert("엑셀 등록 기능은 준비 중입니다! 😅\n(우선 '추가' 버튼을 이용해주세요)");
+                studentBtns[1].onclick = openAddStudentModal;
+            }
         };
 
-        // --- 1. 통신 함수 (서버와 대화하는 공통 함수) ---
+        // --- 통신 함수 ---
         async function sendRequest(action, payload = {}) {
             payload.action = action;
             try {
-                const res = await fetch(APP_URL, {
-                    method: 'POST',
-                    mode: 'cors', // CORS 필수
-                    body: JSON.stringify(payload)
-                });
+                const res = await fetch(APP_URL, { method: 'POST', mode: 'cors', body: JSON.stringify(payload) });
                 const json = await res.json();
                 if (json.result === 'error') throw new Error(json.msg);
                 return json.data;
             } catch (err) {
                 console.error(err);
-                alert("오류 발생: " + err.message);
+                alert("통신 오류: " + err.message);
                 return null;
             }
         }
 
-        // --- 2. 초기 세팅 & 학생 명단 로드 ---
+        // --- 학생 명단 관리 ---
         async function loadStudents() {
             const data = await sendRequest('get_students');
             if (data) {
                 studentList = data;
-                renderRecordList();     // 기록하기 탭 명단 갱신
-                renderStudentNav();     // 학생관리 탭 명단 갱신
+                renderRecordList();
+                renderStudentNav();
             }
         }
 
-        // --- 3. 기록하기 기능 ---
+        // [NEW] 학생 추가 모달 관련
+        function openAddStudentModal() {
+            document.getElementById('newStId').value = '';
+            document.getElementById('newStName').value = '';
+            document.getElementById('addStudentModal').classList.add('open');
+            document.getElementById('newStId').focus();
+        }
+        function closeAddStudentModal() { document.getElementById('addStudentModal').classList.remove('open'); }
+        
+        async function confirmAddStudent() {
+            const id = document.getElementById('newStId').value;
+            const name = document.getElementById('newStName').value;
+            if(!id || !name) { alert("번호와 이름을 모두 입력해주세요."); return; }
+
+            const btn = document.querySelector('#addStudentModal .btn-primary');
+            btn.innerText = "등록 중...";
+            btn.disabled = true;
+
+            await sendRequest('add_student', { id: id, name: name });
+            
+            alert("학생이 추가되었습니다!");
+            closeAddStudentModal();
+            loadStudents(); // 명단 새로고침
+            
+            btn.innerText = "등록";
+            btn.disabled = false;
+        }
+
+        // --- 기록하기 탭 ---
         function setMode(mode) {
             currentMode = mode;
             document.getElementById('btnSubject').className = mode === 'subject' ? 'btn-sm active' : 'btn-sm inactive';
@@ -393,7 +436,6 @@
                             <div class="check-circle" onclick="toggleCheck(this)"></div>
                         </div>`;
                 }
-                // AI 스위치가 켜져있으면 입력창 옆에 마법봉 표시
                 row.innerHTML = `
                     <div class="st-name">${st.id}. ${st.name}</div>
                     <div style="flex-grow:1; position:relative;">
@@ -403,7 +445,6 @@
                     ${checkHtml}`;
                 list.appendChild(row);
             });
-            // AI 토글 상태 반영
             toggleAIMode(); 
         }
 
@@ -412,8 +453,7 @@
             const period = document.getElementById('rPeriod').value;
             const inputs = document.querySelectorAll('.st-input');
             let promises = [];
-
-            const btn = document.querySelector('.btn-primary');
+            const btn = document.querySelector('#record .btn-primary');
             btn.innerText = "저장 중... ⏳";
             btn.disabled = true;
 
@@ -423,7 +463,6 @@
                     const row = input.closest('.student-row');
                     const nameRaw = row.querySelector('.st-name').innerText; 
                     const name = nameRaw.split('.')[1].trim(); 
-                    
                     let checkVal = "없음";
                     if(currentMode === 'subject') {
                         const checks = row.querySelectorAll('.check-circle');
@@ -432,8 +471,6 @@
                         else if(checks[2].classList.contains('checked')) checkVal = "보통";
                         else if(checks[3].classList.contains('checked')) checkVal = "노력요함";
                     }
-
-                    // 전송 약속(Promise) 모으기
                     promises.push(sendRequest('save_record', {
                         date: date, name: name, type: currentMode,
                         text: `[${period}] ${text}`, check: checkVal
@@ -448,23 +485,22 @@
                 return;
             }
 
-            await Promise.all(promises); // 병렬 전송
+            await Promise.all(promises);
             alert("모두 저장되었습니다! 🎉");
             btn.innerText = "저장하기";
             btn.disabled = false;
-            // 초기화
             document.querySelectorAll('.st-input').forEach(el => el.value = '');
             document.querySelectorAll('.check-circle').forEach(el => el.classList.remove('checked'));
         }
 
-        // --- 4. 학생관리 & 기록 조회 (History) ---
+        // --- 학생관리 & 기록조회 ---
         function renderStudentNav() {
             const list = document.getElementById('studentNavList');
             list.innerHTML = '';
             studentList.forEach(st => {
                 const item = document.createElement('div');
                 item.className = 'student-list-item';
-                item.onclick = () => selectStudent(st.name, item); // 이름으로 조회
+                item.onclick = () => selectStudent(st.name, item);
                 item.innerHTML = `<span>${st.id}번 <b>${st.name}</b></span> <span>></span>`;
                 list.appendChild(item);
             });
@@ -474,7 +510,7 @@
             selectedStudentName = name;
             document.querySelectorAll('.student-list-item').forEach(i => i.classList.remove('active'));
             el.classList.add('active');
-            loadHistory(); // 기록 불러오기
+            loadHistory();
         }
 
         function viewTab(mode) {
@@ -486,19 +522,19 @@
 
         async function loadHistory() {
             if(!selectedStudentName) return;
-            document.getElementById('viewerTitle').innerText = `${selectedStudentName} 학생의 기록 불러오는 중...`;
+            document.getElementById('viewerTitle').innerText = `${selectedStudentName} 기록 로딩 중...`;
+            const container = document.getElementById('historyViewer');
+            container.innerHTML = '<div style="text-align:center; padding:20px;">불러오는 중...</div>';
             
             const history = await sendRequest('get_history', { name: selectedStudentName, type: viewTabMode });
             
             document.getElementById('viewerTitle').innerText = `${selectedStudentName} 학생의 기록`;
-            const container = document.getElementById('historyViewer');
             container.innerHTML = '';
 
             if(!history || history.length === 0) {
                 container.innerHTML = `<div style="text-align:center; color:var(--text-sub); padding:50px 0;">기록이 없습니다.</div>`;
                 return;
             }
-
             history.forEach((item, index) => {
                 const card = document.createElement('div');
                 card.className = 'history-card';
@@ -506,47 +542,34 @@
                 card.innerHTML = `
                     <div class="h-date">${item.date}</div>
                     <textarea id="${inputId}" class="h-textarea">${item.txt}</textarea>
-                    <div class="h-btn-area">
-                        <button class="btn-copy" onclick="quietCopy(this, document.getElementById('${inputId}').value)">복사</button>
-                    </div>`;
+                    <div class="h-btn-area"><button class="btn-copy" onclick="quietCopy(this, document.getElementById('${inputId}').value)">복사</button></div>`;
                 container.appendChild(card);
             });
         }
 
-        // --- 5. AI 기능 (Gemini) ---
-        // (1) 기록하기 화면에서 'AI 보완' 스위치
+        // --- AI 기능 (Gemini) ---
         document.getElementById('aiToggle').addEventListener('change', toggleAIMode);
-
         function toggleAIMode() {
             const isOn = document.getElementById('aiToggle').checked;
-            const magics = document.querySelectorAll('.ai-magic');
-            magics.forEach(el => el.style.display = isOn ? 'block' : 'none');
+            document.querySelectorAll('.ai-magic').forEach(el => el.style.display = isOn ? 'block' : 'none');
         }
 
         async function runAI(studentId) {
             const input = document.getElementById(`input_${studentId}`);
             const originalText = input.value;
-            if(!originalText) { alert("내용을 먼저 입력해주세요."); return; }
-
-            // 로딩 표시
-            const originalPlaceholder = input.placeholder;
-            input.value = "AI가 문장을 다듬는 중... 🤖";
+            if(!originalText) { alert("내용을 입력해주세요."); return; }
+            input.value = "AI 다듬는 중... 🤖";
             input.disabled = true;
-
-            const prompt = `다음 학생 생활기록부 문장을 선생님 말투로 자연스럽고 구체적으로 다듬어줘(30자 내외). 문장만 출력해: "${originalText}"`;
             
+            const prompt = `다음 초등학생 관찰 기록을 생활기록부 문체(종결어미 '~함')로 부드럽고 구체적으로 다듬어줘. 문장만 출력: "${originalText}"`;
             const data = await sendRequest('call_ai', { prompt: prompt });
             
             input.disabled = false;
-            if(data && data.text) {
-                input.value = data.text;
-            } else {
-                input.value = originalText; // 실패 시 원복
-                alert("AI 요청 실패");
-            }
+            if(data && data.text) input.value = data.text;
+            else { input.value = originalText; alert("AI 요청 실패"); }
         }
 
-        // (2) NEIS 생성 기능
+        // [NEW] NEIS 생성 기능
         function toggleNeisType() {
             const t = document.getElementById('neisType').value;
             document.getElementById('neisSubOption').style.display = t==='subject'?'block':'none';
@@ -556,35 +579,44 @@
         async function generateNeisCards() {
             const type = document.getElementById('neisType').value;
             const container = document.getElementById('neisResultList');
-            container.innerHTML = '<div style="text-align:center; padding:50px;">AI가 모든 학생의 기록을 분석하고 생성 중입니다...<br>(시간이 좀 걸립니다) ☕️</div>';
-
-            // 모든 학생 순회하며 AI 요청 (실전에서는 서버 부하 고려해야 하나 프로토타입이므로 루프 사용)
-            // 편의상 첫 3명만 예시로 생성하거나, 서버에서 학생별 기록을 먼저 다 가져와야 함.
-            // 여기서는 '예시'로 현재 로드된 학생 명단에 대해 간단한 문구를 생성 요청해봅니다.
             
+            if(studentList.length === 0) { alert("학생 명단이 없습니다."); return; }
+
+            container.innerHTML = '<div style="text-align:center; padding:50px;">AI가 자료를 생성하고 있습니다...<br>학생 수에 따라 시간이 걸릴 수 있습니다. ☕️</div>';
+
             let html = '';
+            // 서버 과부하 방지를 위해 순차적 처리
             for(const st of studentList) {
-                // 실제로는 서버에서 이 학생의 모든 기록을 가져와서 프롬프트에 넣어야 함.
-                // 여기서는 간단히 이름만 넣어서 테스트.
-                const keyword = type === 'subject' ? '수학 수업 참여도 우수' : '배려심 깊음'; 
-                const prompt = `초등학생 ${st.name}의 ${type==='subject'?'과목 세부능력':'행동특성'} NEIS 입력용 문구를 작성해줘. 키워드: ${keyword}. (100자 이내)`;
-                
-                // 순차 처리 (병렬로 하면 API 제한 걸릴 수 있음)
+                // (나중에 고도화: 서버에서 이 학생의 모든 기록을 긁어와서 프롬프트에 넣어야 함)
+                // 현재는 '키워드' 기반 생성으로 구현
+                let prompt = "";
+                if(type === 'subject') {
+                    // 과목 세특 프롬프트
+                    prompt = `초등학생 ${st.name}의 ${document.querySelector('#neisSubOption select').value} 과목 세부능력 및 특기사항 예시 문구를 1개 작성해줘. 긍정적이고 구체적인 활동 중심으로. 100자 이내.`;
+                } else {
+                    // 행동특성 프롬프트
+                    const keyword = document.querySelector('#neisBehOption input').value || "배려, 협력";
+                    prompt = `초등학생 ${st.name}의 행동특성 및 종합의견 예시 문구를 작성해줘. 키워드: ${keyword}. 200자 이내.`;
+                }
+
                 const data = await sendRequest('call_ai', { prompt: prompt });
-                
+                const resultText = data ? data.text : "생성 실패";
+
                 html += `
                 <div class="neis-result-card">
                     <div class="n-name">${st.name}</div>
-                    <textarea id="txt_${st.id}" class="n-textarea">${data ? data.text : '생성 실패'}</textarea>
+                    <textarea id="txt_${st.id}" class="n-textarea">${resultText}</textarea>
                     <div class="n-btn-area">
                         <button class="btn-copy" onclick="quietCopy(this, document.getElementById('txt_${st.id}').value)">복사</button>
                     </div>
                 </div>`;
-                container.innerHTML = html; // 한 명씩 추가되는 것 보여주기
+                
+                // 한 명 완료될 때마다 화면 갱신 (사용자가 진행상황을 알 수 있게)
+                container.innerHTML = html; 
             }
         }
 
-        // 기타 UI 함수
+        // --- 기타 UI 함수 ---
         function quietCopy(btn, text) {
             navigator.clipboard.writeText(text).then(() => {
                 const org = btn.innerText;
@@ -608,7 +640,7 @@
         }
         function openSubjectModal() { document.getElementById('newSubjectName').value = ''; document.getElementById('subjectModal').classList.add('open'); document.getElementById('newSubjectName').focus(); }
         function closeSubjectModal() { document.getElementById('subjectModal').classList.remove('open'); }
-        function confirmAddSubject() { /* 기존 동일 */ const name = document.getElementById('newSubjectName').value; if(name) { const container = document.getElementById('subjectTags'); const addBtn = container.querySelector('.tag-add'); const newTag = document.createElement('div'); newTag.className = 'tag selected'; newTag.innerText = name; newTag.onclick = function() { selSub(this); }; container.querySelectorAll('.tag').forEach(t => t.classList.remove('selected')); container.insertBefore(newTag, addBtn); } closeSubjectModal(); }
+        function confirmAddSubject() { const name = document.getElementById('newSubjectName').value; if(name) { const container = document.getElementById('subjectTags'); const addBtn = container.querySelector('.tag-add'); const newTag = document.createElement('div'); newTag.className = 'tag selected'; newTag.innerText = name; newTag.onclick = function() { selSub(this); }; container.querySelectorAll('.tag').forEach(t => t.classList.remove('selected')); container.insertBefore(newTag, addBtn); } closeSubjectModal(); }
         document.getElementById('newSubjectName').addEventListener('keyup', function(e) { if(e.key === 'Enter') confirmAddSubject(); });
 
     </script>
