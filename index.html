@@ -4,27 +4,38 @@
     <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>쫑알수첩 v14.0</title>
+    <title>쫑알수첩 v10.5 (Fixed)</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
     <style>
-        :root { --bg-main: #f2f8fc; --card-bg: #FFFFFF; --primary-light: #9fcde8; --primary: #6ab0cf; --primary-dark: #35667a; --text-main: #2c3e50; --text-sub: #7f8c8d; --border-color: #e3eff5; --success: #27ae60; --danger: #e74c3c; }
+        /* [1] 기본 테마 */
+        :root {
+            --bg-main: #f2f8fc; --card-bg: #FFFFFF;
+            --primary-light: #9fcde8; --primary: #6ab0cf; --primary-dark: #35667a;
+            --text-main: #2c3e50; --text-sub: #7f8c8d; --border-color: #e3eff5;
+            --success: #27ae60; --danger: #e74c3c;
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Gowun Dodum', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg-main); color: var(--text-main); font-size: 16px; line-height: 1.5; }
         
         .container { max-width: 1400px; margin: 0 auto; padding: 20px; padding-bottom: 80px; }
-        header { text-align: center; margin-bottom: 20px; color: var(--primary-dark); font-size: 1.6rem; font-weight: bold; }
+        header { text-align: center; margin-bottom: 20px; }
+        h1 { color: var(--primary-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: -0.5px; }
 
+        /* 탭 메뉴 */
         .nav-tabs { display: flex; background: var(--card-bg); border-radius: 8px; margin-bottom: 20px; padding: 4px; border: 1px solid var(--border-color); }
         .nav-item { flex: 1; text-align: center; padding: 12px; cursor: pointer; color: var(--text-sub); border-radius: 6px; font-weight: bold; transition: 0.2s; }
         .nav-item.active { color: var(--primary-dark); background-color: #eaf6fc; }
 
+        /* PC용 레이아웃 (기본) */
         .pc-only { display: block; }
         .mobile-only { display: none; }
+        
         .split-container { display: flex; gap: 20px; align-items: flex-start; }
         .split-left { width: 380px; flex-shrink: 0; display: flex; flex-direction: column; gap: 15px; }
         .split-right { flex-grow: 1; display: flex; flex-direction: column; gap: 15px; min-width: 0; }
 
-        .card { background: var(--card-bg); border-radius: 8px; padding: 20px; border: 1px solid var(--border-color); box-shadow: 0 1px 2px rgba(0,0,0,0.03); margin-bottom: 15px; }
+        /* 카드 & 폼 */
+        .card { background: var(--card-bg); border-radius: 8px; padding: 20px; border: 1px solid var(--border-color); box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
         .card.full-height { height: 100%; min-height: 500px; }
         .card-header { font-size: 1.1rem; color: var(--primary-dark); font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid var(--bg-main); display: flex; justify-content: space-between; align-items: center; }
         
@@ -32,22 +43,33 @@
         input, select, textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; background: #fcfdfd; }
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); background: white; }
 
-        .btn { display: inline-flex; justify-content: center; align-items: center; height: 42px; padding: 0 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 1rem; font-weight: bold; transition: 0.2s; white-space: nowrap; }
-        .btn-primary { background: var(--primary); color: white; width: auto; min-width: 100px; }
+        /* 버튼 (너비 수정됨) */
+        .btn { display: inline-flex; justify-content: center; align-items: center; height: 42px; min-width: 80px; padding: 0 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 1rem; font-weight: bold; transition: 0.2s; white-space: nowrap; }
+        .btn-primary { background: var(--primary); color: white; width: auto; } /* 자동 너비 */
         .btn-primary:hover { background: var(--primary-dark); }
         .btn-primary:disabled { background: var(--text-sub); cursor: not-allowed; }
         .btn-outline { background: white; border: 1px solid var(--border-color); color: var(--text-main); }
         .btn-danger { background: var(--danger); color: white; }
-        .btn-sm { height: 34px; padding: 0 12px; font-size: 0.9rem; border-radius: 6px; border: 1px solid; cursor: pointer; }
+        .btn-sm { height: 34px; min-width: 60px; padding: 0 12px; font-size: 0.9rem; border-radius: 6px; border: 1px solid; cursor: pointer; transition: 0.2s; }
         .btn-sm.active { background: var(--primary); color: white; border-color: var(--primary); }
         .btn-sm.inactive { background: white; color: var(--text-sub); border-color: var(--border-color); }
-        .btn-copy { height: 42px; padding: 0 10px; font-size: 0.85rem; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; }
-        .btn-copy.copied { background: var(--success); color: white; border-color: var(--success); }
         .btn-icon { font-size: 0.8rem; background: none; border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-left: 5px; }
+        .btn-edit { color: var(--primary); border-color: var(--primary-light); }
         .btn-del { color: var(--danger); }
+        .btn-copy { height: 42px; min-width: 60px; padding: 0 10px; font-size: 0.85rem; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; }
+        .btn-copy.copied { background: var(--success); color: white; border-color: var(--success); }
 
+        /* [NEW] 로딩 점 애니메이션 */
         .loading-dots::after { content: ''; animation: dots 1.5s steps(4, end) infinite; }
         @keyframes dots { 0%, 20% { content: ''; } 40% { content: '.'; } 60% { content: '..'; } 80%, 100% { content: '...'; } }
+
+        /* 태그 & 리스트 */
+        .tag-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+        .tag { position: relative; padding: 8px 30px 8px 16px; background: var(--bg-main); border-radius: 20px; font-size: 0.95rem; cursor: pointer; border: 1px solid var(--border-color); transition: 0.2s; }
+        .tag.selected { background: var(--primary); color: white; border-color: var(--primary); }
+        .tag-add { padding: 8px 16px; border: 1px dashed var(--primary); background: white; color: var(--primary); text-align:center;}
+        .tag .x-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; line-height: 16px; text-align: center; border-radius: 50%; font-size: 0.8rem; background: rgba(0,0,0,0.1); color: inherit; display: none; }
+        .tag:hover .x-btn { display: block; }
 
         .student-row { display: flex; align-items: center; gap: 15px; padding: 12px 10px; border-bottom: 1px solid var(--bg-main); background: white; }
         .st-name { width: 90px; font-weight: bold; color: var(--primary-dark); flex-shrink: 0; }
@@ -57,23 +79,17 @@
         .check-circle.checked { border-color: var(--primary); background: var(--primary); }
         .check-circle.checked::after { content: '✔'; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; }
         
-        .tag-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
-        .tag { position: relative; padding: 8px 30px 8px 16px; background: var(--bg-main); border-radius: 20px; font-size: 0.95rem; cursor: pointer; border: 1px solid var(--border-color); transition: 0.2s; }
-        .tag.selected { background: var(--primary); color: white; border-color: var(--primary); }
-        .tag-add { padding: 8px 16px; border: 1px dashed var(--primary); background: white; color: var(--primary); text-align:center;}
-        .tag .x-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; line-height: 16px; text-align: center; border-radius: 50%; font-size: 0.8rem; background: rgba(0,0,0,0.1); color: inherit; display: none; }
-        .tag:hover .x-btn { display: block; }
-
         .ai-magic { position: absolute; right: 10px; top: 10px; cursor: pointer; display: none; font-size: 1.2rem; }
         .student-list-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 15px; border-bottom: 1px solid var(--bg-main); cursor: pointer; border-radius: 6px; transition: 0.2s; }
         .student-list-item:hover { background: #eaf6fc; }
         .student-list-item.active { background: #eaf6fc; border: 1px solid var(--primary-light); color: var(--primary-dark); font-weight: bold;}
 
+        /* [NEW] 평가 결과 표시 스타일 (복사 안됨) */
         .history-card { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; border-bottom: 1px solid var(--bg-main); padding-bottom: 10px; }
         .h-info { width: 90px; flex-shrink: 0; text-align: center; }
         .h-date { font-size: 0.85rem; color: var(--text-sub); }
         .h-badge { font-size: 0.8rem; background: #eaf6fc; color: var(--primary-dark); padding: 2px 6px; border-radius: 4px; font-weight: bold; display: inline-block; margin-top: 4px;}
-        .h-eval { font-size: 0.8rem; color: var(--success); margin-top: 4px; user-select: none; font-weight: bold;}
+        .h-eval { font-size: 0.8rem; color: var(--success); font-weight: bold; margin-top: 4px; user-select: none; } /* user-select: none -> 드래그/복사 방지 */
         .h-textarea { flex-grow: 1; margin-bottom: 0 !important; height: 60px; resize: vertical; padding: 8px 12px; font-size: 0.95rem; background: #fff; border: 1px solid var(--border-color); border-radius: 4px; }
         .h-btn-area { width: 60px; flex-shrink: 0; display:flex; flex-direction: column; gap: 5px; }
 
@@ -83,17 +99,9 @@
         .n-btn-area { width: 60px; text-align: right; flex-shrink: 0; }
 
         /* 모달 & 토스트 */
-        .skeleton { background: #e0e0e0; border-radius: 4px; animation: shimmer 1.5s infinite; }
-        @keyframes shimmer { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
-        #loading-screen { display: flex; flex-direction: column; gap: 20px; }
-        .sk-header { height: 60px; width: 100%; border-radius: 8px; }
-        .sk-card { height: 200px; width: 100%; border-radius: 8px; }
-        
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 2000; display: none; align-items: center; justify-content: center; }
-        .modal-overlay.open { display: flex; }
-        .modal-card { background: white; padding: 25px; border-radius: 12px; width: 320px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .modal-card { background: white; padding: 25px; border-radius: 12px; width: 320px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--border-color); }
         .modal-title { font-size: 1.1rem; font-weight: bold; color: var(--primary-dark); margin-bottom: 15px; }
-        
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 30px; padding: 12px 20px; position: fixed; z-index: 3000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 0.95rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
@@ -108,12 +116,13 @@
         input:checked + .slider { background-color: var(--primary); }
         input:checked + .slider:before { transform: translateX(16px); }
 
-        .section { display: none; animation: fadeIn 0.2s; }
-        .section.active { display: block; }
+        .section { display: none; }
+        .section.active { display: block; animation: fadeIn 0.2s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        .hidden { display: none !important; }
 
-        /* 📱 모바일 최적화 (768px 이하) */
+        /* ============================================================= */
+        /* 📱 모바일 최적화 */
+        /* ============================================================= */
         @media (max-width: 768px) {
             .container { padding: 10px; }
             .nav-item { font-size: 0.9rem; padding: 10px 5px; }
@@ -121,174 +130,193 @@
             .mobile-only { display: block !important; }
             .split-container { flex-direction: column; }
             .split-left, .split-right { width: 100%; }
-            .neis-result-card { flex-direction: column; }
-            .n-name { width: 100%; margin-bottom: 5px; }
-            .n-btn-area { width: 100%; text-align: right; }
             
-            .mobile-record-card { background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; }
-            .mobile-btn-group { display: flex; gap: 10px; margin-bottom: 15px; }
-            .mobile-btn { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: white; color: var(--text-sub); font-weight: bold; }
-            .mobile-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-            .mobile-textarea { width: 100%; height: 150px; padding: 15px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem; margin-bottom: 15px; resize: none; }
+            .mobile-record-card {
+                background: white; padding: 20px; border-radius: 12px;
+                border: 1px solid var(--border-color); text-align: center;
+            }
+            .mobile-btn-group { display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; }
+            .mobile-btn {
+                flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);
+                background: white; color: var(--text-sub); font-weight: bold; font-size: 1rem;
+            }
+            .mobile-btn.active {
+                background: var(--primary); color: white; border-color: var(--primary);
+            }
+            .mobile-textarea {
+                width: 100%; height: 150px; padding: 15px; border: 1px solid var(--border-color);
+                border-radius: 8px; font-size: 1rem; margin-bottom: 15px; resize: none;
+                line-height: 1.6;
+            }
             .mobile-textarea:focus { border-color: var(--primary); outline: none; }
-            .mobile-helper-text { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 15px; background: #f9f9f9; padding: 10px; border-radius: 6px; text-align: left; }
             
-            .pc-required-msg { text-align: center; padding: 50px 20px; color: var(--text-sub); background: #fff; border-radius: 8px; border: 1px solid var(--border-color); }
+            .mobile-helper-text {
+                font-size: 0.85rem; color: var(--text-sub); margin-bottom: 15px;
+                background: #f9f9f9; padding: 10px; border-radius: 6px; text-align: left;
+            }
+            .pc-required-msg {
+                text-align: center; padding: 50px 20px; color: var(--text-sub);
+                background: #fff; border-radius: 8px; border: 1px solid var(--border-color);
+            }
             .pc-icon { font-size: 3rem; margin-bottom: 15px; display: block; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div id="loading-screen">
-            <div class="skeleton sk-header"></div>
-            <div class="skeleton sk-card"></div>
-            <div class="skeleton sk-card"></div>
-        </div>
+        <header><h1>쫑알수첩 v10.5</h1></header>
+        <nav class="nav-tabs">
+            <div class="nav-item active" onclick="showSection('record')">기록하기</div>
+            <div class="nav-item" onclick="showSection('students')">학생관리</div>
+            <div class="nav-item" onclick="showSection('neis')">NEIS</div>
+            <div class="nav-item" onclick="showSection('data')">설정</div>
+        </nav>
 
-        <div id="app-content" class="hidden">
-            <header><h1>쫑알수첩 v14.0</h1></header>
-            <nav class="nav-tabs">
-                <div class="nav-item active" onclick="showSection('record')">기록하기</div>
-                <div class="nav-item" onclick="showSection('students')">학생관리</div>
-                <div class="nav-item" onclick="showSection('neis')">NEIS</div>
-                <div class="nav-item" onclick="showSection('data')">자료/설정</div>
-            </nav>
-
-            <div id="record" class="section active">
-                <div class="mobile-only">
-                    <div class="mobile-record-card">
-                        <label style="text-align:left;">날짜</label><input type="date" id="mDate" style="margin-bottom:15px;">
-                        <div class="mobile-btn-group">
-                            <button class="mobile-btn active" id="mBtnSub" onclick="setMobileMode('subject')">과목</button>
-                            <button class="mobile-btn" id="mBtnBeh" onclick="setMobileMode('behavior')">행동</button>
-                        </div>
-                        <div class="mobile-helper-text" id="mHelper">💡 예: <b>김철수/수학/발표 잘함</b></div>
-                        <textarea id="mInput" class="mobile-textarea" placeholder="내용 입력..."></textarea>
-                        <button class="btn btn-primary" style="width:100%; height:50px; font-size:1.1rem;" onclick="saveMobileRecord()">AI 자동 저장 ✨</button>
+        <div id="record" class="section active">
+            <div class="mobile-only">
+                <div class="mobile-record-card">
+                    <label style="text-align:left;">날짜 선택</label>
+                    <input type="date" id="mDate" style="margin-bottom:20px;">
+                    <div class="mobile-btn-group">
+                        <button class="mobile-btn active" id="mBtnSub" onclick="setMobileMode('subject')">과목</button>
+                        <button class="mobile-btn" id="mBtnBeh" onclick="setMobileMode('behavior')">행동</button>
                     </div>
-                </div>
-                <div class="pc-only">
-                    <div class="split-container">
-                        <div class="split-left">
-                            <div class="card">
-                                <div class="card-header">
-                                    <span>기본 정보</span>
-                                    <div style="display: flex; gap: 5px;">
-                                        <button class="btn-sm active" id="btnSubject" onclick="setMode('subject')">과목</button>
-                                        <button class="btn-sm inactive" id="btnBehavior" onclick="setMode('behavior')">행동</button>
-                                    </div>
-                                </div>
-                                <label>날짜</label><input type="date" id="rDate">
-                                <div id="periodArea"><label>교시</label><select id="rPeriod"><option value="">(입력안함)</option><option>1교시</option><option>2교시</option><option>3교시</option><option>4교시</option><option>5교시</option><option>6교시</option></select></div>
-                                <div id="subjectArea">
-                                    <label>과목 선택</label><div class="tag-container" id="subjectTags"><div class="tag tag-add" onclick="openSubjectModal()">+</div></div>
-                                    <label>성취기준/주제</label><input type="text" id="rTopic" placeholder="예: 시 낭송하기">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="split-right">
-                            <div class="card full-height">
-                                <div class="card-header">
-                                    <div style="display:flex; align-items:center; gap:15px;">
-                                        <span>학생별 기록</span>
-                                        <div class="switch-container"><label class="switch"><input type="checkbox" id="aiToggle" checked><span class="slider"></span></label><span>AI</span></div>
-                                    </div>
-                                    <button class="btn btn-primary" onclick="saveData()">저장하기</button>
-                                </div>
-                                <div style="display: flex; padding: 0 10px 10px; border-bottom: 2px solid var(--bg-main); font-weight: bold; color: var(--text-sub); font-size: 0.9rem;">
-                                    <div style="width: 90px;">이름</div><div style="flex-grow: 1; text-align: center;">관찰/특기사항</div>
-                                    <div id="checkHeader" style="width: 220px; display: flex; justify-content: space-between; font-size: 0.8rem;"><span>매우잘함</span><span>잘함</span><span>보통</span><span>노력요함</span></div>
-                                </div>
-                                <div id="recordList"></div>
-                            </div>
-                        </div>
+                    <div class="mobile-helper-text" id="mHelper">
+                        💡 입력 예시:<br><b>김철수/수학/발표 잘함</b><br>(이름/과목/내용 순서로 입력하면 AI가 분류합니다)
                     </div>
+                    <textarea id="mInput" class="mobile-textarea" placeholder="여기에 입력하세요..."></textarea>
+                    <button class="btn btn-primary" style="width:100%; height:50px; font-size:1.1rem;" onclick="saveMobileRecord()">
+                        AI 자동 분류 저장 ✨
+                    </button>
                 </div>
             </div>
 
-            <div id="students" class="section">
+            <div class="pc-only">
                 <div class="split-container">
                     <div class="split-left">
-                        <div class="card full-height">
-                            <div class="card-header">학생 명단</div>
-                            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                                <button class="btn btn-outline" style="flex:1;" onclick="openBulkModal()">📋 엑셀 붙여넣기</button>
-                                <button class="btn btn-outline" style="flex:1;" onclick="openAddStudentModal()">➕ 추가</button>
+                        <div class="card">
+                            <div class="card-header">
+                                <span>기본 정보</span>
+                                <div style="display: flex; gap: 5px;">
+                                    <button class="btn-sm active" id="btnSubject" onclick="setMode('subject')">과목</button>
+                                    <button class="btn-sm inactive" id="btnBehavior" onclick="setMode('behavior')">행동</button>
+                                </div>
                             </div>
-                            <div id="studentNavList" style="overflow-y: auto; max-height: 600px;"></div>
+                            <label>날짜</label><input type="date" id="rDate">
+                            <div id="periodArea">
+                                <label>교시</label>
+                                <select id="rPeriod"><option value="">(입력안함)</option><option>1교시</option><option>2교시</option><option>3교시</option><option>4교시</option><option>5교시</option><option>6교시</option></select>
+                            </div>
+                            <div id="subjectArea">
+                                <label>과목 선택</label><div class="tag-container" id="subjectTags"><div class="tag tag-add" onclick="openSubjectModal()">+</div></div>
+                                <label>성취기준/주제</label><input type="text" id="rTopic" placeholder="예: 시 낭송하기">
+                            </div>
                         </div>
                     </div>
                     <div class="split-right">
                         <div class="card full-height">
                             <div class="card-header">
-                                <span id="viewerTitle">기록 상세 보기</span>
-                                <div style="display: flex; gap: 5px; align-items: center;">
-                                    <select id="viewSubjectFilter" style="margin-bottom:0; width:110px; padding:6px; font-size:0.9rem;" onchange="loadHistory()"></select>
-                                    <button class="btn-sm active" id="viewSubBtn" onclick="viewTab('subject')">과목</button>
-                                    <button class="btn-sm inactive" id="viewBehBtn" onclick="viewTab('behavior')">행동</button>
+                                <div style="display:flex; align-items:center; gap:15px;">
+                                    <span>학생별 기록</span>
+                                    <div class="switch-container">
+                                        <label class="switch"><input type="checkbox" id="aiToggle" checked><span class="slider"></span></label>
+                                        <span>AI</span>
+                                    </div>
                                 </div>
+                                <button class="btn btn-primary" onclick="saveData()">저장하기</button>
                             </div>
-                            <div style="margin-bottom: 15px; text-align: right;"><button class="btn btn-sm btn-del" onclick="openDeleteStudentModal()">🗑️ 학생 삭제</button></div>
-                            <div id="historyViewer" style="overflow-y: auto; max-height: 550px;"><div style="text-align: center; color: var(--text-sub); padding: 50px 0;">학생을 선택해주세요.</div></div>
+                            <div style="display: flex; padding: 0 10px 10px; border-bottom: 2px solid var(--bg-main); font-weight: bold; color: var(--text-sub); font-size: 0.9rem;">
+                                <div style="width: 90px;">이름</div><div style="flex-grow: 1; text-align: center;">관찰/특기사항</div>
+                                <div id="checkHeader" style="width: 220px; display: flex; justify-content: space-between; font-size: 0.8rem;"><span>매우잘함</span><span>잘함</span><span>보통</span><span>노력요함</span></div>
+                            </div>
+                            <div id="recordList"></div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div id="neis" class="section">
-                <div class="mobile-only"><div class="pc-required-msg"><span class="pc-icon">💻</span><b>PC 전용 기능</b><br>NEIS 자료 생성은 컴퓨터에서 이용해주세요.</div></div>
-                <div class="pc-only">
-                     <div class="split-container">
-                        <div class="split-left">
-                            <div class="card">
-                                <div class="card-header">NEIS 옵션</div>
-                                <label>유형</label><select id="neisType" onchange="toggleNeisType()"><option value="subject">과목별 세특</option><option value="behavior">행동특성</option></select>
-                                <div id="neisSubOption"><label>대상 과목</label><select id="neisSubjectSelect"></select></div>
-                                <div id="neisBehOption" style="display:none;"><label>키워드</label><input type="text" id="neisKeyword" placeholder="예: 배려, 협력"></div>
-                                <label style="margin-top:15px;">생성 분량</label>
-                                <div style="display:flex; align-items:center; gap:10px;">
-                                    <input type="range" id="neisLen" min="100" max="1000" step="50" value="300" oninput="document.getElementById('lenVal').innerText=this.value">
-                                    <span style="width:50px; text-align:right; font-weight:bold; color:var(--primary);"><span id="lenVal">300</span>자</span>
-                                </div>
-                                <button class="btn btn-primary" style="margin-top:15px;" onclick="generateNeisCards()">자료 생성하기</button>
+        <div id="students" class="section">
+            <div class="split-container">
+                <div class="split-left">
+                    <div class="card full-height">
+                        <div class="card-header">학생 명단</div>
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <button class="btn btn-outline" style="flex:1;" onclick="showToast('준비중입니다')">엑셀 등록</button>
+                            <button class="btn btn-outline" style="flex:1;" onclick="openAddStudentModal()">추가</button>
+                        </div>
+                        <div id="studentNavList" style="overflow-y: auto; max-height: 600px;"></div>
+                    </div>
+                </div>
+                <div class="split-right">
+                    <div class="card full-height">
+                        <div class="card-header">
+                            <span id="viewerTitle">기록 상세 보기</span>
+                            <div style="display: flex; gap: 5px; align-items: center;">
+                                <select id="viewSubjectFilter" style="margin-bottom:0; width:110px; padding:6px; font-size:0.9rem;" onchange="loadHistory()"></select>
+                                <button class="btn-sm active" id="viewSubBtn" onclick="viewTab('subject')">과목</button>
+                                <button class="btn-sm inactive" id="viewBehBtn" onclick="viewTab('behavior')">행동</button>
                             </div>
                         </div>
-                        <div class="split-right">
-                            <div class="card full-height">
-                                <div class="card-header">생성 결과</div>
-                                <div id="neisResultList" style="padding:15px;"><div style="text-align:center;color:var(--text-sub);margin-top:20px;">옵션 선택 후 생성하기 버튼을 눌러주세요.</div></div>
+                        <div style="margin-bottom: 15px; text-align: right;"><button class="btn btn-sm btn-del" onclick="openDeleteStudentModal()">🗑️ 학생 삭제</button></div>
+                        <div id="historyViewer" style="overflow-y: auto; max-height: 550px;"><div style="text-align: center; color: var(--text-sub); padding: 50px 0;">학생을 선택해주세요.</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="neis" class="section">
+            <div class="mobile-only"><div class="pc-required-msg"><span class="pc-icon">💻</span><b>PC 모드 전용 기능입니다.</b><br>NEIS 자료 생성은 컴퓨터에서 이용해주세요.</div></div>
+            <div class="pc-only">
+                 <div class="split-container">
+                    <div class="split-left">
+                        <div class="card">
+                            <div class="card-header">NEIS 옵션</div>
+                            <label>유형</label><select id="neisType" onchange="toggleNeisType()"><option value="subject">과목별 세특</option><option value="behavior">행동특성</option></select>
+                            <div id="neisSubOption"><label>대상 과목</label><select id="neisSubjectSelect"></select></div>
+                            <div id="neisBehOption" style="display:none;"><label>키워드</label><input type="text" id="neisKeyword" placeholder="예: 배려, 협력"></div>
+                            <label style="margin-top:15px;">생성 분량</label>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <input type="range" id="neisLen" min="100" max="1000" step="50" value="300" oninput="document.getElementById('lenVal').innerText=this.value">
+                                <span style="width:50px; text-align:right; font-weight:bold; color:var(--primary);"><span id="lenVal">300</span>자</span>
                             </div>
+                            <button class="btn btn-primary" style="margin-top:15px;" onclick="generateNeisCards()">자료 생성하기</button>
+                        </div>
+                    </div>
+                    <div class="split-right">
+                        <div class="card full-height">
+                            <div class="card-header">생성 결과</div>
+                            <div id="neisResultList" style="padding:15px;"><div style="text-align:center;color:var(--text-sub);margin-top:20px;">옵션 선택 후 생성하기 버튼을 눌러주세요.</div></div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div id="data" class="section">
-                <div class="mobile-only"><div class="pc-required-msg"><span class="pc-icon">⚙️</span><b>PC 전용 기능</b><br>설정 및 자료 관리는 컴퓨터에서 이용해주세요.</div></div>
-                <div class="pc-only">
-                    <div class="split-container">
-                        <div class="split-left">
-                            <div class="card full-height">
-                                <div class="card-header">참고 자료</div>
-                                <input type="file" id="uploadInput" style="margin-bottom:10px;">
-                                <button class="btn btn-outline" style="width:100%; margin-bottom:15px;" onclick="uploadFile()">파일 업로드 (Drive)</button>
-                                <div id="fileList" style="overflow-y:auto; max-height:400px; font-size:0.95rem;"></div>
-                            </div>
+        <div id="data" class="section">
+            <div class="mobile-only"><div class="pc-required-msg"><span class="pc-icon">⚙️</span><b>PC 모드 전용 기능입니다.</b><br>설정 및 자료 관리는 컴퓨터에서 이용해주세요.</div></div>
+            <div class="pc-only">
+                <div class="split-container">
+                    <div class="split-left">
+                        <div class="card full-height">
+                            <div class="card-header">참고 자료</div>
+                            <input type="file" id="uploadInput" style="margin-bottom:10px;">
+                            <button class="btn btn-outline" style="width:100%; margin-bottom:15px;" onclick="uploadFile()">파일 업로드 (Drive)</button>
+                            <div id="fileList" style="overflow-y:auto; max-height:400px; font-size:0.95rem;"></div>
                         </div>
-                        <div class="split-right">
-                            <div class="card full-height">
-                                <div class="card-header">설정</div>
-                                <div id="publicModeSettings" style="display:none; margin-bottom:20px; background:#f9f9f9; padding:15px; border-radius:8px;">
-                                    <label>Gemini API Key (공용)</label>
-                                    <input type="password" id="settingApiKey" placeholder="AIza...">
-                                    <button class="btn btn-sm active" style="width:100%;" onclick="savePublicSettings()">API Key 저장</button>
-                                </div>
-                                <label>AI 페르소나 (말투 설정)</label>
-                                <textarea id="personaText" style="height:150px;" placeholder="예: 초등학교 교사 말투. ~함으로 끝내라."></textarea>
-                                <div style="text-align:right;">
-                                    <button class="btn btn-primary" onclick="savePersona()">설정 저장</button>
-                                </div>
+                    </div>
+                    <div class="split-right">
+                        <div class="card full-height">
+                            <div class="card-header">설정</div>
+                            <div id="publicModeSettings" style="display:none; margin-bottom:20px; background:#f9f9f9; padding:15px; border-radius:8px;">
+                                <label>Gemini API Key (공용)</label>
+                                <input type="password" id="settingApiKey" placeholder="AIza...">
+                                <button class="btn btn-sm active" style="width:100%;" onclick="savePublicSettings()">API Key 저장</button>
+                            </div>
+                            <label>AI 페르소나 (말투 설정)</label>
+                            <textarea id="personaText" style="height:150px;" placeholder="예: 초등학교 교사 말투. ~함으로 끝내라."></textarea>
+                            <div style="text-align:right;">
+                                <button class="btn btn-primary" onclick="savePersona()">설정 저장</button>
                             </div>
                         </div>
                     </div>
@@ -298,51 +326,53 @@
     </div>
 
     <div id="toast"></div>
-    <div id="subjectModal" class="modal-overlay"><div class="modal-card"><div class="modal-title">새 과목 추가</div><input type="text" id="newSubjectName" placeholder="과목명"><div style="text-align:right;"><button class="btn btn-outline" onclick="closeModal('subjectModal')">취소</button> <button id="confirmSubjectBtn" class="btn btn-primary" onclick="confirmAddSubject()">추가</button></div></div></div>
+    <div id="subjectModal" class="modal-overlay"><div class="modal-card"><div class="modal-title">새 과목 추가</div><input type="text" id="newSubjectName" placeholder="과목명"><div style="text-align:right;"><button class="btn btn-outline" onclick="closeSubjectModal()">취소</button> <button id="confirmSubjectBtn" class="btn btn-primary" onclick="confirmAddSubject()">추가</button></div></div></div>
     <div id="deleteSubjectModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="color:var(--danger)">⚠️ 과목 삭제</div><p>기록이 영구 삭제됩니다.</p><div style="text-align:right;"><button class="btn btn-outline" onclick="closeDeleteSubjectModal()">취소</button> <button class="btn btn-danger" onclick="confirmDeleteSubject()">삭제</button></div></div></div>
-    <div id="addStudentModal" class="modal-overlay"><div class="modal-card"><div class="modal-title">학생 추가</div><input type="text" inputmode="numeric" id="newStId" placeholder="번호"><input type="text" id="newStName" placeholder="이름"><div style="text-align:right;"><button class="btn btn-outline" onclick="closeModal('addStudentModal')">취소</button> <button class="btn btn-primary" onclick="confirmAddStudent()">등록</button></div></div></div>
+    <div id="addStudentModal" class="modal-overlay"><div class="modal-card"><div class="modal-title">학생 추가</div><input type="text" inputmode="numeric" id="newStId" placeholder="번호"><input type="text" id="newStName" placeholder="이름"><div style="text-align:right;"><button class="btn btn-outline" onclick="closeAddStudentModal()">취소</button> <button class="btn btn-primary" onclick="confirmAddStudent()">등록</button></div></div></div>
     <div id="deleteStudentModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="color:var(--danger)">⚠️ 학생 삭제</div><p>명단에서 삭제됩니다.</p><div style="text-align:right;"><button class="btn btn-outline" onclick="closeDeleteStudentModal()">취소</button> <button class="btn btn-danger" onclick="confirmDeleteStudent()">삭제</button></div></div></div>
-    <div id="modalBulk" class="modal-overlay"><div class="modal-card"><div class="modal-title">엑셀 붙여넣기</div><p style="font-size:0.9rem; color:#666;">이름만 복사해서 붙여넣으세요.<br>(번호 자동 생성)</p><textarea id="bulkText" style="height:200px; width:100%; margin-bottom:10px;" placeholder="김철수\n이영희..."></textarea><div style="text-align:right;"><button class="btn btn-outline" onclick="closeModal('modalBulk')">취소</button> <button class="btn btn-primary" onclick="confirmBulkAdd()">등록</button></div></div></div>
 
     <script>
         // ▼▼▼ 선생님의 GAS 배포 주소 (PRO 모드) ▼▼▼
-        const PRO_BACKEND_URL = "https://script.google.com/macros/s/AKfycbxn2nB0ZNXwXSdfx4-XVUWTD3Z_GCb_L2_SkhLyiKu5qrZrpwGTLM9Y4BhQRbveIk4o8Q/exec";
+        const PRO_BACKEND_URL = "https://script.google.com/macros/s/AKfycbxn2nB0ZNXwXSdfx4-XVUWTD3Z_GCb_L2_SkhLyiKu5qrZrpwGTLM9Y4BhQRbveIk4o8Q/exec"; 
         // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
         const IS_GAS_ENV = window.location.hostname.includes('script.google.com');
         const IS_PRO_MODE = !IS_GAS_ENV && PRO_BACKEND_URL !== "";
 
-        let globalData = { students: [], records: [], settings: {}, subjects: [] };
-        let currentRecordMode = 'subject';
-        let mobileMode = 'subject';
+        let currentMode = 'subject';
+        let mobileMode = 'subject'; // 모바일용 모드
         let selectedStudentName = null;
         let viewTabMode = 'subject';
+        let studentList = [];
+        let subjectList = ["국어", "수학", "사회", "과학", "영어", "체육", "음악", "미술"];
+        let targetSubjectToDelete = null;
+        let aiPersona = "";
 
-        window.onload = async () => {
+        window.onload = () => {
             document.getElementById('rDate').valueAsDate = new Date();
             document.getElementById('mDate').valueAsDate = new Date();
             initEnvironment();
-            const data = await sendRequest('getAllData'); 
-            if (data) initApp(data);
+            loadStudents();
+            renderSubjectTags();
+            updateNeisSubjectOptions();
+            loadFiles();
         };
 
-        function initApp(data) {
-            console.log("Data Loaded:", data);
-            globalData = data;
-            if(!globalData.subjects || globalData.subjects.length === 0) globalData.subjects = ["국어", "수학", "사회", "과학", "영어"];
-            if(!globalData.settings) globalData.settings = {};
-
-            document.getElementById('loading-screen').classList.add('hidden');
-            document.getElementById('app-content').classList.remove('hidden');
-
-            renderStudentList();
-            renderSettings();
-            renderSubjectTags();
-            updateSubjectSelect();
-            loadFiles();
+        function initEnvironment() {
+            if (IS_PRO_MODE) {
+                document.getElementById('publicModeSettings').style.display = 'none';
+            } else {
+                document.getElementById('publicModeSettings').style.display = 'block';
+                sendRequest('load_settings').then(res => {
+                    if(res) {
+                        document.getElementById('settingApiKey').value = res.apiKey || "";
+                        document.getElementById('personaText').value = res.persona || "";
+                        aiPersona = res.persona || "";
+                    }
+                });
+            }
         }
 
-        // 통합 통신 어댑터
         function sendRequest(action, payload = {}) {
             if (IS_PRO_MODE) {
                 payload.action = action;
@@ -359,268 +389,262 @@
             }
         }
 
-        // [2,3] 과목 및 학생 추가 버튼 피드백
-        async function confirmAddSubject() {
-            const name = document.getElementById('newSubjectName').value.trim();
-            if(!name || globalData.subjects.includes(name)) return;
-            
-            const btn = document.getElementById('confirmSubjectBtn');
-            btn.classList.add('loading-dots'); 
-            btn.innerText = "추가 중"; 
-            btn.disabled = true;
-
-            await sendRequest('add_subject', {subject:name});
-            globalData.subjects.push(name); 
-            renderSubjectTags(); 
-            
-            btn.classList.remove('loading-dots');
-            btn.innerText = "추가되었습니다!";
-            
-            setTimeout(() => {
-                closeModal('subjectModal');
-                btn.innerText = "추가"; 
-                btn.disabled = false;
-            }, 500);
+        function showToast(msg) {
+            const t = document.getElementById("toast");
+            t.innerText = msg; t.className = "show";
+            setTimeout(() => { t.className = t.className.replace("show", ""); }, 3000);
         }
 
-        async function confirmAddStudent() {
-            const id = document.getElementById('newStId').value;
-            const name = document.getElementById('newStName').value;
-            if(!id || !name) return alert("입력해주세요");
-
-            const btn = document.querySelector('#addStudentModal .btn-primary');
-            btn.classList.add('loading-dots'); 
-            btn.innerText = "등록 중"; 
-            btn.disabled = true;
-
-            await sendRequest('add_student', { id, name });
-            globalData.students.push({ id, name }); 
-            renderStudentList(); renderRecordList(); renderStudentNav(); 
+        // ========================= 📱 모바일 로직 =========================
+        function setMobileMode(mode) {
+            mobileMode = mode;
+            document.getElementById('mBtnSub').className = mode === 'subject' ? 'mobile-btn active' : 'mobile-btn';
+            document.getElementById('mBtnBeh').className = mode === 'behavior' ? 'mobile-btn active' : 'mobile-btn';
             
-            btn.classList.remove('loading-dots');
-            btn.innerText = "등록되었습니다!";
-            
-            setTimeout(() => {
-                closeModal('addStudentModal');
-                btn.innerText = "등록"; 
-                btn.disabled = false;
-            }, 500);
+            const helper = document.getElementById('mHelper');
+            if (mode === 'subject') {
+                helper.innerHTML = `💡 입력 예시:<br><b>김철수/수학/발표 잘함</b><br>(이름/과목/내용 순서로 입력하면 AI가 분류합니다)`;
+            } else {
+                helper.innerHTML = `💡 입력 예시:<br><b>이영희/친구를 잘 도와줌</b><br>(이름/내용 순서로 입력)`;
+            }
         }
 
-        // 기록 저장
+        async function saveMobileRecord() {
+            const text = document.getElementById('mInput').value.trim();
+            if(!text) { showToast("내용을 입력해주세요"); return; }
+            
+            const btn = document.querySelector('.mobile-record-card .btn-primary');
+            btn.classList.add('loading-dots'); btn.innerText = "AI 분석 중"; btn.disabled = true;
+
+            const prompt = `
+                사용자 입력을 JSON으로 추출.
+                모드: ${mobileMode} (subject=과목, behavior=행동)
+                입력: "${text}"
+                규칙:
+                1. 이름, 과목(subject면), 내용을 분리.
+                2. 과목명 없으면 내용 보고 추측. 정 모르면 '교과'. behavior면 과목명='행동'.
+                3. 내용은 "초등 생기부 평어체(~함)"로 다듬어 'finalText'에.
+                출력(JSON): {"name": "이름", "type": "과목명", "text": "finalText"}
+            `;
+
+            const aiRes = await sendRequest('call_ai', { prompt: prompt });
+            
+            try {
+                const jsonStr = aiRes.text.replace(/```json/g, "").replace(/```/g, "").trim();
+                const parsed = JSON.parse(jsonStr);
+                
+                if (!parsed.name) throw new Error("이름 식별 불가");
+
+                await sendRequest('save_record', {
+                    date: document.getElementById('mDate').value,
+                    name: parsed.name,
+                    type: parsed.type,
+                    text: parsed.text,
+                    check: "없음"
+                });
+                
+                showToast(`[${parsed.name}] 저장 완료!`);
+                document.getElementById('mInput').value = ""; 
+
+            } catch (e) {
+                showToast("AI 분류 실패. 양식 확인.");
+                console.error(e);
+            }
+            btn.classList.remove('loading-dots'); btn.innerText = "AI 자동 분류 저장 ✨"; btn.disabled = false;
+        }
+
+        // ========================= 💻 PC 로직 =========================
+        
+        async function savePublicSettings() {
+            const key = document.getElementById('settingApiKey').value.trim();
+            if(!key) { showToast("API Key 필요"); return; }
+            await sendRequest('save_settings', { apiKey: key });
+            showToast("API Key 저장 완료");
+        }
+        async function savePersona() {
+            const p = document.getElementById('personaText').value;
+            aiPersona = p;
+            if(!IS_PRO_MODE) await sendRequest('save_persona', { persona: p }); 
+            showToast("페르소나 저장 완료");
+        }
+        function uploadFile() {
+            const input = document.getElementById('uploadInput');
+            if(input.files.length === 0) { showToast("파일을 선택하세요"); return; }
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const base64 = e.target.result.split(',')[1];
+                showToast("업로드 중...");
+                const res = await sendRequest('upload_file', { name: file.name, mimeType: file.type, data: base64 });
+                if(res) { showToast("업로드 완료"); loadFiles(); input.value = ''; }
+            };
+            reader.readAsDataURL(file);
+        }
+        async function loadFiles() {
+            const files = await sendRequest('get_files');
+            const list = document.getElementById('fileList');
+            list.innerHTML = '';
+            if(files) files.forEach(f => {
+                const div = document.createElement('div');
+                div.style.padding = "10px"; div.style.borderBottom = "1px solid #eee";
+                div.innerHTML = `<a href="${f.url}" target="_blank" style="text-decoration:none; color:var(--primary); font-weight:bold;">📄 ${f.name}</a>`;
+                list.appendChild(div);
+            });
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.getElementById('btnSubject').className = mode === 'subject' ? 'btn-sm active' : 'btn-sm inactive';
+            document.getElementById('btnBehavior').className = mode === 'behavior' ? 'btn-sm active' : 'btn-sm inactive';
+            document.getElementById('subjectArea').style.display = mode === 'subject' ? 'block' : 'none';
+            document.getElementById('checkHeader').style.visibility = mode === 'subject' ? 'visible' : 'hidden';
+            renderRecordList();
+        }
+        function renderRecordList() {
+            const list = document.getElementById('recordList'); list.innerHTML = '';
+            studentList.forEach(st => {
+                const row = document.createElement('div'); row.className = 'student-row';
+                let checkHtml = currentMode === 'subject' ? `<div class="st-check-group"><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div></div>` : '';
+                row.innerHTML = `<div class="st-name">${st.id}. ${st.name}</div><div style="flex-grow:1; position:relative;"><input type="text" class="st-input" id="input_${st.id}" placeholder="${currentMode==='subject'?'관찰/특기사항':'행동특성'}"><span class="ai-magic" onclick="runAI('${st.id}')">✨</span></div>${checkHtml}`;
+                list.appendChild(row);
+            });
+            toggleAIMode();
+        }
+        function toggleCheck(el) { const p = el.parentElement; const was = el.classList.contains('checked'); p.querySelectorAll('.check-circle').forEach(c => c.classList.remove('checked')); if(!was) el.classList.add('checked'); }
+
         async function saveData() {
             const inputs = document.querySelectorAll('.st-input');
             const btn = document.querySelector('#record .btn-primary');
-            const date = document.getElementById('rDate').value;
-            const period = document.getElementById('rPeriod').value;
-            const topic = document.getElementById('rTopic').value.trim();
-            const periodPrefix = period ? `[${period}]` : "";
-            
+            let promises = [];
             let targetType = "행동";
-            if (currentRecordMode === 'subject') {
+            if(currentMode === 'subject') {
                 const selTag = document.querySelector('#subjectTags .tag.selected');
-                if (!selTag) { showToast("과목을 선택해주세요."); return; }
+                if(!selTag) { showToast("과목을 선택해주세요."); return; }
                 targetType = selTag.innerText.split(' ')[0].trim();
             }
-
             btn.classList.add('loading-dots'); btn.innerText = "저장 중"; btn.disabled = true;
-            let promises = [];
-
+            
             inputs.forEach(input => {
                 const text = input.value.trim();
-                if (text) {
-                    const row = input.closest('.student-row');
-                    const name = row.querySelector('.st-name').innerText.split('.')[1].trim();
-                    let checkVal = "없음";
-                    
-                    if (currentRecordMode === 'subject') {
-                        const checks = row.querySelectorAll('.check-circle');
-                        if (checks[0].classList.contains('checked')) checkVal = "매우잘함";
-                        else if (checks[1].classList.contains('checked')) checkVal = "잘함";
-                        else if (checks[2].classList.contains('checked')) checkVal = "보통";
-                        else if (checks[3].classList.contains('checked')) checkVal = "노력요함";
-                    }
+                const row = input.closest('.student-row');
+                const name = row.querySelector('.st-name').innerText.split('.')[1].trim();
+                let checkVal = "없음";
+                if(currentMode === 'subject') {
+                    const checks = row.querySelectorAll('.check-circle');
+                    if(checks[0].classList.contains('checked')) checkVal = "매우잘함";
+                    else if(checks[1].classList.contains('checked')) checkVal = "잘함";
+                    else if(checks[2].classList.contains('checked')) checkVal = "보통";
+                    else if(checks[3].classList.contains('checked')) checkVal = "노력요함";
+                }
 
-                    // 내용 조합
+                if (text.length > 0 || checkVal !== "없음") {
+                    let period = document.getElementById('rPeriod').value;
+                    const topic = document.getElementById('rTopic').value.trim();
+                    let periodPrefix = period ? `[${period}]` : "";
                     let finalBody = text;
-                    if (topic && !finalBody.includes(topic)) finalBody = `${topic} / ${finalBody}`;
+                    if (text.length === 0 && checkVal !== "없음") finalBody = `(평가: ${checkVal}) 수업 활동에 참여함.`;
+                    if(topic && !finalBody.includes(topic)) finalBody = `${topic} / ${finalBody}`;
                     finalBody = `${periodPrefix} ${finalBody}`.trim();
-
-                    // 로컬 업데이트
-                    globalData.records.push({
-                        rowNum: -1, 
-                        sheetName: targetType,
-                        date: new Date(date).toLocaleDateString(),
-                        name: name,
-                        type: targetType,
-                        text: finalBody,
-                        check: checkVal
-                    });
-
-                    // 서버 전송
-                    promises.push(sendRequest('save_record', { date, name, type: targetType, text: finalBody, check: checkVal }));
+                    promises.push(sendRequest('save_record', { date: document.getElementById('rDate').value, name, type: targetType, text: finalBody, check: checkVal }));
                 }
             });
-
-            if (promises.length === 0) { 
-                btn.classList.remove('loading-dots'); btn.innerText = "저장하기"; btn.disabled = false;
-                showToast("입력된 내용이 없습니다."); 
-                return; 
-            }
-
             await Promise.all(promises);
             btn.classList.remove('loading-dots'); btn.innerText = "저장하기"; btn.disabled = false;
-            
             inputs.forEach(el => el.value = '');
             document.querySelectorAll('.check-circle').forEach(el => el.classList.remove('checked'));
             showToast("저장 완료");
         }
 
-        // 모바일 저장
-        async function saveMobileRecord() {
-            const text = document.getElementById('mInput').value.trim();
-            if(!text) { showToast("내용 입력 필요"); return; }
-            const btn = document.querySelector('.mobile-record-card .btn-primary');
-            btn.classList.add('loading-dots'); btn.innerText = "AI 분석 중"; btn.disabled = true;
-
-            const prompt = `입력: "${text}". 모드: ${mobileMode}. 이름, 과목(subject면), 내용을 분리하고 내용을 평어체로 다듬어. JSON출력: {"name":"이름","type":"과목","text":"내용"}`;
-            const aiRes = await sendRequest('call_ai', { prompt });
-            
-            try {
-                const json = JSON.parse(aiRes.text.replace(/```json/g,"").replace(/```/g,"").trim());
-                if(json.name) {
-                    await sendRequest('save_record', { 
-                        date: document.getElementById('mDate').value,
-                        name: json.name, type: json.type || '교과', text: json.text, check: "없음"
-                    });
-                    globalData.records.push({ sheetName: json.type, date: "방금", name: json.name, type: json.type, text: json.text });
-                    showToast(`${json.name} 저장 완료`);
-                    document.getElementById('mInput').value = "";
-                }
-            } catch(e) { showToast("AI 분류 실패"); }
-            btn.classList.remove('loading-dots'); btn.innerText = "AI 자동 저장 ✨"; btn.disabled = false;
+        document.getElementById('aiToggle').addEventListener('change', toggleAIMode);
+        function toggleAIMode() { const on = document.getElementById('aiToggle').checked; document.querySelectorAll('.ai-magic').forEach(e => e.style.display = on ? 'block' : 'none'); }
+        async function runAI(studentId) {
+            const input = document.getElementById(`input_${studentId}`);
+            if(!input) return;
+            const text = input.value;
+            if(!text) { showToast("내용을 입력해주세요."); return; }
+            input.value = "AI..."; input.disabled = true;
+            const topic = document.getElementById('rTopic').value;
+            let prompt = topic ? `주제: "${topic}", 관찰내용: "${text}". 이 두 가지를 결합하여 초등학교 생활기록부 문체(~함)로 자연스러운 한 문장으로 작성해줘. ${aiPersona}` : `내용: "${text}". 이를 초등학교 생활기록부 문체(~함)로 다듬어줘. ${aiPersona}`;
+            const data = await sendRequest('call_ai', { prompt });
+            input.disabled = false;
+            if(data && data.text) input.value = data.text; else { input.value = text; showToast("AI 실패"); }
         }
 
-        // 기록 조회
-        function renderHistory() {
+        function viewTab(mode) {
+            viewTabMode = mode;
+            document.getElementById('viewSubBtn').className = mode === 'subject' ? 'btn-sm active' : 'btn-sm inactive';
+            document.getElementById('viewBehBtn').className = mode === 'behavior' ? 'btn-sm active' : 'btn-sm inactive';
+            document.getElementById('viewSubjectFilter').style.display = mode === 'subject' ? 'block' : 'none';
+            loadHistory();
+        }
+        async function loadHistory() {
             if(!selectedStudentName) return;
-            const container = document.getElementById('historyViewer');
+            const container = document.getElementById('historyViewer'); container.innerHTML = '로딩 중...';
             let reqType = viewTabMode === 'subject' ? document.getElementById('viewSubjectFilter').value : '행동';
-            
-            const history = globalData.records.filter(r => 
-                r.name === selectedStudentName && 
-                (viewTabMode === 'behavior' ? r.sheetName === '행동' : r.sheetName === reqType)
-            );
-
+            const history = await sendRequest('get_history', { name: selectedStudentName, type: reqType, mode: viewTabMode });
             container.innerHTML = '';
-            if(history.length === 0) { container.innerHTML = `<div style="text-align:center;color:var(--text-sub);padding:50px 0;">기록이 없습니다.</div>`; return; }
-            
+            if(!history || history.length === 0) { container.innerHTML = `<div style="text-align:center;color:var(--text-sub);padding:50px 0;">기록이 없습니다.</div>`; return; }
             history.forEach(item => {
                 const card = document.createElement('div'); card.className = 'history-card';
+                // [3번] 평가 결과 복사 방지 (CSS: .h-eval {user-select: none})
                 let evalHtml = item.check && item.check !== "없음" ? `<div class="h-eval">${item.check}</div>` : "";
-                card.innerHTML = `<div class="h-info"><div class="h-date">${item.date}</div><div class="h-badge">${item.type}</div>${evalHtml}</div><textarea readonly class="h-textarea">${item.text}</textarea><div class="h-btn-area"><button class="btn-icon btn-del" onclick="deleteRecord('${item.sheetName}', ${item.rowNum})">삭제</button><button class="btn-copy" onclick="quietCopy(this, '${item.text}')">복사</button></div>`;
+                card.innerHTML = `<div class="h-info"><div class="h-date">${item.date}</div><div class="h-badge">${item.type}</div>${evalHtml}</div><textarea id="hist_txt_${item.rowNum}" class="h-textarea">${item.txt}</textarea><div class="h-btn-area"><button class="btn-icon btn-edit" onclick="updateRecord('${reqType}', ${item.rowNum})">수정</button><button class="btn-icon btn-del" onclick="deleteRecord('${reqType}', ${item.rowNum})">삭제</button><button class="btn-copy" onclick="quietCopy(this, '${item.txt}')">복사</button></div>`;
                 container.appendChild(card);
             });
         }
+        async function updateRecord(sheetName, rowNum) {
+            const newText = document.getElementById(`hist_txt_${rowNum}`).value;
+            if(!confirm("수정하시겠습니까?")) return;
+            await sendRequest('update_record_row', { type: sheetName, rowNum, text: newText });
+            showToast("수정되었습니다.");
+        }
+        async function deleteRecord(sheetName, rowNum) { if(confirm("삭제?")) { await sendRequest('delete_record_row', { type: sheetName, rowNum }); loadHistory(); } }
+        function quietCopy(btn, txt) { navigator.clipboard.writeText(txt).then(() => { const org = btn.innerText; btn.innerText = "완료"; btn.classList.add('copied'); setTimeout(()=> { btn.innerText = org; btn.classList.remove('copied'); }, 1000); }); }
 
-        // NEIS 생성
+        function updateSubjectFilterOptions() { const filter=document.getElementById('viewSubjectFilter'); filter.innerHTML=''; subjectList.forEach(sub=>{ const opt=document.createElement('option'); opt.value=sub; opt.innerText=sub; filter.appendChild(opt); }); }
+        function updateNeisSubjectOptions() { const sel=document.getElementById('neisSubjectSelect'); sel.innerHTML=''; subjectList.forEach(sub=>{ const opt=document.createElement('option'); opt.value=sub; opt.innerText=sub; sel.appendChild(opt); }); }
+        function renderSubjectTags() { const container=document.getElementById('subjectTags'); const addBtn=container.querySelector('.tag-add'); container.querySelectorAll('.tag:not(.tag-add)').forEach(el=>el.remove()); subjectList.forEach(sub=>{ const tag=document.createElement('div'); tag.className='tag'; tag.innerHTML=`${sub} <span class="x-btn" onclick="openDeleteSubjectModal('${sub}', event)">x</span>`; tag.onclick=(e)=>{if(e.target.classList.contains('x-btn')) return; selSub(tag);}; if(sub==="국어") tag.classList.add('selected'); container.insertBefore(tag, addBtn); }); updateSubjectFilterOptions(); updateNeisSubjectOptions(); }
+        function selSub(el) { document.querySelectorAll('.tag').forEach(t => t.classList.remove('selected')); el.classList.add('selected'); }
+        async function confirmAddSubject() { const name=document.getElementById('newSubjectName').value.trim(); if(!name || subjectList.includes(name)) return; const btn=document.getElementById('confirmSubjectBtn'); btn.classList.add('loading-dots'); btn.innerText=""; btn.disabled=true; await sendRequest('add_subject', {subject:name}); subjectList.push(name); renderSubjectTags(); closeSubjectModal(); btn.classList.remove('loading-dots'); btn.innerText="추가"; btn.disabled=false; showToast("추가 완료"); }
+        function openSubjectModal() { document.getElementById('newSubjectName').value=''; document.getElementById('subjectModal').classList.add('open'); document.getElementById('newSubjectName').focus(); }
+        function closeSubjectModal() { document.getElementById('subjectModal').classList.remove('open'); }
+        function openDeleteSubjectModal(sub, e) { if(e) e.stopPropagation(); targetSubjectToDelete=sub; document.getElementById('deleteSubjectModal').classList.add('open'); }
+        function closeDeleteSubjectModal() { document.getElementById('deleteSubjectModal').classList.remove('open'); }
+        async function confirmDeleteSubject() { if(!targetSubjectToDelete) return; await sendRequest('delete_subject', {subject:targetSubjectToDelete}); subjectList=subjectList.filter(s=>s!==targetSubjectToDelete); renderSubjectTags(); closeDeleteSubjectModal(); showToast("삭제 완료"); }
+
+        async function loadStudents() { const data=await sendRequest('get_students'); if(data){ studentList=data; renderRecordList(); renderStudentNav(); } }
+        function renderStudentNav() { const list=document.getElementById('studentNavList'); list.innerHTML=''; studentList.forEach(st=>{ const item=document.createElement('div'); item.className='student-list-item'; item.innerHTML=`${st.id}번 <b>${st.name}</b>`; item.onclick=()=>selectStudent(st.name, item); list.appendChild(item); }); }
+        function selectStudent(name, el) { selectedStudentName=name; document.querySelectorAll('.student-list-item').forEach(i=>i.classList.remove('active')); el.classList.add('active'); loadHistory(); }
+        function openAddStudentModal() { document.getElementById('newStId').value=''; document.getElementById('newStName').value=''; document.getElementById('addStudentModal').classList.add('open'); document.getElementById('newStId').focus(); }
+        function closeAddStudentModal() { document.getElementById('addStudentModal').classList.remove('open'); }
+        async function confirmAddStudent() { const id=document.getElementById('newStId').value; const name=document.getElementById('newStName').value; if(!id || !name) return; await sendRequest('add_student', {id, name}); closeAddStudentModal(); loadStudents(); showToast("추가 완료"); }
+        function openDeleteStudentModal() { if(!selectedStudentName) {showToast("학생 선택 필요"); return;} document.getElementById('deleteStudentModal').classList.add('open'); }
+        function closeDeleteStudentModal() { document.getElementById('deleteStudentModal').classList.remove('open'); }
+        async function confirmDeleteStudent() { await sendRequest('delete_student', {name:selectedStudentName}); closeDeleteStudentModal(); selectedStudentName=null; document.getElementById('historyViewer').innerHTML=''; loadStudents(); showToast("삭제 완료"); }
+
+        function toggleNeisType() { const t=document.getElementById('neisType').value; document.getElementById('neisSubOption').style.display=t==='subject'?'block':'none'; document.getElementById('neisBehOption').style.display=t==='behavior'?'block':'none'; }
         async function generateNeisCards() {
             const container = document.getElementById('neisResultList');
-            if(globalData.students.length === 0) { showToast("학생이 없습니다."); return; }
-            
+            if(studentList.length === 0) { showToast("학생이 없습니다."); return; }
             const btn = document.querySelector('#neis .btn-primary');
             btn.classList.add('loading-dots'); btn.innerText = "생성 중"; btn.disabled = true;
             container.innerHTML = ""; 
-
             const typeMode = document.getElementById('neisType').value;
             let targetType = typeMode === 'subject' ? document.getElementById('neisSubjectSelect').value : '행동';
             let keyword = typeMode === 'behavior' ? document.getElementById('neisKeyword').value : "";
             let len = document.getElementById('neisLen').value;
-
-            for(const st of globalData.students) {
+            for(const st of studentList) {
                 const card = document.createElement('div'); card.className = 'neis-result-card';
                 card.innerHTML = `<div class="n-name">${st.name}</div><textarea class="n-textarea">작성 중...</textarea><div class="n-btn-area"><button class="btn-copy">복사</button></div>`;
                 container.appendChild(card);
-
-                const records = globalData.records.filter(r => r.name === st.name && (targetType === '행동' ? r.sheetName === '행동' : r.sheetName === targetType));
-                const recordsText = records.map(r => `- ${r.text}`).join("\n");
-
-                if(!recordsText) {
-                    card.querySelector('textarea').value = "기록 없음";
-                } else {
-                    const prompt = `역할: 교사. 목표: 생기부 ${targetType} 작성. 조건: 평어체. 키워드: "${keyword}". 분량: ${len}자. 내용:\n${recordsText}`;
-                    const data = await sendRequest('call_ai', { prompt });
-                    const textarea = card.querySelector('textarea');
-                    textarea.value = data ? data.text : "실패";
-                    card.querySelector('.btn-copy').onclick = () => { navigator.clipboard.writeText(textarea.value); showToast("복사됨"); };
-                }
+                const data = await sendRequest('generate_neis_individual', { name: st.name, type: targetType, keyword, length: len });
+                const textarea = card.querySelector('textarea');
+                textarea.value = data ? data.text : "실패";
+                card.querySelector('.btn-copy').onclick = () => { navigator.clipboard.writeText(textarea.value); showToast("복사됨"); };
             }
             btn.classList.remove('loading-dots'); btn.innerText = "자료 생성하기"; btn.disabled = false; showToast("완료");
         }
-
-        // ========================= 공통/UI 로직 =========================
         function showSection(id) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active')); event.currentTarget.classList.add('active'); if(id === 'students') updateSubjectFilterOptions(); }
-        function showToast(msg) { const t = document.getElementById("toast"); t.innerText = msg; t.className = "show"; setTimeout(() => { t.className = t.className.replace("show", ""); }, 3000); }
-        function quietCopy(btn, txt) { navigator.clipboard.writeText(txt).then(() => { showToast("복사되었습니다"); }); }
-        
-        // 탭/모드 전환
-        function setMode(mode) { currentRecordMode = mode; document.getElementById('btnSubject').className = mode === 'subject' ? 'btn-sm active' : 'btn-sm inactive'; document.getElementById('btnBehavior').className = mode === 'behavior' ? 'btn-sm active' : 'btn-sm inactive'; document.getElementById('subjectArea').style.display = mode === 'subject' ? 'block' : 'none'; document.getElementById('checkHeader').style.visibility = mode === 'subject' ? 'visible' : 'hidden'; renderRecordList(); }
-        function setMobileMode(mode) { mobileMode = mode; document.getElementById('mBtnSub').className = mode === 'subject' ? 'mobile-btn active' : 'mobile-btn'; document.getElementById('mBtnBeh').className = mode === 'behavior' ? 'mobile-btn active' : 'mobile-btn'; document.getElementById('mHelper').innerHTML = mode === 'subject' ? `💡 예: <b>김철수/수학/발표 잘함</b>` : `💡 예: <b>이영희/친구를 잘 도와줌</b>`; }
-        function toggleNeisType() { const t=document.getElementById('neisType').value; document.getElementById('neisSubOption').style.display=t==='subject'?'block':'none'; document.getElementById('neisBehOption').style.display=t==='behavior'?'block':'none'; }
-        function viewTab(mode) { viewTabMode = mode; document.getElementById('viewSubBtn').className = mode === 'subject' ? 'btn-sm active' : 'btn-sm inactive'; document.getElementById('viewBehBtn').className = mode === 'behavior' ? 'btn-sm active' : 'btn-sm inactive'; document.getElementById('viewSubjectFilter').style.display = mode === 'subject' ? 'block' : 'none'; renderHistory(); }
-
-        // 학생 목록
-        function renderStudentList() { const list=document.getElementById('studentListArea'); list.innerHTML=''; globalData.students.forEach(st=>{ const div=document.createElement('div'); div.className='student-list-item'; div.innerHTML=`<span><b>${st.id}.</b> ${st.name}</span><button class="btn-danger" style="width:auto; padding:5px 10px; font-size:0.8rem;" onclick="deleteStudent('${st.name}')">삭제</button>`; list.appendChild(div); }); }
-        function renderStudentNav() { const list=document.getElementById('studentNavList'); list.innerHTML=''; globalData.students.forEach(st=>{ const item=document.createElement('div'); item.className='student-list-item'; item.innerHTML=`<span>${st.id}번 <b>${st.name}</b></span>`; item.onclick=()=>selectStudent(st.name, item); list.appendChild(item); }); }
-        function selectStudent(name, el) { selectedStudentName=name; document.querySelectorAll('.student-list-item').forEach(i=>i.classList.remove('active')); el.classList.add('active'); renderHistory(); }
-        
-        // 기록 목록 (입력창)
-        function renderRecordList() { const list = document.getElementById('recordList'); list.innerHTML = ''; globalData.students.forEach(st => { const row = document.createElement('div'); row.className = 'student-row'; let checkHtml = currentRecordMode === 'subject' ? `<div class="st-check-group"><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div></div>` : ''; row.innerHTML = `<div class="st-name">${st.id}. ${st.name}</div><div style="flex-grow:1; position:relative;"><input type="text" class="st-input" id="input_${st.id}" placeholder="${currentRecordMode==='subject'?'관찰/특기사항':'행동특성'}"><span class="ai-magic" onclick="runAI('${st.id}')">✨</span></div>${checkHtml}`; list.appendChild(row); }); }
-        function toggleCheck(el) { const p = el.parentElement; const was = el.classList.contains('checked'); p.querySelectorAll('.check-circle').forEach(c => c.classList.remove('checked')); if(!was) el.classList.add('checked'); }
-
-        // 데이터 관리 (과목, 학생 추가/삭제)
-        function renderSubjectTags() { const container=document.getElementById('subjectTags'); const addBtn=container.querySelector('.tag-add'); container.querySelectorAll('.tag:not(.tag-add)').forEach(el=>el.remove()); globalData.subjects.forEach(sub=>{ const tag=document.createElement('div'); tag.className='tag'; tag.innerHTML=`${sub} <span class="x-btn" onclick="openDeleteSubjectModal('${sub}', event)">x</span>`; tag.onclick=(e)=>{if(e.target.classList.contains('x-btn')) return; selSub(tag);}; if(sub==="국어") tag.classList.add('selected'); container.insertBefore(tag, addBtn); }); updateSubjectSelect(); updateSubjectFilterOptions(); updateNeisSubjectOptions(); }
-        function updateSubjectSelect() { const sel = document.getElementById('rSubject'); sel.innerHTML = ''; globalData.subjects.forEach(s => { const opt = document.createElement('option'); opt.value = s; opt.innerText = s; sel.appendChild(opt); }); }
-        function updateSubjectFilterOptions() { const filter=document.getElementById('viewSubjectFilter'); filter.innerHTML=''; globalData.subjects.forEach(sub=>{ const opt=document.createElement('option'); opt.value=sub; opt.innerText=sub; filter.appendChild(opt); }); }
-        function updateNeisSubjectOptions() { const sel=document.getElementById('neisSubjectSelect'); sel.innerHTML=''; globalData.subjects.forEach(sub=>{ const opt=document.createElement('option'); opt.value=sub; opt.innerText=sub; sel.appendChild(opt); }); }
-        function selSub(el) { document.querySelectorAll('.tag').forEach(t => t.classList.remove('selected')); el.classList.add('selected'); }
-
-        function openSubjectModal() { document.getElementById('newSubjectName').value=''; document.getElementById('subjectModal').classList.add('open'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-        function openDeleteSubjectModal(sub, e) { if(e) e.stopPropagation(); targetSubjectToDelete=sub; document.getElementById('deleteSubjectModal').classList.add('open'); }
-        function closeDeleteSubjectModal() { document.getElementById('deleteSubjectModal').classList.remove('open'); }
-        async function confirmDeleteSubject() { if(!targetSubjectToDelete) return; await sendRequest('delete_subject', {subject:targetSubjectToDelete}); globalData.subjects=globalData.subjects.filter(s=>s!==targetSubjectToDelete); renderSubjectTags(); closeDeleteSubjectModal(); showToast("삭제 완료"); }
-
-        function openAddStudentModal() { document.getElementById('newStId').value=''; document.getElementById('newStName').value=''; document.getElementById('addStudentModal').classList.add('open'); }
-        function closeAddStudentModal() { document.getElementById('addStudentModal').classList.remove('open'); }
-        function openBulkModal() { document.getElementById('modalBulk').classList.add('open'); }
-        async function confirmBulkAdd() { const raw=document.getElementById('bulkText').value; const lines=raw.split('\n').map(s=>s.trim()).filter(s=>s); let nextId=globalData.students.length+1; const newSt=[]; lines.forEach(n=>{ newSt.push([nextId, n]); globalData.students.push({id:nextId++, name:n}); }); renderStudentList(); renderStudentNav(); renderRecordList(); closeModal('modalBulk'); await sendRequest('addStudentBulk', {dataArray:newSt}); showToast("일괄 등록 완료"); }
-        async function deleteStudent(name) { if(!confirm("삭제?")) return; globalData.students=globalData.students.filter(s=>s.name!==name); renderStudentList(); renderStudentNav(); renderRecordList(); await sendRequest('delete_student', {name}); showToast("삭제됨"); }
-        function openDeleteStudentModal() { if(!selectedStudentName) {showToast("학생 선택 필요"); return;} document.getElementById('deleteStudentModal').classList.add('open'); }
-        function closeDeleteStudentModal() { document.getElementById('deleteStudentModal').classList.remove('open'); }
-        async function confirmDeleteStudent() { await sendRequest('delete_student', {name:selectedStudentName}); closeDeleteStudentModal(); selectedStudentName=null; document.getElementById('historyViewer').innerHTML=''; loadStudents(); showToast("삭제 완료"); }
-        async function deleteRecord(sheetName, rowNum) { if(confirm("삭제?")) { await sendRequest('delete_record_row', {sheetName, rowNum}); globalData.records = globalData.records.filter(r => !(r.sheetName === sheetName && r.rowNum === rowNum)); renderHistory(); } }
-
-        document.getElementById('aiToggle').addEventListener('change', () => { const on = document.getElementById('aiToggle').checked; document.querySelectorAll('.ai-magic').forEach(e => e.style.display = on ? 'block' : 'none'); });
-        async function runAI(studentId) {
-            const input = document.getElementById(`input_${studentId}`);
-            if(!input || !input.value) return;
-            const text = input.value; input.value = "AI..."; input.disabled = true;
-            const topic = document.getElementById('rTopic').value;
-            let prompt = topic ? `주제: "${topic}", 내용: "${text}". 이 두 가지를 결합하여 초등학교 생활기록부 문체(~함)로 한 문장 작성.` : `내용: "${text}". 이를 생기부 문체(~함)로 다듬어줘.`;
-            const data = await sendRequest('call_ai', { prompt });
-            input.disabled = false; input.value = data ? data.text : text;
-        }
-
-        function initEnvironment() { if(IS_PRO_MODE) { document.getElementById('publicModeSettings').style.display='none'; } else { document.getElementById('publicModeSettings').style.display='block'; } renderSettings(); }
-        function renderSettings() { document.getElementById('settingApiKey').value = globalData.settings.apiKey || ""; document.getElementById('personaText').value = globalData.settings.persona || ""; }
-        async function savePublicSettings() { const key = document.getElementById('settingApiKey').value.trim(); if(!key) return; await sendRequest('save_settings', {apiKey:key}); showToast("저장됨"); }
-        async function savePersona() { const p = document.getElementById('personaText').value; await sendRequest('save_persona', {persona:p}); showToast("저장됨"); }
-        function uploadFile() { const input=document.getElementById('uploadInput'); if(!input.files[0]) return; const file=input.files[0]; const reader=new FileReader(); reader.onload=async(e)=>{ const base64=e.target.result.split(',')[1]; showToast("업로드 중"); const res=await sendRequest('upload_file',{name:file.name, mimeType:file.type, data:base64}); if(res) { showToast("완료"); loadFiles(); input.value=''; } }; reader.readAsDataURL(file); }
-        async function loadFiles() { const files=await sendRequest('get_files'); const list=document.getElementById('fileList'); list.innerHTML=''; if(files) files.forEach(f=>{ const div=document.createElement('div'); div.style.padding="10px"; div.style.borderBottom="1px solid #eee"; div.innerHTML=`<a href="${f.url}" target="_blank" style="color:var(--primary); text-decoration:none;">📄 ${f.name}</a>`; list.appendChild(div); }); }
-
-        document.getElementById('loading-screen').style.display = 'none';
-        document.getElementById('app-content').classList.remove('hidden');
     </script>
 </body>
 </html>
