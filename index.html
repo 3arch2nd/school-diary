@@ -4,42 +4,34 @@
     <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>쫑알수첩 v13.0</title>
+    <title>쫑알수첩 v14.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-main: #f2f8fc; --card-bg: #FFFFFF;
-            --primary-light: #9fcde8; --primary: #6ab0cf; --primary-dark: #35667a;
-            --text-main: #2c3e50; --text-sub: #7f8c8d; --border-color: #e3eff5;
-            --success: #27ae60; --danger: #e74c3c;
-        }
+        :root { --bg-main: #f2f8fc; --card-bg: #FFFFFF; --primary-light: #9fcde8; --primary: #6ab0cf; --primary-dark: #35667a; --text-main: #2c3e50; --text-sub: #7f8c8d; --border-color: #e3eff5; --success: #27ae60; --danger: #e74c3c; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Gowun Dodum', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg-main); color: var(--text-main); font-size: 16px; line-height: 1.5; }
         
         .container { max-width: 1400px; margin: 0 auto; padding: 20px; padding-bottom: 80px; }
-        
-        /* [1] 제목 크기 수정 (1.2배) */
-        header { text-align: center; margin-bottom: 20px; color: var(--primary-dark); font-size: 1.2rem; font-weight: bold; }
+        header { text-align: center; margin-bottom: 20px; color: var(--primary-dark); font-size: 1.6rem; font-weight: bold; }
 
-        /* 탭 메뉴 */
         .nav-tabs { display: flex; background: var(--card-bg); border-radius: 8px; margin-bottom: 20px; padding: 4px; border: 1px solid var(--border-color); }
         .nav-item { flex: 1; text-align: center; padding: 12px; cursor: pointer; color: var(--text-sub); border-radius: 6px; font-weight: bold; transition: 0.2s; }
         .nav-item.active { color: var(--primary-dark); background-color: #eaf6fc; }
 
-        /* 레이아웃 */
+        .pc-only { display: block; }
+        .mobile-only { display: none; }
         .split-container { display: flex; gap: 20px; align-items: flex-start; }
         .split-left { width: 380px; flex-shrink: 0; display: flex; flex-direction: column; gap: 15px; }
         .split-right { flex-grow: 1; display: flex; flex-direction: column; gap: 15px; min-width: 0; }
 
-        /* 카드 & 폼 */
         .card { background: var(--card-bg); border-radius: 8px; padding: 20px; border: 1px solid var(--border-color); box-shadow: 0 1px 2px rgba(0,0,0,0.03); margin-bottom: 15px; }
         .card.full-height { height: 100%; min-height: 500px; }
         .card-header { font-size: 1.1rem; color: var(--primary-dark); font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid var(--bg-main); display: flex; justify-content: space-between; align-items: center; }
+        
         label { display: block; margin-bottom: 6px; color: var(--text-sub); font-size: 0.9rem; font-weight: bold; }
         input, select, textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; background: #fcfdfd; }
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); background: white; }
 
-        /* 버튼 */
         .btn { display: inline-flex; justify-content: center; align-items: center; height: 42px; padding: 0 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 1rem; font-weight: bold; transition: 0.2s; white-space: nowrap; }
         .btn-primary { background: var(--primary); color: white; width: auto; min-width: 100px; }
         .btn-primary:hover { background: var(--primary-dark); }
@@ -54,11 +46,9 @@
         .btn-icon { font-size: 0.8rem; background: none; border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-left: 5px; }
         .btn-del { color: var(--danger); }
 
-        /* 로딩 애니메이션 */
         .loading-dots::after { content: ''; animation: dots 1.5s steps(4, end) infinite; }
         @keyframes dots { 0%, 20% { content: ''; } 40% { content: '.'; } 60% { content: '..'; } 80%, 100% { content: '...'; } }
 
-        /* 리스트 & 태그 */
         .student-row { display: flex; align-items: center; gap: 15px; padding: 12px 10px; border-bottom: 1px solid var(--bg-main); background: white; }
         .st-name { width: 90px; font-weight: bold; color: var(--primary-dark); flex-shrink: 0; }
         .st-input { flex-grow: 1; margin-bottom: 0 !important; height: 40px; }
@@ -79,7 +69,6 @@
         .student-list-item:hover { background: #eaf6fc; }
         .student-list-item.active { background: #eaf6fc; border: 1px solid var(--primary-light); color: var(--primary-dark); font-weight: bold;}
 
-        /* 기록 뷰어 */
         .history-card { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; border-bottom: 1px solid var(--bg-main); padding-bottom: 10px; }
         .h-info { width: 90px; flex-shrink: 0; text-align: center; }
         .h-date { font-size: 0.85rem; color: var(--text-sub); }
@@ -88,13 +77,12 @@
         .h-textarea { flex-grow: 1; margin-bottom: 0 !important; height: 60px; resize: vertical; padding: 8px 12px; font-size: 0.95rem; background: #fff; border: 1px solid var(--border-color); border-radius: 4px; }
         .h-btn-area { width: 60px; flex-shrink: 0; display:flex; flex-direction: column; gap: 5px; }
 
-        /* NEIS 결과 */
         .neis-result-card { background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; margin-bottom: 10px; display: flex; gap:15px; }
         .n-name { width: 80px; font-weight: bold; color: var(--primary-dark); flex-shrink: 0; padding-top:10px; }
         .n-textarea { flex-grow: 1; height: 120px; resize: vertical; width:100%; padding:10px; border:1px solid var(--border-color); border-radius:4px;}
         .n-btn-area { width: 60px; text-align: right; flex-shrink: 0; }
 
-        /* 스켈레톤 & 모달 & 토스트 */
+        /* 모달 & 토스트 */
         .skeleton { background: #e0e0e0; border-radius: 4px; animation: shimmer 1.5s infinite; }
         @keyframes shimmer { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
         #loading-screen { display: flex; flex-direction: column; gap: 20px; }
@@ -105,6 +93,7 @@
         .modal-overlay.open { display: flex; }
         .modal-card { background: white; padding: 25px; border-radius: 12px; width: 320px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .modal-title { font-size: 1.1rem; font-weight: bold; color: var(--primary-dark); margin-bottom: 15px; }
+        
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 30px; padding: 12px 20px; position: fixed; z-index: 3000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 0.95rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
@@ -125,8 +114,6 @@
         .hidden { display: none !important; }
 
         /* 📱 모바일 최적화 (768px 이하) */
-        .pc-only { display: block; }
-        .mobile-only { display: none; }
         @media (max-width: 768px) {
             .container { padding: 10px; }
             .nav-item { font-size: 0.9rem; padding: 10px 5px; }
@@ -160,12 +147,12 @@
         </div>
 
         <div id="app-content" class="hidden">
-            <header>쫑알수첩 v13.0</header>
+            <header><h1>쫑알수첩 v14.0</h1></header>
             <nav class="nav-tabs">
                 <div class="nav-item active" onclick="showSection('record')">기록하기</div>
                 <div class="nav-item" onclick="showSection('students')">학생관리</div>
                 <div class="nav-item" onclick="showSection('neis')">NEIS</div>
-                <div class="nav-item" onclick="showSection('data')">설정/자료</div>
+                <div class="nav-item" onclick="showSection('data')">자료/설정</div>
             </nav>
 
             <div id="record" class="section active">
@@ -313,7 +300,7 @@
     <div id="toast"></div>
     <div id="subjectModal" class="modal-overlay"><div class="modal-card"><div class="modal-title">새 과목 추가</div><input type="text" id="newSubjectName" placeholder="과목명"><div style="text-align:right;"><button class="btn btn-outline" onclick="closeModal('subjectModal')">취소</button> <button id="confirmSubjectBtn" class="btn btn-primary" onclick="confirmAddSubject()">추가</button></div></div></div>
     <div id="deleteSubjectModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="color:var(--danger)">⚠️ 과목 삭제</div><p>기록이 영구 삭제됩니다.</p><div style="text-align:right;"><button class="btn btn-outline" onclick="closeDeleteSubjectModal()">취소</button> <button class="btn btn-danger" onclick="confirmDeleteSubject()">삭제</button></div></div></div>
-    <div id="addStudentModal" class="modal-overlay"><div class="modal-card"><div class="modal-title">학생 추가</div><input type="text" inputmode="numeric" id="newStId" placeholder="번호"><input type="text" id="newStName" placeholder="이름"><div style="text-align:right;"><button class="btn btn-outline" onclick="closeModal('addStudentModal')">취소</button> <button id="confirmStudentBtn" class="btn btn-primary" onclick="confirmAddStudent()">등록</button></div></div></div>
+    <div id="addStudentModal" class="modal-overlay"><div class="modal-card"><div class="modal-title">학생 추가</div><input type="text" inputmode="numeric" id="newStId" placeholder="번호"><input type="text" id="newStName" placeholder="이름"><div style="text-align:right;"><button class="btn btn-outline" onclick="closeModal('addStudentModal')">취소</button> <button class="btn btn-primary" onclick="confirmAddStudent()">등록</button></div></div></div>
     <div id="deleteStudentModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="color:var(--danger)">⚠️ 학생 삭제</div><p>명단에서 삭제됩니다.</p><div style="text-align:right;"><button class="btn btn-outline" onclick="closeDeleteStudentModal()">취소</button> <button class="btn btn-danger" onclick="confirmDeleteStudent()">삭제</button></div></div></div>
     <div id="modalBulk" class="modal-overlay"><div class="modal-card"><div class="modal-title">엑셀 붙여넣기</div><p style="font-size:0.9rem; color:#666;">이름만 복사해서 붙여넣으세요.<br>(번호 자동 생성)</p><textarea id="bulkText" style="height:200px; width:100%; margin-bottom:10px;" placeholder="김철수\n이영희..."></textarea><div style="text-align:right;"><button class="btn btn-outline" onclick="closeModal('modalBulk')">취소</button> <button class="btn btn-primary" onclick="confirmBulkAdd()">등록</button></div></div></div>
 
@@ -335,7 +322,7 @@
             document.getElementById('rDate').valueAsDate = new Date();
             document.getElementById('mDate').valueAsDate = new Date();
             initEnvironment();
-            const data = await sendRequest('getAllData'); // 한 번에 다 가져오기
+            const data = await sendRequest('getAllData'); 
             if (data) initApp(data);
         };
 
@@ -401,7 +388,7 @@
             const name = document.getElementById('newStName').value;
             if(!id || !name) return alert("입력해주세요");
 
-            const btn = document.getElementById('confirmStudentBtn');
+            const btn = document.querySelector('#addStudentModal .btn-primary');
             btn.classList.add('loading-dots'); 
             btn.innerText = "등록 중"; 
             btn.disabled = true;
@@ -441,22 +428,22 @@
 
             inputs.forEach(input => {
                 const text = input.value.trim();
-                const row = input.closest('.student-row');
-                const name = row.querySelector('.st-name').innerText.split('.')[1].trim();
-                let checkVal = "없음";
-                
-                if (currentRecordMode === 'subject') {
-                    const checks = row.querySelectorAll('.check-circle');
-                    if(checks[0].classList.contains('checked')) checkVal = "매우잘함";
-                    else if(checks[1].classList.contains('checked')) checkVal = "잘함";
-                    else if(checks[2].classList.contains('checked')) checkVal = "보통";
-                    else if(checks[3].classList.contains('checked')) checkVal = "노력요함";
-                }
+                if (text) {
+                    const row = input.closest('.student-row');
+                    const name = row.querySelector('.st-name').innerText.split('.')[1].trim();
+                    let checkVal = "없음";
+                    
+                    if (currentRecordMode === 'subject') {
+                        const checks = row.querySelectorAll('.check-circle');
+                        if (checks[0].classList.contains('checked')) checkVal = "매우잘함";
+                        else if (checks[1].classList.contains('checked')) checkVal = "잘함";
+                        else if (checks[2].classList.contains('checked')) checkVal = "보통";
+                        else if (checks[3].classList.contains('checked')) checkVal = "노력요함";
+                    }
 
-                if (text.length > 0 || checkVal !== "없음") {
+                    // 내용 조합
                     let finalBody = text;
-                    if (text.length === 0 && checkVal !== "없음") finalBody = `(평가: ${checkVal}) 수업 활동에 참여함.`;
-                    if(topic && !finalBody.includes(topic)) finalBody = `${topic} / ${finalBody}`;
+                    if (topic && !finalBody.includes(topic)) finalBody = `${topic} / ${finalBody}`;
                     finalBody = `${periodPrefix} ${finalBody}`.trim();
 
                     // 로컬 업데이트
@@ -571,23 +558,27 @@
             btn.classList.remove('loading-dots'); btn.innerText = "자료 생성하기"; btn.disabled = false; showToast("완료");
         }
 
-        // UI & Common
+        // ========================= 공통/UI 로직 =========================
         function showSection(id) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active')); event.currentTarget.classList.add('active'); if(id === 'students') updateSubjectFilterOptions(); }
         function showToast(msg) { const t = document.getElementById("toast"); t.innerText = msg; t.className = "show"; setTimeout(() => { t.className = t.className.replace("show", ""); }, 3000); }
         function quietCopy(btn, txt) { navigator.clipboard.writeText(txt).then(() => { showToast("복사되었습니다"); }); }
         
+        // 탭/모드 전환
         function setMode(mode) { currentRecordMode = mode; document.getElementById('btnSubject').className = mode === 'subject' ? 'btn-sm active' : 'btn-sm inactive'; document.getElementById('btnBehavior').className = mode === 'behavior' ? 'btn-sm active' : 'btn-sm inactive'; document.getElementById('subjectArea').style.display = mode === 'subject' ? 'block' : 'none'; document.getElementById('checkHeader').style.visibility = mode === 'subject' ? 'visible' : 'hidden'; renderRecordList(); }
         function setMobileMode(mode) { mobileMode = mode; document.getElementById('mBtnSub').className = mode === 'subject' ? 'mobile-btn active' : 'mobile-btn'; document.getElementById('mBtnBeh').className = mode === 'behavior' ? 'mobile-btn active' : 'mobile-btn'; document.getElementById('mHelper').innerHTML = mode === 'subject' ? `💡 예: <b>김철수/수학/발표 잘함</b>` : `💡 예: <b>이영희/친구를 잘 도와줌</b>`; }
         function toggleNeisType() { const t=document.getElementById('neisType').value; document.getElementById('neisSubOption').style.display=t==='subject'?'block':'none'; document.getElementById('neisBehOption').style.display=t==='behavior'?'block':'none'; }
         function viewTab(mode) { viewTabMode = mode; document.getElementById('viewSubBtn').className = mode === 'subject' ? 'btn-sm active' : 'btn-sm inactive'; document.getElementById('viewBehBtn').className = mode === 'behavior' ? 'btn-sm active' : 'btn-sm inactive'; document.getElementById('viewSubjectFilter').style.display = mode === 'subject' ? 'block' : 'none'; renderHistory(); }
 
+        // 학생 목록
         function renderStudentList() { const list=document.getElementById('studentListArea'); list.innerHTML=''; globalData.students.forEach(st=>{ const div=document.createElement('div'); div.className='student-list-item'; div.innerHTML=`<span><b>${st.id}.</b> ${st.name}</span><button class="btn-danger" style="width:auto; padding:5px 10px; font-size:0.8rem;" onclick="deleteStudent('${st.name}')">삭제</button>`; list.appendChild(div); }); }
         function renderStudentNav() { const list=document.getElementById('studentNavList'); list.innerHTML=''; globalData.students.forEach(st=>{ const item=document.createElement('div'); item.className='student-list-item'; item.innerHTML=`<span>${st.id}번 <b>${st.name}</b></span>`; item.onclick=()=>selectStudent(st.name, item); list.appendChild(item); }); }
         function selectStudent(name, el) { selectedStudentName=name; document.querySelectorAll('.student-list-item').forEach(i=>i.classList.remove('active')); el.classList.add('active'); renderHistory(); }
         
+        // 기록 목록 (입력창)
         function renderRecordList() { const list = document.getElementById('recordList'); list.innerHTML = ''; globalData.students.forEach(st => { const row = document.createElement('div'); row.className = 'student-row'; let checkHtml = currentRecordMode === 'subject' ? `<div class="st-check-group"><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div></div>` : ''; row.innerHTML = `<div class="st-name">${st.id}. ${st.name}</div><div style="flex-grow:1; position:relative;"><input type="text" class="st-input" id="input_${st.id}" placeholder="${currentRecordMode==='subject'?'관찰/특기사항':'행동특성'}"><span class="ai-magic" onclick="runAI('${st.id}')">✨</span></div>${checkHtml}`; list.appendChild(row); }); }
         function toggleCheck(el) { const p = el.parentElement; const was = el.classList.contains('checked'); p.querySelectorAll('.check-circle').forEach(c => c.classList.remove('checked')); if(!was) el.classList.add('checked'); }
 
+        // 데이터 관리 (과목, 학생 추가/삭제)
         function renderSubjectTags() { const container=document.getElementById('subjectTags'); const addBtn=container.querySelector('.tag-add'); container.querySelectorAll('.tag:not(.tag-add)').forEach(el=>el.remove()); globalData.subjects.forEach(sub=>{ const tag=document.createElement('div'); tag.className='tag'; tag.innerHTML=`${sub} <span class="x-btn" onclick="openDeleteSubjectModal('${sub}', event)">x</span>`; tag.onclick=(e)=>{if(e.target.classList.contains('x-btn')) return; selSub(tag);}; if(sub==="국어") tag.classList.add('selected'); container.insertBefore(tag, addBtn); }); updateSubjectSelect(); updateSubjectFilterOptions(); updateNeisSubjectOptions(); }
         function updateSubjectSelect() { const sel = document.getElementById('rSubject'); sel.innerHTML = ''; globalData.subjects.forEach(s => { const opt = document.createElement('option'); opt.value = s; opt.innerText = s; sel.appendChild(opt); }); }
         function updateSubjectFilterOptions() { const filter=document.getElementById('viewSubjectFilter'); filter.innerHTML=''; globalData.subjects.forEach(sub=>{ const opt=document.createElement('option'); opt.value=sub; opt.innerText=sub; filter.appendChild(opt); }); }
