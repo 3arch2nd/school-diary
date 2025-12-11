@@ -4,7 +4,7 @@
     <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>쫑알수첩 v10.0 (Mobile Hybrid)</title>
+    <title>쫑알수첩 v10.5 (Fixed)</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
     <style>
         /* [1] 기본 테마 */
@@ -43,9 +43,9 @@
         input, select, textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; background: #fcfdfd; }
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); background: white; }
 
-        /* 버튼 */
+        /* 버튼 (너비 수정됨) */
         .btn { display: inline-flex; justify-content: center; align-items: center; height: 42px; min-width: 80px; padding: 0 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 1rem; font-weight: bold; transition: 0.2s; white-space: nowrap; }
-        .btn-primary { background: var(--primary); color: white; width: auto; }
+        .btn-primary { background: var(--primary); color: white; width: auto; } /* 자동 너비 */
         .btn-primary:hover { background: var(--primary-dark); }
         .btn-primary:disabled { background: var(--text-sub); cursor: not-allowed; }
         .btn-outline { background: white; border: 1px solid var(--border-color); color: var(--text-main); }
@@ -59,9 +59,9 @@
         .btn-copy { height: 42px; min-width: 60px; padding: 0 10px; font-size: 0.85rem; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; }
         .btn-copy.copied { background: var(--success); color: white; border-color: var(--success); }
 
-        /* 로딩 애니메이션 */
-        .loading-dots::after { content: '.'; animation: dots 1.5s steps(5, end) infinite; }
-        @keyframes dots { 0%, 20% { content: '.'; } 40% { content: '..'; } 60% { content: '...'; } 80%, 100% { content: ''; } }
+        /* [NEW] 로딩 점 애니메이션 */
+        .loading-dots::after { content: ''; animation: dots 1.5s steps(4, end) infinite; }
+        @keyframes dots { 0%, 20% { content: ''; } 40% { content: '.'; } 60% { content: '..'; } 80%, 100% { content: '...'; } }
 
         /* 태그 & 리스트 */
         .tag-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
@@ -84,11 +84,12 @@
         .student-list-item:hover { background: #eaf6fc; }
         .student-list-item.active { background: #eaf6fc; border: 1px solid var(--primary-light); color: var(--primary-dark); font-weight: bold;}
 
+        /* [NEW] 평가 결과 표시 스타일 (복사 안됨) */
         .history-card { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; border-bottom: 1px solid var(--bg-main); padding-bottom: 10px; }
         .h-info { width: 90px; flex-shrink: 0; text-align: center; }
         .h-date { font-size: 0.85rem; color: var(--text-sub); }
         .h-badge { font-size: 0.8rem; background: #eaf6fc; color: var(--primary-dark); padding: 2px 6px; border-radius: 4px; font-weight: bold; display: inline-block; margin-top: 4px;}
-        .h-eval { font-size: 0.8rem; color: var(--success); margin-top: 4px; user-select: none; font-weight: bold; }
+        .h-eval { font-size: 0.8rem; color: var(--success); font-weight: bold; margin-top: 4px; user-select: none; } /* user-select: none -> 드래그/복사 방지 */
         .h-textarea { flex-grow: 1; margin-bottom: 0 !important; height: 60px; resize: vertical; padding: 8px 12px; font-size: 0.95rem; background: #fff; border: 1px solid var(--border-color); border-radius: 4px; }
         .h-btn-area { width: 60px; flex-shrink: 0; display:flex; flex-direction: column; gap: 5px; }
 
@@ -120,21 +121,16 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         /* ============================================================= */
-        /* 📱 모바일 최적화 (768px 이하) */
+        /* 📱 모바일 최적화 */
         /* ============================================================= */
         @media (max-width: 768px) {
             .container { padding: 10px; }
             .nav-item { font-size: 0.9rem; padding: 10px 5px; }
-            
-            /* 모바일 레이아웃 변경 */
             .pc-only { display: none !important; }
             .mobile-only { display: block !important; }
-            
-            /* 스플릿 컨테이너 해제 */
             .split-container { flex-direction: column; }
             .split-left, .split-right { width: 100%; }
             
-            /* 모바일 전용 기록하기 뷰 */
             .mobile-record-card {
                 background: white; padding: 20px; border-radius: 12px;
                 border: 1px solid var(--border-color); text-align: center;
@@ -158,8 +154,6 @@
                 font-size: 0.85rem; color: var(--text-sub); margin-bottom: 15px;
                 background: #f9f9f9; padding: 10px; border-radius: 6px; text-align: left;
             }
-            
-            /* PC 유도 메시지 */
             .pc-required-msg {
                 text-align: center; padding: 50px 20px; color: var(--text-sub);
                 background: #fff; border-radius: 8px; border: 1px solid var(--border-color);
@@ -170,7 +164,7 @@
 </head>
 <body>
     <div class="container">
-        <header><h1>쫑알수첩 v10.0</h1></header>
+        <header><h1>쫑알수첩 v10.5</h1></header>
         <nav class="nav-tabs">
             <div class="nav-item active" onclick="showSection('record')">기록하기</div>
             <div class="nav-item" onclick="showSection('students')">학생관리</div>
@@ -179,25 +173,18 @@
         </nav>
 
         <div id="record" class="section active">
-            
             <div class="mobile-only">
                 <div class="mobile-record-card">
                     <label style="text-align:left;">날짜 선택</label>
                     <input type="date" id="mDate" style="margin-bottom:20px;">
-                    
                     <div class="mobile-btn-group">
                         <button class="mobile-btn active" id="mBtnSub" onclick="setMobileMode('subject')">과목</button>
                         <button class="mobile-btn" id="mBtnBeh" onclick="setMobileMode('behavior')">행동</button>
                     </div>
-
                     <div class="mobile-helper-text" id="mHelper">
-                        💡 입력 예시:<br>
-                        <b>김철수/수학/발표 목소리가 큼</b><br>
-                        (이름, 과목, 내용을 한 번에 적으면 AI가 분류합니다)
+                        💡 입력 예시:<br><b>김철수/수학/발표 잘함</b><br>(이름/과목/내용 순서로 입력하면 AI가 분류합니다)
                     </div>
-
                     <textarea id="mInput" class="mobile-textarea" placeholder="여기에 입력하세요..."></textarea>
-                    
                     <button class="btn btn-primary" style="width:100%; height:50px; font-size:1.1rem;" onclick="saveMobileRecord()">
                         AI 자동 분류 저장 ✨
                     </button>
@@ -279,13 +266,7 @@
         </div>
 
         <div id="neis" class="section">
-            <div class="mobile-only">
-                <div class="pc-required-msg">
-                    <span class="pc-icon">💻</span>
-                    <b>PC 모드 전용 기능입니다.</b><br>
-                    NEIS 자료 생성은 컴퓨터에서 이용해주세요.
-                </div>
-            </div>
+            <div class="mobile-only"><div class="pc-required-msg"><span class="pc-icon">💻</span><b>PC 모드 전용 기능입니다.</b><br>NEIS 자료 생성은 컴퓨터에서 이용해주세요.</div></div>
             <div class="pc-only">
                  <div class="split-container">
                     <div class="split-left">
@@ -313,13 +294,7 @@
         </div>
 
         <div id="data" class="section">
-            <div class="mobile-only">
-                <div class="pc-required-msg">
-                    <span class="pc-icon">⚙️</span>
-                    <b>PC 모드 전용 기능입니다.</b><br>
-                    설정 및 자료 관리는 컴퓨터에서 이용해주세요.
-                </div>
-            </div>
+            <div class="mobile-only"><div class="pc-required-msg"><span class="pc-icon">⚙️</span><b>PC 모드 전용 기능입니다.</b><br>설정 및 자료 관리는 컴퓨터에서 이용해주세요.</div></div>
             <div class="pc-only">
                 <div class="split-container">
                     <div class="split-left">
@@ -339,7 +314,7 @@
                                 <button class="btn btn-sm active" style="width:100%;" onclick="savePublicSettings()">API Key 저장</button>
                             </div>
                             <label>AI 페르소나 (말투 설정)</label>
-                            <textarea id="personaText" style="height:150px;" placeholder="예: 초등학교 교사 말투. ~함으로 끝내라. 긍정적인 면을 부각하라."></textarea>
+                            <textarea id="personaText" style="height:150px;" placeholder="예: 초등학교 교사 말투. ~함으로 끝내라."></textarea>
                             <div style="text-align:right;">
                                 <button class="btn btn-primary" onclick="savePersona()">설정 저장</button>
                             </div>
@@ -357,7 +332,7 @@
     <div id="deleteStudentModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="color:var(--danger)">⚠️ 학생 삭제</div><p>명단에서 삭제됩니다.</p><div style="text-align:right;"><button class="btn btn-outline" onclick="closeDeleteStudentModal()">취소</button> <button class="btn btn-danger" onclick="confirmDeleteStudent()">삭제</button></div></div></div>
 
     <script>
-        // ▼▼▼ 선생님의 GAS 주소 (Pro 모드용) ▼▼▼
+        // ▼▼▼ 선생님의 GAS 배포 주소 (PRO 모드) ▼▼▼
         const PRO_BACKEND_URL = "https://script.google.com/macros/s/AKfycbxn2nB0ZNXwXSdfx4-XVUWTD3Z_GCb_L2_SkhLyiKu5qrZrpwGTLM9Y4BhQRbveIk4o8Q/exec"; 
         // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
@@ -420,7 +395,7 @@
             setTimeout(() => { t.className = t.className.replace("show", ""); }, 3000);
         }
 
-        // ========================= 📱 모바일 로직 (핵심) =========================
+        // ========================= 📱 모바일 로직 =========================
         function setMobileMode(mode) {
             mobileMode = mode;
             document.getElementById('mBtnSub').className = mode === 'subject' ? 'mobile-btn active' : 'mobile-btn';
@@ -441,53 +416,44 @@
             const btn = document.querySelector('.mobile-record-card .btn-primary');
             btn.classList.add('loading-dots'); btn.innerText = "AI 분석 중"; btn.disabled = true;
 
-            // AI에게 파싱 요청 (프롬프트 엔지니어링)
             const prompt = `
-                사용자가 입력한 텍스트를 분석해서 JSON 데이터로 추출해줘.
-                입력 모드: ${mobileMode} (subject=과목, behavior=행동)
-                
-                입력 텍스트: "${text}"
-                
-                [규칙]
-                1. 이름, 과목(subject일 경우), 내용을 분리해.
-                2. subject 모드인데 과목명이 없으면 내용을 보고 추측해. 정 모르면 '교과'라고 해.
-                3. behavior 모드면 과목명은 '행동'이야.
-                4. 내용은 "초등학교 생기부 평어체(~함)"로 다듬어서 'finalText'에 넣어.
-                
-                [출력 포맷 (JSON Only)]
-                {"name": "이름", "type": "과목명", "text": "finalText"}
+                사용자 입력을 JSON으로 추출.
+                모드: ${mobileMode} (subject=과목, behavior=행동)
+                입력: "${text}"
+                규칙:
+                1. 이름, 과목(subject면), 내용을 분리.
+                2. 과목명 없으면 내용 보고 추측. 정 모르면 '교과'. behavior면 과목명='행동'.
+                3. 내용은 "초등 생기부 평어체(~함)"로 다듬어 'finalText'에.
+                출력(JSON): {"name": "이름", "type": "과목명", "text": "finalText"}
             `;
 
             const aiRes = await sendRequest('call_ai', { prompt: prompt });
             
             try {
-                // AI 응답에서 JSON만 추출
                 const jsonStr = aiRes.text.replace(/```json/g, "").replace(/```/g, "").trim();
                 const parsed = JSON.parse(jsonStr);
                 
-                if (!parsed.name) throw new Error("이름을 찾을 수 없습니다.");
+                if (!parsed.name) throw new Error("이름 식별 불가");
 
-                // 실제 저장 요청
                 await sendRequest('save_record', {
                     date: document.getElementById('mDate').value,
                     name: parsed.name,
                     type: parsed.type,
                     text: parsed.text,
-                    check: "없음" // 모바일은 평가 생략
+                    check: "없음"
                 });
                 
                 showToast(`[${parsed.name}] 저장 완료!`);
-                document.getElementById('mInput').value = ""; // 초기화
+                document.getElementById('mInput').value = ""; 
 
             } catch (e) {
-                showToast("AI 분류 실패. 양식을 확인해주세요.");
+                showToast("AI 분류 실패. 양식 확인.");
                 console.error(e);
             }
-            
             btn.classList.remove('loading-dots'); btn.innerText = "AI 자동 분류 저장 ✨"; btn.disabled = false;
         }
 
-        // ========================= 💻 PC 로직 (기존 유지) =========================
+        // ========================= 💻 PC 로직 =========================
         
         async function savePublicSettings() {
             const key = document.getElementById('settingApiKey').value.trim();
@@ -620,6 +586,7 @@
             if(!history || history.length === 0) { container.innerHTML = `<div style="text-align:center;color:var(--text-sub);padding:50px 0;">기록이 없습니다.</div>`; return; }
             history.forEach(item => {
                 const card = document.createElement('div'); card.className = 'history-card';
+                // [3번] 평가 결과 복사 방지 (CSS: .h-eval {user-select: none})
                 let evalHtml = item.check && item.check !== "없음" ? `<div class="h-eval">${item.check}</div>` : "";
                 card.innerHTML = `<div class="h-info"><div class="h-date">${item.date}</div><div class="h-badge">${item.type}</div>${evalHtml}</div><textarea id="hist_txt_${item.rowNum}" class="h-textarea">${item.txt}</textarea><div class="h-btn-area"><button class="btn-icon btn-edit" onclick="updateRecord('${reqType}', ${item.rowNum})">수정</button><button class="btn-icon btn-del" onclick="deleteRecord('${reqType}', ${item.rowNum})">삭제</button><button class="btn-copy" onclick="quietCopy(this, '${item.txt}')">복사</button></div>`;
                 container.appendChild(card);
