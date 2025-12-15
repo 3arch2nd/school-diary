@@ -4,7 +4,7 @@
     <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>쫑알수첩 v10.5 (Background AI)</title>
+    <title>쫑알수첩 v10.5 (Final AI Fix)</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
     <style>
         /* [기본 테마] */
@@ -65,7 +65,7 @@
         /* [비활성화 상태] */
         .disabled-area { opacity: 0.6; pointer-events: none; user-select: none; }
 
-        /* [NEW] 하단 상태바 (AI 작업 큐 모니터링) */
+        /* 하단 상태바 */
         #status-bar {
             position: fixed; bottom: 0; left: 0; width: 100%;
             background: #2c3e50; color: white; font-size: 0.85rem;
@@ -84,13 +84,15 @@
 
         .student-row { display: flex; align-items: center; gap: 15px; padding: 12px 10px; border-bottom: 1px solid var(--bg-main); background: white; }
         .st-name { width: 90px; font-weight: bold; color: var(--primary-dark); flex-shrink: 0; }
-        .st-input { flex-grow: 1; margin-bottom: 0 !important; height: 40px; }
+        /* [수정] 입력창 오른쪽 여백 추가 (아이콘 겹침 방지) */
+        .st-input { flex-grow: 1; margin-bottom: 0 !important; height: 40px; padding-right: 40px; }
+        
         .st-check-group { display: flex; gap: 8px; width: 220px; flex-shrink: 0; justify-content: space-between; }
         .check-circle { width: 28px; height: 28px; border: 2px solid var(--border-color); border-radius: 50%; cursor: pointer; position: relative; background: var(--bg-main); }
         .check-circle.checked { border-color: var(--primary); background: var(--primary); }
         .check-circle.checked::after { content: '✔'; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; }
         
-        .ai-magic { position: absolute; right: 10px; top: 5px; cursor: pointer; display: none; font-size: 1.2rem; }
+        .ai-magic { position: absolute; right: 10px; top: 5px; cursor: pointer; display: none; font-size: 1.2rem; z-index: 5; }
         .student-list-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 15px; border-bottom: 1px solid var(--bg-main); cursor: pointer; border-radius: 6px; transition: 0.2s; }
         .student-list-item:hover { background: #eaf6fc; }
         .student-list-item.active { background: #eaf6fc; border: 1px solid var(--primary-light); color: var(--primary-dark); font-weight: bold;}
@@ -362,7 +364,7 @@
         let aiPersona = "";
         let isGlobalProcessing = false; 
 
-        // [NEW] AI 백그라운드 큐
+        // AI 백그라운드 큐
         let aiJobQueue = [];
         let isAiQueueRunning = false;
 
@@ -646,7 +648,7 @@
             clearLoading(btn);
             inputs.forEach(el => el.value = '');
             document.querySelectorAll('.check-circle').forEach(el => el.classList.remove('checked'));
-            showToast("저장되었습니다! (AI 변환은 배경에서 진행됩니다)");
+            showToast("저장되었습니다! (AI 변환은 백그라운드에서 진행됩니다)");
 
             // [4] 백그라운드 AI 처리 시작
             processNextAiJob();
@@ -666,7 +668,7 @@
             const job = aiJobQueue[0]; // 큐의 첫 번째 작업 확인
             document.getElementById('status-msg').innerText = `AI 변환 중... (${job.name} 학생) - 남은 작업 ${aiJobQueue.length}건`;
 
-            // 프롬프트 생성
+            // [수정] 프롬프트 강화: ~함/음 필수, 합쇼체 금지
             const prompt = `
                 역할: 초등교사.
                 과제: 생기부 문장 1개 작성.
@@ -683,6 +685,7 @@
                 5. ${aiPersona}
                 6. 따옴표 금지.
                 7. **굵게** 등의 마크다운 강조 표시를 절대 하지 말 것. (순수 텍스트만 출력)
+                8. [중요] 문장의 끝은 반드시 명사형 종결어미 '~함' 또는 '~음'으로 끝낼 것. 절대 '~합니다', '~해요' 등의 해요체나 합쇼체를 사용하지 말 것.
             `;
 
             try {
@@ -732,6 +735,7 @@
             btnEl.classList.add('loading-dots'); 
             input.disabled = true;
 
+            // [수정] 매직 버튼도 동일 프롬프트 강화 적용
             const prompt = `
                 역할: 초등교사.
                 과제: 생기부 문장 1개 작성.
@@ -748,6 +752,7 @@
                 5. ${aiPersona}
                 6. 따옴표 금지.
                 7. **굵게** 등의 마크다운 강조 표시를 절대 하지 말 것. (순수 텍스트만 출력)
+                8. [중요] 문장의 끝은 반드시 명사형 종결어미 '~함' 또는 '~음'으로 끝낼 것. 절대 '~합니다', '~해요' 등의 해요체나 합쇼체를 사용하지 말 것.
             `;
             
             const data = await sendRequest('call_ai', { prompt });
