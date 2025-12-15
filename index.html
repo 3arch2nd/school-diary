@@ -120,35 +120,29 @@
         .cal-dot { width: 6px; height: 6px; background: var(--primary); border-radius: 50%; margin-top: 4px; display: none; }
         .cal-day.has-memo .cal-dot { display: block; }
         
-        /* [수정] 메모 목록 한줄 강제 (Date ... Content) */
+        /* [수정] 메모 한줄 강제 처리 (엄격 모드) */
         .memo-mini-item { 
             padding: 10px 8px; 
             border-bottom: 1px solid #eee; 
             cursor: pointer; 
             font-size: 0.9rem; 
             color: var(--text-main);
+            /* 한 줄 말줄임 핵심 */
             display: block;
             width: 100%;
             white-space: nowrap !important;
             overflow: hidden !important;
             text-overflow: ellipsis !important;
-            height: 40px; 
-            line-height: 20px;
+            height: 40px; /* 높이 고정 */
+            line-height: 20px; /* 텍스트 수직 정렬 보조 */
         }
         .memo-mini-item:hover { color: var(--primary); }
         .memo-mini-item.done-memo { text-decoration: line-through; opacity: 0.6; color: #aaa; }
         
-        /* 목록형 메모도 한줄로 간결하게 */
-        .memo-list-item { 
-            background: white; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; padding: 12px;
-            display: flex; align-items: center; gap: 10px;
-        }
+        .memo-list-item { background: white; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; padding: 15px; }
         .memo-list-item:hover { border-color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .memo-list-date { font-size: 0.85rem; color: var(--text-sub); white-space: nowrap; flex-shrink: 0; }
-        .memo-list-content { 
-            font-size: 0.95rem; color: var(--text-main); 
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-grow: 1;
-        }
+        .memo-list-date { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 5px; display: flex; justify-content: space-between;}
+        .memo-list-content { font-size: 1rem; color: var(--text-main); line-height: 1.4; word-break: break-all; }
         .memo-list-item.done-memo .memo-list-content { text-decoration: line-through; opacity: 0.6; }
 
         .student-nav-item { background: white; border: 1px solid var(--border-color); padding: 12px 15px; border-radius: 8px; cursor: pointer; margin-bottom: 8px; transition: 0.2s; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center; }
@@ -217,7 +211,7 @@
     </div>
 
     <div class="container">
-        <header><h1>쫑알수첩 v18.2</h1></header>
+        <header><h1>쫑알수첩 v18.3</h1></header>
         <nav class="nav-tabs">
             <div class="nav-item nav-item-home active" onclick="changeSection('home')">HOME</div>
             <div class="nav-item" onclick="changeSection('record')">기록하기</div>
@@ -556,24 +550,27 @@
             const job = aiJobQueue.shift();
             showToast(`AI 작성 중... (${job.name})`);
             
-            const prompt = `역할: 초등학교 교사. 생기부 문장 1개 작성.
+            // [수정] 4초 딜레이 (Rate Limit 방지)
+            setTimeout(async () => {
+                const prompt = `역할: 초등학교 교사. 생기부 문장 1개 작성.
 입력: [주제:${job.topic}], [내용:${job.text}], [평가:${job.check}]
 조건:
 1. 활동+내용+평가를 자연스럽게 연결하여 '~함' 종결.
 2. 따옴표, 굵게, 특수문자 금지.
 3. 칭찬 지양, 사실 위주.`;
 
-            try {
-                const aiRes = await sendRequest('call_ai', { prompt });
-                if(aiRes && aiRes.text) {
-                    let prefix = job.topic ? `[${job.topic}] ` : "";
-                    await sendRequest('save_record', {
-                        date: document.getElementById('rDate').value,
-                        name: job.name, type: job.type, text: (prefix + aiRes.text).trim(), check: job.check
-                    });
-                }
-            } catch(e) {}
-            processNextAiJob();
+                try {
+                    const aiRes = await sendRequest('call_ai', { prompt });
+                    if(aiRes && aiRes.text) {
+                        let prefix = job.topic ? `[${job.topic}] ` : "";
+                        await sendRequest('save_record', {
+                            date: document.getElementById('rDate').value,
+                            name: job.name, type: job.type, text: (prefix + aiRes.text).trim(), check: job.check
+                        });
+                    }
+                } catch(e) {}
+                processNextAiJob();
+            }, 4000); // 4000ms = 4초
         }
 
         // [Student Manager]
@@ -618,10 +615,13 @@
         function setMemoMode(m) { memoMode=m; document.getElementById('btnMemoModeCal').className=m==='cal'?'btn-sm active':'btn-sm inactive'; document.getElementById('btnMemoModeList').className=m==='list'?'btn-sm active':'btn-sm inactive'; document.getElementById('memoCalView').style.display=m==='cal'?'block':'none'; document.getElementById('memoListView').style.display=m==='list'?'block':'none'; if(m==='cal')renderMemoCalendar(); else renderMemoList(); }
         async function loadMemos() { memoList=await sendRequest('get_memos')||[]; setMemoMode(memoMode); }
         function moveMemoMonth(d) { curMemoMonth+=d; if(curMemoMonth>11){curMemoMonth=0;curMemoYear++;}else if(curMemoMonth<0){curMemoMonth=11;curMemoYear--;} renderMemoCalendar(); }
-        function renderMemoCalendar() { const g=document.getElementById('memoCalGrid'); g.innerHTML=''; document.getElementById('memoMonthTitle').innerText=`${curMemoYear}.${curMemoMonth+1}`; const f=new Date(curMemoYear,curMemoMonth,1); const l=new Date(curYear,curMemoMonth+1,0); ['일','월','화','수','목','금','토'].forEach(d=>g.innerHTML+=`<div style="font-weight:bold">${d}</div>`); for(i=0;i<f.getDay();i++)g.appendChild(document.createElement('div')); for(i=1;i<=l.getDate();i++){const dStr=`${curMemoYear}-${String(curMemoMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; const d=document.createElement('div');d.className='cal-day';if(dStr===selectedMemoDate)d.classList.add('selected');if(memoList.some(m=>m.date===dStr))d.classList.add('has-memo');d.innerHTML=`<span>${i}</span><div class="cal-dot"></div>`;d.onclick=()=>{selectedMemoDate=dStr;renderMemoCalendar();renderMemoPreview();openMemoForm();};g.appendChild(d);} renderMemoPreview(); }
-        // [수정] 메모 목록형도 심플하게 통일 (CSS 클래스 수정됨)
+        function renderMemoCalendar() { const g=document.getElementById('memoCalGrid'); g.innerHTML=''; document.getElementById('memoMonthTitle').innerText=`${curMemoYear}.${curMemoMonth+1}`; const f=new Date(curMemoYear,curMemoMonth,1); const l=new Date(curYear,curMemoMonth+1,0); ['일','월','화','수','목','금','토'].forEach(d=>g.innerHTML+=`<div style="font-weight:bold">${d}</div>`); for(i=0;i<f.getDay();i++)g.appendChild(document.createElement('div')); for(i=1;i<=l.getDate();i++){const dStr=`${curYear}-${String(curMemoMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; const d=document.createElement('div');d.className='cal-day';if(dStr===selectedMemoDate)d.classList.add('selected');if(memoList.some(m=>m.date===dStr))d.classList.add('has-memo');d.innerHTML=`<span>${i}</span><div class="cal-dot"></div>`;d.onclick=()=>{selectedMemoDate=dStr;renderMemoCalendar();renderMemoPreview();openMemoForm();};g.appendChild(d);} renderMemoPreview(); }
+        
+        // [수정] 달력 프리뷰 (한 줄)
         function renderMemoPreview() { const a=document.getElementById('memoDatePreview'); const t=memoList.filter(m=>m.date===selectedMemoDate); if(t.length===0){a.style.display='none';return;} a.style.display='block'; a.innerHTML=''; t.forEach(m=>{const d=document.createElement('div');d.className='memo-mini-item'+(m.done?' done-memo':'');d.innerText=(m.pinned?'★ ':'')+m.content;d.onclick=()=>openMemoForm(m);a.appendChild(d);}); }
-        function renderMemoList() { const l=document.getElementById('memoListView'); l.innerHTML=''; memoList.sort((a,b)=>new Date(b.date)-new Date(a.date)); memoList.forEach(m=>{const d=document.createElement('div');d.className='memo-list-item'+(m.done?' done-memo':'');d.style.padding='15px';d.innerHTML=`<div class="memo-list-date"><span>${m.date}</span><span>${m.pinned?'★':''}</span></div><div class="memo-list-content">${m.content}</div>`;d.onclick=()=>{selectedMemoDate=m.date;openMemoForm(m);};l.appendChild(d);}); }
+        // [수정] 목록형 (카드)
+        function renderMemoList() { const l=document.getElementById('memoListView'); l.innerHTML=''; memoList.sort((a,b)=>new Date(b.date)-new Date(a.date)); memoList.forEach(m=>{const d=document.createElement('div');d.className='memo-list-item'+(m.done?' done-memo':'');d.innerHTML=`<div class="memo-list-date"><span>${m.date}</span><span>${m.pinned?'★':''}</span></div><div class="memo-list-content">${m.content}</div>`;d.onclick=()=>{selectedMemoDate=m.date;openMemoForm(m);};l.appendChild(d);}); }
+        
         function openMemoForm(i) { document.getElementById('memoDateDisp').innerText=selectedMemoDate; if(i){document.getElementById('memoContent').value=i.content;document.getElementById('memoPinned').checked=i.pinned;document.getElementById('memoDone').checked=i.done;document.getElementById('memoEditRow').value=i.row;document.getElementById('btnDelMemo').style.display='inline-block';}else clearMemoInput(); }
         function clearMemoInput() { document.getElementById('memoContent').value='';document.getElementById('memoPinned').checked=false;document.getElementById('memoDone').checked=false;document.getElementById('memoEditRow').value='';document.getElementById('btnDelMemo').style.display='none'; }
         async function saveMemo() { const c=document.getElementById('memoContent').value; if(!c)return; await sendRequest('save_memo',{row:document.getElementById('memoEditRow').value||null,content:c,pinned:document.getElementById('memoPinned').checked,done:document.getElementById('memoDone').checked}); showToast("메모 저장"); loadMemos(); }
@@ -632,6 +632,7 @@
         function formatDateYMD(d) { if(!d)return""; const D=new Date(d); return `${D.getFullYear()}-${String(D.getMonth()+1).padStart(2,'0')}-${String(D.getDate()).padStart(2,'0')}`; }
         function initEnvironment() { if(IS_PRO_MODE) document.getElementById('publicModeSettings').style.display='none'; else { document.getElementById('publicModeSettings').style.display='block'; sendRequest('load_settings').then(res=>{if(res)document.getElementById('settingApiKey').value=res.apiKey}); } }
         function sendRequest(a,p={}) { if(IS_PRO_MODE){p.action=a;return fetch(PRO_BACKEND_URL,{method:'POST',mode:'cors',body:JSON.stringify(p)}).then(r=>r.json()).then(j=>j.data).catch(e=>null);}else return new Promise(r=>{google.script.run.withSuccessHandler(res=>r(res.data)).withFailureHandler(e=>r(null)).dispatch(a,p)});}
+        // [수정] 파일 삭제 버튼 추가
         async function loadFiles() { const l=document.getElementById('fileList'); l.innerHTML='로딩...'; const f=await sendRequest('get_files')||[]; l.innerHTML=''; if(f.length===0) l.innerHTML='<div style="color:#999;font-size:0.9rem">파일 없음</div>'; f.forEach(d=>{ const r=document.createElement('div'); r.style.display='flex'; r.style.justifyContent='space-between'; r.style.marginBottom='5px'; r.innerHTML=`<a href="${d.url}" target="_blank" style="text-decoration:none;color:var(--primary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.name}</a> <button class="btn-sm btn-del" onclick="deleteFile(${d.row})">삭제</button>`; l.appendChild(r); }); }
         function uploadFile() { const i=document.getElementById('uploadInput'); if(i.files.length===0)return; const f=i.files[0]; const r=new FileReader(); r.onload=async(e)=>{ await sendRequest('upload_file',{name:f.name,mimeType:f.type,data:e.target.result.split(',')[1]}); loadFiles(); }; r.readAsDataURL(f); }
         async function deleteFile(r) { reqConfirm('삭제하시겠습니까?', async()=>{ await sendRequest('delete_file',{row:r}); loadFiles(); }); }
