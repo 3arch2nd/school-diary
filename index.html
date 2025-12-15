@@ -4,7 +4,7 @@
     <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>쫑알수첩 v11.5 (Clean)</title>
+    <title>쫑알수첩 Pro (Personal)</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
     <style>
         /* [기본 테마] */
@@ -21,6 +21,11 @@
         .container { max-width: 1400px; margin: 0 auto; padding: 20px; padding-bottom: 80px; }
         header { text-align: center; margin-bottom: 20px; }
         h1 { color: var(--primary-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: -0.5px; }
+
+        /* 잠금 화면 */
+        #lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-main); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #lockCard { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; width: 320px; }
+        #lockInput { font-size: 1.2rem; text-align: center; margin-bottom: 20px; letter-spacing: 2px; }
 
         /* 탭 메뉴 */
         .nav-tabs { display: flex; background: var(--card-bg); border-radius: 8px; margin-bottom: 20px; padding: 4px; border: 1px solid var(--border-color); }
@@ -90,7 +95,6 @@
         .bm-link { font-weight: bold; color: var(--primary-dark); text-decoration: none; font-size: 1.05rem; display: block; margin-bottom: 5px; }
         .bm-tag-disp { display: inline-block; background: #eaf6fc; color: var(--primary); font-size: 0.8rem; padding: 2px 6px; border-radius: 4px; margin-right: 5px; cursor: pointer; }
         .bm-memo { font-size: 0.9rem; color: var(--text-sub); margin-top: 4px; }
-        /* 북마크 전용 태그 버튼 */
         .bm-tag-btn { display: inline-block; padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 20px; font-size: 0.9rem; margin-right: 5px; margin-bottom: 5px; cursor: pointer; background: white; }
         .bm-tag-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
         
@@ -102,7 +106,8 @@
         .cal-day.selected { border: 2px solid var(--primary-dark); }
         .cal-dot { width: 6px; height: 6px; background: var(--primary); border-radius: 50%; margin-top: 4px; display: none; }
         .cal-day.has-memo .cal-dot { display: block; }
-        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: bold; }
+        .cal-header { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 10px; font-weight: bold; }
+        .arrow-btn { background:none; border:none; cursor:pointer; font-size:1.2rem; color:var(--text-sub); }
         
         /* 메모 목록 */
         .memo-preview-item { padding: 15px; background: white; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
@@ -110,7 +115,6 @@
         .memo-preview-item.active { border-left: 5px solid var(--primary); background: #fbfdfe; }
         .memo-date { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 4px; }
         
-        /* 메모 달력 프리뷰 영역 */
         #memoDatePreview { margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 15px; }
         .memo-mini-item { padding: 8px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 0.9rem; }
         .memo-mini-item:hover { background: #f9f9f9; color: var(--primary); }
@@ -119,7 +123,7 @@
         .att-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; padding: 8px 0; border-bottom: 1px solid #eee; }
         .att-sel { font-size: 0.9rem; padding: 4px; width: 80px; margin-bottom: 0 !important; }
         
-        /* 기존 스타일 (태그, 학생 등) */
+        /* 기존 스타일 */
         .tag-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
         .tag { position: relative; padding: 8px 30px 8px 16px; background: var(--bg-main); border-radius: 20px; font-size: 0.95rem; cursor: pointer; border: 1px solid var(--border-color); transition: 0.2s; }
         .tag.selected { background: var(--primary); color: white; border-color: var(--primary); }
@@ -171,15 +175,24 @@
     </style>
 </head>
 <body>
+    <div id="lockScreen">
+        <div id="lockCard">
+            <h2 style="color:var(--primary-dark); margin-bottom:20px;">쫑알수첩 Pro</h2>
+            <p style="margin-bottom:20px; color:var(--text-sub);">관리자 인증이 필요합니다.</p>
+            <input type="password" id="lockInput" placeholder="Password" onkeyup="if(window.event.keyCode==13){unlockApp()}">
+            <button class="btn btn-primary" onclick="unlockApp()" style="width:100%;">접속</button>
+        </div>
+    </div>
+
     <div class="float-btn" onclick="toggleFloatMenu()">+</div>
     <div class="float-menu" id="floatMenu">
-        <div class="float-menu-item" onclick="changeSection('bookmarks')">북마크 (자료)</div>
+        <div class="float-menu-item" onclick="changeSection('bookmarks')">북마크</div>
         <div class="float-menu-item" onclick="changeSection('calendar')">달력/일정</div>
         <div class="float-menu-item" onclick="changeSection('memo')">메모/할일</div>
     </div>
 
     <div class="container">
-        <header><h1>쫑알수첩 v11.5</h1></header>
+        <header><h1>쫑알수첩 v12.0</h1></header>
         <nav class="nav-tabs">
             <div class="nav-item active" onclick="changeSection('record')">기록하기</div>
             <div class="nav-item" onclick="changeSection('students')">학생관리</div>
@@ -197,7 +210,7 @@
                     </div>
                     <div style="font-size:0.85rem; color:var(--text-sub); margin-bottom:15px; background:#f9f9f9; padding:10px; border-radius:6px; text-align:left;">[팁] 예시: <b>김철수/수학/발표 잘함</b></div>
                     <textarea id="mInput" style="width:100%; height:150px; padding:15px; border:1px solid var(--border-color); border-radius:8px; font-size:1rem; margin-bottom:15px; resize:none;" placeholder="입력..."></textarea>
-                    <button class="btn btn-primary" style="width:100%; height:50px;" onclick="saveMobileRecord()">AI 저장</button>
+                    <button class="btn btn-primary" style="width:100%; height:50px;" onclick="saveMobileRecord()">✨</button>
                 </div>
             </div>
             <div class="pc-only">
@@ -261,13 +274,18 @@
         <div id="data" class="section">
              <div class="split-container">
                  <div class="split-left pc-only">
-                    <div class="card full-height"><div class="card-header">참고 자료</div><input type="file" id="uploadInput" style="margin-bottom:10px;"><button class="btn btn-outline" id="btnUpload" style="width:100%; margin-bottom:15px;" onclick="uploadFile()">파일 업로드 (Drive)</button><div id="fileList" style="overflow-y:auto; max-height:400px; font-size:0.95rem;"></div></div>
+                    <div class="card full-height"><div class="card-header">참고 자료 (드라이브)</div><input type="file" id="uploadInput" style="margin-bottom:10px;"><button class="btn btn-outline" id="btnUpload" style="width:100%; margin-bottom:15px;" onclick="uploadFile()">업로드</button><div id="fileList" style="overflow-y:auto; max-height:400px; font-size:0.95rem;"></div></div>
                 </div>
                 <div class="split-right">
                     <div class="card full-height">
                         <div class="card-header">설정</div>
                         <div id="publicModeSettings" style="display:none; margin-bottom:20px; background:#f9f9f9; padding:15px; border-radius:8px;"><label>Gemini API Key</label><input type="password" id="settingApiKey" placeholder="AIza..."><button class="btn btn-sm active" style="width:100%;" onclick="savePublicSettings()">저장</button></div>
                         <label>AI 페르소나</label><textarea id="personaText" style="height:150px;" placeholder="예: 초등학교 교사 말투..."></textarea><div style="text-align:right;"><button class="btn btn-primary" id="btnPersona" onclick="savePersona()">저장</button></div>
+                        
+                        <hr style="margin:20px 0;">
+                        <div class="card-header" style="color:var(--danger); border-bottom:none;">데이터 관리</div>
+                        <p style="font-size:0.9rem; color:var(--text-sub); margin-bottom:10px;">현재 데이터를 백업 파일로 저장하고, 기록을 초기화하여 새 학년을 준비합니다.</p>
+                        <button class="btn btn-danger" style="width:100%" onclick="archiveData()">[새 학년 준비] 데이터 이관 및 초기화</button>
                     </div>
                 </div>
              </div>
@@ -298,9 +316,6 @@
                             <button class="btn btn-outline" style="flex:1" onclick="clearBmInput()">초기화</button>
                             <button class="btn btn-primary" style="flex:1" onclick="saveBookmark()" id="btnSaveBm">저장</button>
                         </div>
-                        <div style="margin-top:20px; text-align:center;">
-                            <button class="btn-sm inactive" onclick="window.open('https://replayer.3arch2nd.site/')">리플레이어 바로가기</button>
-                        </div>
                     </div>
                 </div>
                 <div class="split-right">
@@ -320,9 +335,10 @@
                 <div class="split-left">
                     <div class="card">
                          <div class="cal-header">
-                            <button class="btn-icon" onclick="moveMonth(-1)">[이전]</button>
+                            <button class="arrow-btn" onclick="moveMonth(-1)">◀</button>
                             <span id="calMonth"></span>
-                            <button class="btn-icon" onclick="moveMonth(1)">[다음]</button>
+                            <button class="arrow-btn" onclick="moveMonth(1)">▶</button>
+                            <button class="btn-sm" style="margin-left:10px;" onclick="goToToday()">[오늘]</button>
                         </div>
                         <div class="cal-grid" id="calGrid"></div>
                     </div>
@@ -336,7 +352,7 @@
                         <div class="card-header">
                             <span id="calDetailTitle">선택한 날짜 일정</span>
                         </div>
-                        <label>새 일정 등록</label>
+                        <label>새 일정 등록 (구글 캘린더)</label>
                         <div style="display:flex; gap:5px; margin-bottom:15px;">
                             <input type="text" id="newEvent" placeholder="일정 내용" style="margin-bottom:0;">
                             <button class="btn-primary" onclick="addEvent()" style="width:80px; border-radius:6px;">등록</button>
@@ -372,9 +388,9 @@
                         </div>
                         <div id="memoCalView">
                             <div class="cal-header">
-                                <button class="btn-icon" onclick="moveMemoMonth(-1)">[이전]</button>
+                                <button class="arrow-btn" onclick="moveMemoMonth(-1)">◀</button>
                                 <span id="memoMonthTitle"></span>
-                                <button class="btn-icon" onclick="moveMemoMonth(1)">[다음]</button>
+                                <button class="arrow-btn" onclick="moveMemoMonth(1)">▶</button>
                             </div>
                             <div class="cal-grid" id="memoCalGrid"></div>
                             <div id="memoDatePreview" style="display:none;">
@@ -438,8 +454,8 @@
         // 북마크
         let bmList = [];
         let bmFilter = null;
-        let bmTags = ["국어", "수학", "사회", "과학", "영어", "체육", "음악", "미술", "자료", "영상"]; // 북마크 전용 태그풀
-        let selectedBmTags = []; // 다중 선택된 태그
+        let bmTags = ["국어", "수학", "사회", "과학", "영어", "체육", "음악", "미술", "자료", "영상"]; 
+        let selectedBmTags = [];
 
         // 메모
         let memoList = [];
@@ -448,14 +464,39 @@
         let curMemoYear = new Date().getFullYear();
         let selectedMemoDate = formatDateYMD(new Date());
 
+        // 캘린더 이벤트 캐시
+        let calendarEvents = [];
+
+        // [보안] 잠금 해제 체크
+        function checkLock() {
+            if(sessionStorage.getItem('isUnlocked') === 'true') {
+                document.getElementById('lockScreen').style.display = 'none';
+            }
+        }
+        function unlockApp() {
+            const val = document.getElementById('lockInput').value;
+            if(val === 'ekdms320') {
+                sessionStorage.setItem('isUnlocked', 'true');
+                document.getElementById('lockScreen').style.display = 'none';
+                loadFiles(); // 잠금 해제 후 파일 로드
+            } else {
+                alert('비밀번호가 틀렸습니다.');
+                document.getElementById('lockInput').value = '';
+            }
+        }
+
         window.onload = () => {
+            checkLock(); // 잠금 체크
             document.getElementById('rDate').valueAsDate = new Date();
             document.getElementById('mDate').valueAsDate = new Date();
             initEnvironment();
             loadStudents();
             renderSubjectTags();
             updateNeisSubjectOptions();
-            loadFiles();
+            
+            // 파일 목록은 잠금 해제 후 로드됨
+            if(sessionStorage.getItem('isUnlocked') === 'true') loadFiles();
+            
             renderBmTags();
             
             window.onbeforeunload = function(e) {
@@ -485,7 +526,7 @@
             document.getElementById('floatMenu').classList.remove('show');
 
             if(id === 'bookmarks') loadBookmarks();
-            else if(id === 'calendar') { renderCalendar(); showDailyView(new Date().getDate()); }
+            else if(id === 'calendar') { loadGoogleEvents().then(()=>{ renderCalendar(); showDailyView(new Date().getDate()); }); }
             else if(id === 'memo') { loadMemos(); }
         }
 
@@ -546,7 +587,6 @@
             
             filtered.forEach(b => {
                 const card = document.createElement('div'); card.className = 'bm-card';
-                // 태그 렌더링
                 const tagArr = b.tags ? b.tags.split(',') : [];
                 let tagHtml = tagArr.map(t => `<span class="bm-tag-disp" onclick="filterBookmark('${t.trim()}')">${t.trim()}</span>`).join('');
                 
@@ -579,20 +619,14 @@
             if(!url) { showToast("URL은 필수입니다."); return; }
             const btn = document.getElementById('btnSaveBm'); setLoading(btn, "저장 중");
             
-            // 1. 저장 (빈칸이라도 우선 저장)
             const res = await sendRequest('save_bookmark', { row: row ? parseInt(row) : null, tags: tagsStr, title: title||"", url, memo });
             
-            // 2. AI 후처리 (제목이 없거나 태그가 없으면)
             if (!title || selectedBmTags.length === 0) {
                 showToast("저장됨. AI가 자동 분류 중...");
-                clearBmInput(); // UI 초기화
-                loadBookmarks(); // 목록 갱신 (빈칸으로 뜸)
-                
-                // 후처리 요청
+                clearBmInput(); loadBookmarks(); 
                 sendRequest('process_bookmark_ai', { row: res.rowNum, url: url, availableTags: bmTags }).then(aiRes => {
                     if(aiRes.title) showToast(`자동 업데이트: ${aiRes.title}`);
-                    loadBookmarks(); // AI 완료 후 재로드
-                    clearLoading(btn);
+                    loadBookmarks(); clearLoading(btn);
                 });
             } else {
                 clearBmInput(); loadBookmarks(); clearLoading(btn); showToast("저장 완료");
@@ -605,7 +639,6 @@
             document.getElementById('bmTitle').value = item.title;
             document.getElementById('bmMemo').value = item.memo;
             document.getElementById('bmEditRow').value = item.row;
-            // 태그 복원
             selectedBmTags = item.tags ? item.tags.split(',').map(s=>s.trim()) : [];
             renderBmTags();
             document.getElementById('bmUrl').focus();
@@ -617,9 +650,18 @@
         }
         async function deleteBookmark(row) { if(confirm('삭제하시겠습니까?')) { await sendRequest('delete_bookmark', {row}); loadBookmarks(); } }
 
-        // ================= 2. 달력/일정 =================
+        // ================= 2. 달력/일정 (구글 연동) =================
+        async function loadGoogleEvents() {
+            calendarEvents = await sendRequest('get_events') || [];
+        }
         function moveMonth(dir) { curMonth += dir; if(curMonth>11) { curMonth=0; curYear++; } else if(curMonth<0) { curMonth=11; curYear--; } renderCalendar(); }
-        
+        function goToToday() {
+            const today = new Date();
+            curYear = today.getFullYear(); curMonth = today.getMonth();
+            selectedDate = formatDateYMD(today);
+            renderCalendar(); showDailyView(today.getDate());
+        }
+
         async function renderCalendar() {
             const grid = document.getElementById('calGrid'); grid.innerHTML='';
             document.getElementById('calMonth').innerText = `${curYear}년 ${curMonth+1}월`;
@@ -633,35 +675,41 @@
             for(let i=1; i<=lastDay.getDate(); i++) {
                 const d = document.createElement('div'); d.className='cal-day'; d.innerHTML=`<span>${i}</span><div class="cal-dot"></div>`;
                 const dateStr = `${curYear}-${String(curMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                
                 if(dateStr === selectedDate) d.classList.add('selected');
                 const today = new Date();
                 if(today.getFullYear()===curYear && today.getMonth()===curMonth && today.getDate()===i) d.classList.add('today');
+                
+                // 이벤트 있으면 점 찍기
+                const hasEvent = calendarEvents.some(e => e.date === dateStr);
+                if(hasEvent) d.classList.add('has-memo');
+
                 d.onclick = () => { selectedDate = dateStr; renderCalendar(); showDailyView(i); };
                 grid.appendChild(d);
             }
         }
 
         async function showDailyView(day) {
-            document.getElementById('calDetailTitle').innerText = `${selectedDate} 일정`;
-            const evDiv = document.getElementById('dailyEvents'); evDiv.innerHTML='로딩...';
-            const events = await sendRequest('get_events'); 
+            document.getElementById('calDetailTitle').innerText = `${selectedDate} 일정 (Google)`;
+            const evDiv = document.getElementById('dailyEvents');
+            
+            // 캐시된 데이터에서 필터링
+            const todays = calendarEvents.filter(e => e.date === selectedDate);
             evDiv.innerHTML='';
-            if(events) {
-                const todays = events.filter(e => e.date === selectedDate);
-                todays.forEach(e => {
-                    const d = document.createElement('div'); d.style.padding="8px"; d.style.borderBottom="1px solid #eee"; d.style.display="flex"; d.style.justifyContent="space-between";
-                    d.innerHTML = `<span>${e.title}</span> <button class="btn-icon btn-del" onclick="deleteEvent(${e.row})">x</button>`;
-                    evDiv.appendChild(d);
-                });
-                if(todays.length === 0) evDiv.innerHTML = '<div style="color:#999; padding:10px;">일정이 없습니다.</div>';
-                
-                const todayStr = formatDateYMD(new Date());
-                const todoDiv = document.getElementById('todayTodoList');
-                const todayEvents = events.filter(e => e.date === todayStr);
-                if(todayEvents.length > 0) todoDiv.innerHTML = todayEvents.map(e => `• ${e.title}`).join('<br>');
-                else todoDiv.innerText = "일정 없음";
-            }
+            todays.forEach(e => {
+                const d = document.createElement('div'); d.style.padding="8px"; d.style.borderBottom="1px solid #eee";
+                d.innerHTML = `<span>${e.type==='종일'?'[종일] ':''}${e.title}</span>`;
+                evDiv.appendChild(d);
+            });
+            if(todays.length === 0) evDiv.innerHTML = '<div style="color:#999; padding:10px;">일정이 없습니다.</div>';
+            
+            const todayStr = formatDateYMD(new Date());
+            const todoDiv = document.getElementById('todayTodoList');
+            const todayEvents = calendarEvents.filter(e => e.date === todayStr);
+            if(todayEvents.length > 0) todoDiv.innerHTML = todayEvents.map(e => `• ${e.title}`).join('<br>');
+            else todoDiv.innerText = "일정 없음";
 
+            // 출석 로드
             const attDiv = document.getElementById('attList'); attDiv.innerHTML='로딩...';
             const attData = await sendRequest('get_attendance');
             const existAtt = attData ? attData.filter(a => a.date === selectedDate) : [];
@@ -679,9 +727,9 @@
         async function addEvent() {
             const title = document.getElementById('newEvent').value; if(!title) return;
             await sendRequest('save_event', {date:selectedDate, title, type:'일반'});
-            document.getElementById('newEvent').value=''; showDailyView(new Date(selectedDate).getDate());
+            document.getElementById('newEvent').value=''; 
+            loadGoogleEvents().then(() => showDailyView(new Date(selectedDate).getDate())); // 갱신
         }
-        async function deleteEvent(row) { if(confirm('삭제?')) { await sendRequest('delete_event', {row}); showDailyView(new Date(selectedDate).getDate()); } }
         async function saveAttendance() {
             const list = [];
             document.querySelectorAll('.att-row').forEach(row => { list.push({ name: row.querySelector('.att-status').dataset.name, status: row.querySelector('.att-status').value, memo: row.querySelector('.att-memo').value }); });
@@ -738,21 +786,18 @@
                 if(dateStr === selectedMemoDate) d.classList.add('selected');
                 
                 d.innerHTML = `<span>${i}</span><div class="cal-dot"></div>`;
-                // [수정] 날짜 클릭 시 프리뷰 렌더링
                 d.onclick = () => { 
                     selectedMemoDate = dateStr; 
-                    renderMemoCalendar(); // 선택 효과 갱신
-                    renderMemoDatePreview(); // 하단 프리뷰 표시
-                    clearMemoInput(); // 입력창은 리셋하되 날짜는 유지
+                    renderMemoCalendar(); 
+                    renderMemoDatePreview(); 
+                    clearMemoInput(); 
                     document.getElementById('memoDateDisp').innerText = selectedMemoDate;
                 };
                 grid.appendChild(d);
             }
-            // 초기 로딩 시 프리뷰도 같이
             renderMemoDatePreview();
         }
         
-        // [NEW] 달력 모드 프리뷰
         function renderMemoDatePreview() {
             const previewArea = document.getElementById('memoDatePreview');
             const previewList = document.getElementById('memoDatePreviewList');
@@ -816,7 +861,6 @@
             await sendRequest('save_memo', { row: row?parseInt(row):null, content, pinned, done });
             showToast("메모 저장됨"); loadMemos();
         }
-        
         async function deleteMemo() {
              const row = document.getElementById('memoEditRow').value;
              if(row && confirm("삭제하시겠습니까?")) {
@@ -845,6 +889,13 @@
 
         async function savePublicSettings() { const key = document.getElementById('settingApiKey').value.trim(); if(!key) return; await sendRequest('save_settings', { apiKey: key }); showToast("저장 완료"); }
         async function savePersona() { const p = document.getElementById('personaText').value; aiPersona = p; const btn = document.getElementById('btnPersona'); setLoading(btn, "저장 중"); if(!IS_PRO_MODE) await sendRequest('save_persona', { persona: p }); showToast("저장 완료"); clearLoading(btn); }
+        async function archiveData() {
+            if(!confirm("⚠️ 경고 ⚠️\n현재 모든 기록(행동, 출석 등)이 백업 파일로 이동되고,\n현재 시트는 초기화됩니다.\n\n새 학년을 시작하시겠습니까?")) return;
+            const btn = document.querySelector('.btn-danger'); setLoading(btn, "데이터 이관 중");
+            const res = await sendRequest('archive_data');
+            alert(res.msg); clearLoading(btn); location.reload();
+        }
+        
         function uploadFile() { const input = document.getElementById('uploadInput'); if(input.files.length === 0) return; const file = input.files[0]; const reader = new FileReader(); const btn = document.getElementById('btnUpload'); reader.onload = async function(e) { const base64 = e.target.result.split(',')[1]; setLoading(btn, "업로드 중"); const res = await sendRequest('upload_file', { name: file.name, mimeType: file.type, data: base64 }); if(res) { showToast("완료"); loadFiles(); input.value = ''; } clearLoading(btn); }; reader.readAsDataURL(file); }
         async function loadFiles() { const list = document.getElementById('fileList'); list.innerHTML = '로딩...'; const files = await sendRequest('get_files'); list.innerHTML = ''; if(files) files.forEach(f => { const div = document.createElement('div'); div.style.padding = "10px"; div.style.borderBottom = "1px solid #eee"; div.innerHTML = `<a href="${f.url}" target="_blank" style="text-decoration:none; color:var(--primary); font-weight:bold;">[파일] ${f.name}</a>`; list.appendChild(div); }); }
 
@@ -854,7 +905,7 @@
             studentList.forEach(st => {
                 const row = document.createElement('div'); row.className = 'student-row';
                 let checkHtml = currentMode === 'subject' ? `<div class="st-check-group"><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div></div>` : '';
-                row.innerHTML = `<div class="st-name">${st.id}. ${st.name}</div><div style="flex-grow:1; position:relative;"><input type="text" class="st-input" id="input_${st.id}" placeholder="${currentMode==='subject'?'관찰/특기사항':'행동특성'}"><span class="ai-magic" onclick="runAI('${st.id}', this)">AI</span></div>${checkHtml}`;
+                row.innerHTML = `<div class="st-name">${st.id}. ${st.name}</div><div style="flex-grow:1; position:relative;"><input type="text" class="st-input" id="input_${st.id}" placeholder="${currentMode==='subject'?'관찰/특기사항':'행동특성'}"><span class="ai-magic" onclick="runAI('${st.id}', this)">✨</span></div>${checkHtml}`;
                 list.appendChild(row);
             });
             toggleAIMode();
@@ -924,7 +975,6 @@
             if(!history || history.length === 0) { container.innerHTML = `<div style="text-align:center;color:var(--text-sub);padding:50px 0;">기록이 없습니다.</div>`; return; }
             history.forEach(item => {
                 const card = document.createElement('div'); card.className = 'history-card';
-                // [수정] 학생 상세 보기에서 과목명(item.type) 배지 제거
                 let evalHtml = item.check && item.check !== "없음" ? `<div class="h-eval" style="color:var(--success); font-weight:bold; font-size:0.85rem;">${item.check}</div>` : "";
                 card.innerHTML = `<div class="h-chk"><input type="checkbox" class="hist-chk" value="${item.rowNum}"></div><div class="h-info"><div class="h-date">${item.date}</div>${evalHtml}</div><textarea id="hist_txt_${item.rowNum}" class="h-textarea">${item.txt}</textarea><div class="h-btn-area"><button class="btn-icon btn-edit" onclick="updateRecord('${reqType}', ${item.rowNum})">[수정]</button><button class="btn-copy" onclick="quietCopy(this, '${item.txt}')">[복사]</button></div>`;
                 container.appendChild(card);
