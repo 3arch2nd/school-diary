@@ -29,16 +29,16 @@
         #lockInput { font-size: 1.2rem; text-align: center; margin-bottom: 5px; letter-spacing: 2px; }
         .lock-msg { font-size: 0.8rem; color: var(--danger); min-height: 20px; margin-bottom: 10px;}
 
-        /* [수정] 탭 메뉴 */
+        /* 탭 메뉴 */
         .nav-tabs { display: flex; flex-shrink: 0; background: var(--card-bg); border-radius: 8px; margin-bottom: 15px; padding: 4px; border: 1px solid var(--border-color); }
         .nav-item { flex: 1; text-align: center; padding: 12px; cursor: pointer; color: var(--text-sub); border-radius: 6px; font-weight: bold; transition: 0.2s; }
         .nav-item.active { color: var(--primary-dark); background-color: #eaf6fc; }
         .nav-item-home { flex: 0.5; min-width: 60px; color: var(--primary-dark); }
 
-        /* 플로팅 메뉴 (복구) */
-        .float-btn { position: fixed; bottom: 30px; right: 30px; width: 56px; height: 56px; background: var(--primary); color: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 2100; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.8rem; transition: 0.3s; }
+        /* [수정] 플로팅 메뉴: 다시 우상단으로 복귀 */
+        .float-btn { position: fixed; top: 20px; right: 20px; width: 50px; height: 50px; background: var(--primary); color: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 2100; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; transition: 0.3s; }
         .float-btn:hover { background: var(--primary-dark); transform: scale(1.05); }
-        .float-menu { position: fixed; bottom: 100px; right: 30px; display: none; flex-direction: column; gap: 10px; z-index: 2100; }
+        .float-menu { position: fixed; top: 80px; right: 20px; display: none; flex-direction: column; gap: 10px; z-index: 2100; }
         .float-menu.show { display: flex; animation: fadeIn 0.2s; }
         .float-menu-item { background: white; padding: 10px 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; font-weight: bold; color: var(--text-main); text-align: right; border: 1px solid var(--border-color); transition: 0.2s; }
         .float-menu-item:hover { background: #eaf6fc; color: var(--primary); }
@@ -59,7 +59,7 @@
         .card.scrollable { overflow-y: auto; }
         .card-header { font-size: 1.1rem; color: var(--primary-dark); font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; flex-shrink: 0; border-bottom: 2px solid var(--bg-main); display: flex; justify-content: space-between; align-items: center; }
 
-        /* [UI 요소 복구: 태그 & 스위치] */
+        /* 태그 스타일 (삭제 버튼 포함) */
         .tag-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
         .tag { position: relative; padding: 8px 30px 8px 16px; background: var(--bg-main); border-radius: 20px; font-size: 0.95rem; cursor: pointer; border: 1px solid var(--border-color); transition: 0.2s; }
         .tag.selected { background: var(--primary); color: white; border-color: var(--primary); }
@@ -67,6 +67,7 @@
         .tag .x-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; line-height: 16px; text-align: center; border-radius: 50%; font-size: 0.8rem; background: rgba(0,0,0,0.1); color: inherit; display: none; }
         .tag:hover .x-btn { display: block; }
         
+        /* 스위치 */
         .switch-container { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text-sub); }
         .switch { position: relative; display: inline-block; width: 36px; height: 20px; margin-bottom: 0; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -75,15 +76,19 @@
         input:checked + .slider { background-color: var(--primary); }
         input:checked + .slider:before { transform: translateX(16px); }
 
-        /* [UI 요소 복구: 학생 체크] */
+        /* [수정] 학생 평가 체크 (4단계) */
         .student-row { display: flex; align-items: center; gap: 15px; padding: 12px 10px; border-bottom: 1px solid var(--bg-main); background: white; }
         .st-name { width: 90px; font-weight: bold; color: var(--primary-dark); flex-shrink: 0; }
         .st-input { flex-grow: 1; margin-bottom: 0 !important; height: 40px; }
-        .st-check-group { display: flex; gap: 8px; width: 160px; flex-shrink: 0; justify-content: space-between; }
+        .st-check-group { display: flex; gap: 8px; width: 220px; flex-shrink: 0; justify-content: space-between; }
         .check-circle { width: 28px; height: 28px; border: 2px solid var(--border-color); border-radius: 50%; cursor: pointer; position: relative; background: var(--bg-main); }
         .check-circle.checked { border-color: var(--primary); background: var(--primary); }
         .check-circle.checked::after { content: 'v'; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; font-weight:bold; }
         
+        /* [수정] 번호 입력란 화살표 제거 */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
         /* 폼 공통 */
         label { display: block; margin-bottom: 6px; color: var(--text-sub); font-size: 0.9rem; font-weight: bold; }
         input, select, textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; background: #fcfdfd; }
@@ -102,13 +107,14 @@
         /* [HOME] */
         .home-image-area { flex-grow: 1; background: #fafafa; border: 2px dashed #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; position: relative; min-height: 200px; }
         .home-image-area img { width: 100%; height: 100%; object-fit: cover; }
+        .home-image-msg { color: #aaa; font-weight: bold; pointer-events: none; }
         .quick-link-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }
         .quick-link-item { background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100px; }
         .quick-link-item:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-color: var(--primary); }
         .ql-emoji { font-size: 2rem; margin-bottom: 5px; }
         .ql-name { font-size: 0.85rem; color: var(--text-main); font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
 
-        /* [북마크 개선] Grid 반응형 */
+        /* [북마크] Grid 반응형 */
         #bmList { display: grid; gap: 15px; padding-right: 5px; }
         @media (min-width: 1200px) { #bmList { grid-template-columns: repeat(3, 1fr); } }
         @media (min-width: 800px) and (max-width: 1199px) { #bmList { grid-template-columns: repeat(2, 1fr); } }
@@ -118,7 +124,7 @@
         .bm-star.active { color: #f1c40f; }
         .bm-link { font-weight: bold; color: var(--primary-dark); text-decoration: none; font-size: 1.05rem; display: block; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* [메모 & 달력] */
+        /* [달력] */
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-bottom: 10px; }
         .cal-day { padding: 4px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; height: 50px; display: flex; flex-direction: column; align-items: center; }
         .cal-day:hover { background: #eaf6fc; }
@@ -127,11 +133,12 @@
         .cal-dot { width: 6px; height: 6px; background: var(--primary); border-radius: 50%; margin-top: 4px; display: none; }
         .cal-day.has-memo .cal-dot { display: block; }
         
-        /* [메모 프리뷰 - 한줄 고정] */
-        .memo-mini-item { padding: 8px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        /* [수정] 메모 프리뷰 한줄 강제 & 완료된 메모 스타일 */
+        .memo-mini-item { padding: 8px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; max-width: 100%; }
         .memo-mini-item:hover { color: var(--primary); }
+        .memo-mini-item.done-memo { text-decoration: line-through; opacity: 0.6; color: #aaa; }
 
-        /* [출석부 행 복구] */
+        /* [출석부] */
         .att-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; padding: 8px 0; border-bottom: 1px solid #eee; }
         .att-sel { font-size: 0.9rem; padding: 4px; width: 80px; margin-bottom: 0 !important; }
 
@@ -152,6 +159,9 @@
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 2000; display: none; align-items: center; justify-content: center; }
         .modal-overlay.open { display: flex; }
         .modal-card { background: white; padding: 25px; border-radius: 12px; width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--border-color); }
+        
+        /* [수정] 확인 모달 */
+        .modal-msg { margin-bottom: 20px; text-align: center; color: var(--text-main); font-weight: bold; }
 
         @media (max-width: 768px) {
             .container { padding: 10px; }
@@ -165,8 +175,8 @@
             .pc-only-tab .mobile-block-overlay { display: flex; }
             .home-image-area { min-height: 150px; }
             .quick-link-grid { grid-template-columns: repeat(3, 1fr); }
-            .float-btn { bottom: 80px; }
-            .float-menu { bottom: 150px; }
+            .float-btn { top: auto; bottom: 30px; } /* 모바일은 아래로 */
+            .float-menu { top: auto; bottom: 90px; }
         }
     </style>
 </head>
@@ -189,7 +199,7 @@
     </div>
 
     <div class="container">
-        <header><h1>쫑알수첩 v13.1</h1></header>
+        <header><h1>쫑알수첩 v14.0</h1></header>
         <nav class="nav-tabs">
             <div class="nav-item nav-item-home active" onclick="changeSection('home')">HOME</div>
             <div class="nav-item" onclick="changeSection('record')">기록하기</div>
@@ -202,14 +212,13 @@
             <div class="split-container">
                 <div class="split-left">
                     <div class="card full-height scrollable">
-                        <div class="card-header">우리 반 추억 (4:3)</div>
                         <div class="home-image-area" id="homeImgArea" onclick="document.getElementById('homeImgInput').click()">
                             <span class="home-image-msg">이미지 드래그 또는 클릭</span>
                             <img id="homeMainImg" style="display:none;">
                             <input type="file" id="homeImgInput" style="display:none" accept="image/*" onchange="uploadHomeImage(this)">
                         </div>
                         <div class="card-header" style="margin-top:20px; border-bottom:0;">오늘의 할 일</div>
-                        <div id="homeToDoList" style="flex-grow:1; font-size:0.95rem; color:var(--text-sub);">일정 없음</div>
+                        <div id="homeToDoList" style="flex-grow:1; font-size:1rem; color:#333; font-weight:bold; line-height:1.8;">일정 없음</div>
                     </div>
                 </div>
                 <div class="split-right">
@@ -263,7 +272,8 @@
                                 <button class="btn btn-primary" id="btnSaveAll" onclick="saveData()">저장하기</button>
                             </div>
                             <div style="display:flex; padding-bottom:10px; border-bottom:1px solid #eee; font-weight:bold; color:var(--text-sub); font-size:0.9rem;">
-                                <div style="width:90px;">이름</div><div style="flex-grow:1; text-align:center;">내용</div><div id="checkHeader" style="width:160px; display:flex; justify-content:space-between; font-size:0.7rem;"><span>매우</span><span>잘함</span><span>보통</span><span>노력</span></div>
+                                <div style="width:90px;">이름</div><div style="flex-grow:1; text-align:center;">내용</div>
+                                <div id="checkHeader" style="width:220px; display:flex; justify-content:space-between; font-size:0.75rem;"><span>매우잘함</span><span>잘함</span><span>보통</span><span>노력요함</span></div>
                             </div>
                             <div id="recordList"></div>
                         </div>
@@ -321,7 +331,7 @@
                         <input type="hidden" id="bmEditRow" value="">
                         <label>URL</label><input type="text" id="bmUrl" placeholder="https://..." style="margin-bottom:10px;">
                         <label>제목</label><input type="text" id="bmTitle" placeholder="자동 완성 됨">
-                        <label>태그 (과목처럼 선택)</label>
+                        <label>태그</label>
                         <div class="tag-container" id="bmTagArea"></div>
                         <div style="display:flex; gap:5px; margin-bottom:15px;"><input type="text" id="newBmTagInput" placeholder="새 태그" style="margin:0; flex:1;"><button class="btn-sm active" onclick="addNewBmTag()">+</button></div>
                         <label>메모</label><textarea id="bmMemo" style="height:60px;" placeholder="활용 팁..."></textarea>
@@ -344,6 +354,7 @@
                     <div class="card scrollable">
                         <div class="card-header" style="justify-content:center; gap:15px;">
                             <button class="arrow-btn" onclick="moveMonth(-1)">◀</button><span id="calMonth"></span><button class="arrow-btn" onclick="moveMonth(1)">▶</button>
+                            <button class="btn-sm" style="margin-left:5px;" onclick="goToToday()">오늘</button>
                         </div>
                         <div class="cal-grid" id="calGrid"></div>
                     </div>
@@ -358,7 +369,7 @@
                          <div style="display:flex; gap:5px; margin-bottom:15px;"><input type="text" id="newEvent" placeholder="일정 등록 (구글 캘린더)" style="margin:0;"><button class="btn-primary" onclick="addEvent()" style="border-radius:6px; width:70px;">등록</button></div>
                          <div id="dailyEvents" style="margin-bottom:20px;"></div>
                          <hr style="margin:20px 0; border:0; border-top:1px dashed #eee;">
-                         <div class="card-header"><span>출석 체크</span><button class="btn-sm active" onclick="saveAttendance()">저장</button></div>
+                         <div class="card-header"><span>출석 체크</span><div style="display:flex; gap:5px;"><button class="btn-sm" onclick="openMonthAttSummary()">월별 통계</button><button class="btn-sm active" onclick="saveAttendance()">저장</button></div></div>
                          <div id="attList"></div>
                     </div>
                 </div>
@@ -407,7 +418,7 @@
                          <label>AI 페르소나</label><textarea id="personaText" style="height:150px;" placeholder="예: 초등학교 교사 말투..."></textarea><div style="text-align:right;"><button class="btn btn-primary" id="btnPersona" onclick="savePersona()">저장</button></div>
                          <hr style="margin:20px 0;">
                          <div class="card-header" style="color:var(--danger); border-bottom:none;">데이터 관리</div>
-                         <button class="btn btn-danger" style="width:100%" onclick="archiveData()">[새 학년 준비] 데이터 백업 및 초기화</button>
+                         <button class="btn btn-danger" style="width:100%" onclick="reqConfirm('데이터를 초기화하시겠습니까?', archiveData)">[새 학년 준비] 데이터 백업 및 초기화</button>
                      </div>
                  </div>
              </div>
@@ -417,10 +428,13 @@
 
     <div id="status-bar"><span id="status-msg">대기중...</span><div class="loading-dots" style="color:white; font-weight:bold;"></div></div>
     <div id="toast"></div>
+    <div id="confirmModal" class="modal-overlay"><div class="modal-card"><div class="modal-msg" id="confirmMsg"></div><div style="text-align:center; display:flex; gap:10px;"><button class="btn btn-outline" style="flex:1" onclick="document.getElementById('confirmModal').classList.remove('open')">취소</button><button class="btn btn-primary" style="flex:1" id="btnConfirmYes">확인</button></div></div></div>
+    
     <div id="subjectModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="font-weight:bold; margin-bottom:15px;">새 과목 추가</div><input type="text" id="newSubjectName" placeholder="과목명"><div style="text-align:right;"><button class="btn btn-outline" onclick="closeSubjectModal()">취소</button> <button id="confirmSubjectBtn" class="btn btn-primary" onclick="confirmAddSubject()">추가</button></div></div></div>
     <div id="deleteSubjectModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="color:var(--danger)">과목 삭제</div><p>기록이 영구 삭제됩니다.</p><div style="text-align:right;"><button class="btn btn-outline" onclick="document.getElementById('deleteSubjectModal').classList.remove('open')">취소</button> <button class="btn btn-danger" onclick="confirmDeleteSubject()">삭제</button></div></div></div>
     <div id="manageStudentModal" class="modal-overlay"><div class="modal-card" style="width:500px;"><div class="modal-title" style="font-weight:bold; margin-bottom:15px;">학생 명단 관리</div><div id="manageStudentRows" style="max-height:300px; overflow-y:auto; margin-bottom:15px;"></div><button class="btn-sm active" onclick="addStudentRow()">+ 행 추가</button><div style="text-align:right; margin-top:15px;"><button class="btn btn-outline" onclick="closeStudentManageModal()">취소</button> <button class="btn btn-primary" id="btnManageStSave" onclick="saveStudentManagement()">전체 저장</button></div></div></div>
     <div id="addLinkModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="font-weight:bold; margin-bottom:15px;">바로가기 추가</div><label>이모지</label><input type="text" id="qlEmoji" placeholder="🏫"><label>이름 (짧게)</label><input type="text" id="qlName" placeholder="나이스"><label>URL</label><input type="text" id="qlUrl" placeholder="https://..."><div style="text-align:right;"><button class="btn btn-outline" onclick="document.getElementById('addLinkModal').classList.remove('open')">취소</button> <button class="btn btn-primary" onclick="confirmAddLink()">추가</button></div></div></div>
+    <div id="monthAttModal" class="modal-overlay"><div class="modal-card" style="width:600px;"><div class="modal-title" style="font-weight:bold; margin-bottom:15px;">월별 출석 현황</div><div class="modal-body" id="monthAttBody" style="max-height:400px; overflow-y:auto; margin-bottom:15px;"></div><div style="text-align:right;"><button class="btn btn-outline" onclick="document.getElementById('monthAttModal').classList.remove('open')">닫기</button></div></div></div>
 
     <script>
         const PRO_BACKEND_URL = "https://script.google.com/macros/s/AKfycbxn2nB0ZNXwXSdfx4-XVUWTD3Z_GCb_L2_SkhLyiKu5qrZrpwGTLM9Y4BhQRbveIk4o8Q/exec"; 
@@ -451,10 +465,20 @@
             if(nav) nav.classList.add('active');
             if(id==='bookmarks') loadBookmarks(); else if(id==='calendar') { renderCalendar(); showDailyView(new Date().getDate()); } else if(id==='memo') loadMemos();
         }
+        
+        // [수정] 예쁜 Confirm 창
+        function reqConfirm(msg, callback) {
+            document.getElementById('confirmMsg').innerText = msg;
+            document.getElementById('confirmModal').classList.add('open');
+            document.getElementById('btnConfirmYes').onclick = () => {
+                document.getElementById('confirmModal').classList.remove('open');
+                callback();
+            };
+        }
 
         // [HOME Logic]
         async function loadHomeData() { const d=await sendRequest('get_home_data'); if(d){ if(d.image) { document.getElementById('homeMainImg').src=d.image; document.getElementById('homeMainImg').style.display='block'; document.querySelector('.home-image-msg').style.display='none'; } homeQuickLinks=d.links||[]; renderQuickLinks(); } }
-        function renderQuickLinks() { const g=document.getElementById('quickLinkGrid'); g.innerHTML=''; homeQuickLinks.slice(0,5).forEach((l,i)=>{ const d=document.createElement('div'); d.className='quick-link-item'; d.innerHTML=`<div class="ql-emoji">${l.emoji}</div><div class="ql-name">${l.name}</div>`; d.onclick=()=>window.open(l.url,'_blank'); d.oncontextmenu=(e)=>{e.preventDefault();if(confirm('삭제?')){homeQuickLinks.splice(i,1);saveHomeLinks();}}; g.appendChild(d); }); if(homeQuickLinks.length<5){ const a=document.createElement('div'); a.className='quick-link-item'; a.innerHTML='<div style="font-size:2rem; color:var(--primary)">+</div><div class="ql-name">추가</div>'; a.onclick=()=>document.getElementById('addLinkModal').classList.add('open'); g.appendChild(a); } }
+        function renderQuickLinks() { const g=document.getElementById('quickLinkGrid'); g.innerHTML=''; homeQuickLinks.slice(0,5).forEach((l,i)=>{ const d=document.createElement('div'); d.className='quick-link-item'; d.innerHTML=`<div class="ql-emoji">${l.emoji}</div><div class="ql-name">${l.name}</div>`; d.onclick=()=>window.open(l.url,'_blank'); d.oncontextmenu=(e)=>{e.preventDefault();reqConfirm('삭제하시겠습니까?',()=>{homeQuickLinks.splice(i,1);saveHomeLinks();})}; g.appendChild(d); }); if(homeQuickLinks.length<5){ const a=document.createElement('div'); a.className='quick-link-item'; a.innerHTML='<div style="font-size:2rem; color:var(--primary)">+</div><div class="ql-name">추가</div>'; a.onclick=()=>document.getElementById('addLinkModal').classList.add('open'); g.appendChild(a); } }
         function confirmAddLink() { const u=document.getElementById('qlUrl').value; if(!u) return; homeQuickLinks.push({emoji:document.getElementById('qlEmoji').value||'🔗', name:document.getElementById('qlName').value||'링크', url:u}); saveHomeLinks(); document.getElementById('addLinkModal').classList.remove('open'); document.getElementById('qlUrl').value=''; }
         async function saveHomeLinks() { renderQuickLinks(); await sendRequest('save_home_config', {key:"QuickLinks", value:JSON.stringify(homeQuickLinks)}); }
         async function uploadHomeImage(inp) { if(inp.files.length===0) return; const f=inp.files[0]; const r=new FileReader(); r.onload=async(e)=>{ const b=e.target.result.split(',')[1]; const res=await sendRequest('upload_file', {name:"home_"+Date.now(), mimeType:f.type, data:b}); if(res){ document.getElementById('homeMainImg').src=res.url; document.getElementById('homeMainImg').style.display='block'; document.querySelector('.home-image-msg').style.display='none'; await sendRequest('save_home_config',{key:"MainImage", value:res.url}); } }; r.readAsDataURL(f); }
@@ -462,10 +486,11 @@
         async function saveHomeQuickRecord() { const t=document.getElementById('homeQuickInput').value.trim(); if(!t) return; showToast("AI 처리 중"); try{ const a=await sendRequest('call_ai',{prompt:`입력:"${t}". 규칙: 이름/과목/내용 분리. JSON출력:{"name":"이름","type":"과목","text":"내용"}`}); const j=JSON.parse(a.text.replace(/```json/g,"").replace(/```/g,"")); await sendRequest('save_record',{date:formatDateYMD(new Date()), name:j.name, type:j.type, text:j.text, check:"없음"}); document.getElementById('homeQuickInput').value=""; showToast("저장 완료"); }catch(e){showToast("실패");} }
         const da=document.getElementById('homeImgArea'); da.addEventListener('dragover',e=>{e.preventDefault();da.style.background='#eee';}); da.addEventListener('drop',e=>{e.preventDefault();da.style.background='#fafafa'; if(e.dataTransfer.files.length>0){document.getElementById('homeImgInput').files=e.dataTransfer.files; uploadHomeImage(document.getElementById('homeImgInput'));}});
 
-        // [Record Logic] (복구)
+        // [Record Logic]
         function setMode(m) { currentMode=m; document.getElementById('btnSubject').className=m==='subject'?'btn-sm active':'btn-sm inactive'; document.getElementById('btnBehavior').className=m==='behavior'?'btn-sm active':'btn-sm inactive'; document.getElementById('subjectArea').style.display=m==='subject'?'block':'none'; document.getElementById('checkHeader').style.visibility=m==='subject'?'visible':'hidden'; renderRecordList(); }
-        function renderSubjectTags() { const c=document.getElementById('subjectTags'); c.innerHTML=''; subjectList.forEach(s=>{ const t=document.createElement('div'); t.className='tag'; t.innerHTML=`${s} <span class="x-btn" onclick="openDelSub('${s}', event)">x</span>`; t.onclick=(e)=>{if(e.target.classList.contains('x-btn'))return; selectSub(t);}; if(s==="국어") t.classList.add('selected'); c.appendChild(t); }); c.innerHTML+='<div class="tag tag-add" onclick="openSubjectModal()">+</div>'; }
-        function selectSub(el) { document.querySelectorAll('.tag').forEach(t=>t.classList.remove('selected')); el.classList.add('selected'); }
+        // [수정] 과목 선택/해제/삭제 로직 개선
+        function renderSubjectTags() { const c=document.getElementById('subjectTags'); c.innerHTML=''; subjectList.forEach(s=>{ const t=document.createElement('div'); t.className='tag'; t.innerHTML=`${s} <span class="x-btn" onclick="openDelSub('${s}', event)">x</span>`; t.onclick=(e)=>{if(e.target.classList.contains('x-btn'))return; selectSub(t);}; if(s==="국어") t.classList.add('selected'); c.appendChild(t); }); c.innerHTML+='<div class="tag tag-add" onclick="openSubjectModal()">+</div>'; updateSubjectFilterOptions(); }
+        function selectSub(el) { if(el.classList.contains('selected')) {el.classList.remove('selected');} else {document.querySelectorAll('#subjectTags .tag').forEach(t=>t.classList.remove('selected')); el.classList.add('selected');} }
         function openDelSub(s,e) { e.stopPropagation(); targetSubjectToDelete=s; document.getElementById('deleteSubjectModal').classList.add('open'); }
         async function confirmDeleteSubject() { await sendRequest('delete_subject',{subject:targetSubjectToDelete}); subjectList=subjectList.filter(s=>s!==targetSubjectToDelete); renderSubjectTags(); document.getElementById('deleteSubjectModal').classList.remove('open'); }
         async function confirmAddSubject() { const n=document.getElementById('newSubjectName').value.trim(); if(n && !subjectList.includes(n)) { await sendRequest('add_subject',{subject:n}); subjectList.push(n); renderSubjectTags(); closeSubjectModal(); } }
@@ -475,6 +500,7 @@
              const l=document.getElementById('recordList'); l.innerHTML='';
              studentList.forEach(st=>{
                  const r=document.createElement('div'); r.className='student-row';
+                 // [수정] 4단계 평가 버튼 매핑
                  let chk=currentMode==='subject'?`<div class="st-check-group"><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div></div>`:'';
                  r.innerHTML=`<div class="st-name">${st.name}</div><input type="text" class="st-input" id="input_${st.id}" placeholder="내용">${chk}`;
                  l.appendChild(r);
@@ -508,36 +534,46 @@
         function addStudentRow(id='',name='') { const d=document.createElement('div'); d.style.display='flex'; d.style.gap='5px'; d.style.marginBottom='5px'; d.innerHTML=`<input type="number" class="st-add-id" value="${id}" style="width:60px;margin:0"><input type="text" class="st-add-name" value="${name}" style="flex:1;margin:0"><button class="btn-sm btn-del" onclick="this.parentElement.remove()">-</button>`; document.getElementById('manageStudentRows').appendChild(d); }
         async function saveStudentManagement() { const ids=document.querySelectorAll('.st-add-id'); const nms=document.querySelectorAll('.st-add-name'); let l=[]; for(let i=0;i<ids.length;i++)if(ids[i].value&&nms[i].value)l.push({id:parseInt(ids[i].value),name:nms[i].value.trim()}); await sendRequest('sync_student_list',{students:l}); closeStudentManageModal(); loadStudents(); }
 
-        // [Bookmarks] (복구: 태그스타일)
-        function renderBmTags() { const c=document.getElementById('bmTagArea'); c.innerHTML=''; bmTags.forEach(t=>{const b=document.createElement('div');b.className='tag';b.innerText=t;if(selectedBmTags.includes(t))b.classList.add('selected');b.onclick=()=>{if(selectedBmTags.includes(t))selectedBmTags=selectedBmTags.filter(x=>x!==t);else selectedBmTags.push(t);renderBmTags();};c.appendChild(b);}); }
+        // [Bookmarks]
+        // [수정] 태그 삭제 기능 구현
+        function renderBmTags() { const c=document.getElementById('bmTagArea'); c.innerHTML=''; bmTags.forEach(t=>{const b=document.createElement('div');b.className='tag';b.innerHTML=`${t} <span class="x-btn" onclick="removeBmTag('${t}', event)">x</span>`;if(selectedBmTags.includes(t))b.classList.add('selected');b.onclick=(e)=>{if(e.target.classList.contains('x-btn'))return;if(selectedBmTags.includes(t))selectedBmTags=selectedBmTags.filter(x=>x!==t);else selectedBmTags.push(t);renderBmTags();};c.appendChild(b);}); }
+        function removeBmTag(t,e) { e.stopPropagation(); reqConfirm('태그를 삭제하시겠습니까?', ()=>{ bmTags=bmTags.filter(x=>x!==t); renderBmTags(); }); }
         function addNewBmTag() { const v=document.getElementById('newBmTagInput').value; if(v && !bmTags.includes(v)) { bmTags.push(v); renderBmTags(); document.getElementById('newBmTagInput').value=''; } }
         async function loadBookmarks() { bmList=await sendRequest('get_bookmarks')||[]; renderBmList(); }
-        function renderBmList() { const l=document.getElementById('bmList'); l.innerHTML=''; let f=bmFilter?bmList.filter(b=>b.tags&&b.tags.includes(bmFilter)):bmList; f.sort((a,b)=>(b.starred===true)-(a.starred===true)); f.forEach(b=>{const d=document.createElement('div');d.className='bm-card';d.innerHTML=`<div class="bm-star ${b.starred?'active':''}" onclick="toggleBmStar(${b.row},${!b.starred},event)">★</div><div style="padding-right:20px"><a href="${b.url}" target="_blank" class="bm-link">${b.title}</a><div style="font-size:0.8rem;color:#666">${b.memo}</div></div><div style="margin-top:10px;text-align:right"><button class="btn-icon" onclick="deleteBookmark(${b.row})">삭제</button></div>`;l.appendChild(d);}); const fd=document.getElementById('bmFilterDisp'); if(bmFilter){fd.style.display='inline-block';fd.querySelector('span').innerText=bmFilter;}else fd.style.display='none'; }
+        // [수정] 수정 버튼 복구
+        function renderBmList() { const l=document.getElementById('bmList'); l.innerHTML=''; let f=bmFilter?bmList.filter(b=>b.tags&&b.tags.includes(bmFilter)):bmList; f.sort((a,b)=>(b.starred===true)-(a.starred===true)); f.forEach(b=>{const d=document.createElement('div');d.className='bm-card';d.innerHTML=`<div class="bm-star ${b.starred?'active':''}" onclick="toggleBmStar(${b.row},${!b.starred},event)">★</div><div style="padding-right:20px"><a href="${b.url}" target="_blank" class="bm-link">${b.title}</a><div style="font-size:0.8rem;color:#666">${b.memo}</div></div><div style="margin-top:10px;text-align:right"><button class="btn-icon" onclick="editBookmark(${b.row})">수정</button> <button class="btn-icon" style="color:var(--danger)" onclick="deleteBookmark(${b.row})">삭제</button></div>`;l.appendChild(d);}); const fd=document.getElementById('bmFilterDisp'); if(bmFilter){fd.style.display='inline-block';fd.querySelector('span').innerText=bmFilter;}else fd.style.display='none'; }
         async function toggleBmStar(r,v,e) { e.stopPropagation(); const i=bmList.find(b=>b.row===r); if(i){i.starred=v;renderBmList();await sendRequest('save_bookmark',{row:r,tags:i.tags,title:i.title,url:i.url,memo:i.memo,starred:v});} }
+        function editBookmark(r) { const item=bmList.find(b=>b.row===r); if(!item)return; document.getElementById('bmUrl').value=item.url; document.getElementById('bmTitle').value=item.title; document.getElementById('bmMemo').value=item.memo; document.getElementById('bmEditRow').value=item.row; document.getElementById('bmStar').checked=item.starred; selectedBmTags=item.tags?item.tags.split(',').map(s=>s.trim()):[]; renderBmTags(); }
         async function saveBookmark() { await sendRequest('save_bookmark',{row:document.getElementById('bmEditRow').value||null, tags:selectedBmTags.join(','), title:document.getElementById('bmTitle').value, url:document.getElementById('bmUrl').value, memo:document.getElementById('bmMemo').value, starred:document.getElementById('bmStar').checked}); clearBmInput(); loadBookmarks(); }
         function clearBmInput() { document.getElementById('bmUrl').value='';document.getElementById('bmTitle').value='';document.getElementById('bmMemo').value='';document.getElementById('bmStar').checked=false;selectedBmTags=[];renderBmTags(); }
-        async function deleteBookmark(r) { if(confirm('삭제?')) { await sendRequest('delete_bookmark',{row:r}); loadBookmarks(); } }
+        async function deleteBookmark(r) { reqConfirm('삭제하시겠습니까?', async()=>{ await sendRequest('delete_bookmark',{row:r}); loadBookmarks(); }); }
         function filterBookmark(t) { bmFilter=t; renderBmList(); }
 
-        // [Calendar & Memo] (복구: 출석부 row, 메모 한줄)
+        // [Calendar & Memo]
         async function loadGoogleEvents() { calendarEvents=await sendRequest('get_events')||[]; }
+        function moveMonth(d) { curMonth+=d; if(curMonth>11){curMonth=0;curYear++;}else if(curMonth<0){curMonth=11;curYear--;} renderCalendar(); }
+        // [수정] 오늘 버튼 함수
+        function goToToday() { const t=new Date(); curYear=t.getFullYear(); curMonth=t.getMonth(); selectedDate=formatDateYMD(t); renderCalendar(); showDailyView(t.getDate()); }
         function renderCalendar() { const g=document.getElementById('calGrid'); g.innerHTML=''; document.getElementById('calMonth').innerText=`${curYear}.${curMonth+1}`; const f=new Date(curYear,curMonth,1); const l=new Date(curYear,curMonth+1,0); ['일','월','화','수','목','금','토'].forEach(d=>g.innerHTML+=`<div style="font-weight:bold">${d}</div>`); for(i=0;i<f.getDay();i++)g.appendChild(document.createElement('div')); for(i=1;i<=l.getDate();i++){const dStr=`${curYear}-${String(curMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; const d=document.createElement('div');d.className='cal-day';if(dStr===selectedDate)d.classList.add('selected');if(calendarEvents.some(e=>e.date===dStr))d.classList.add('has-memo');d.innerHTML=`<span>${i}</span><div class="cal-dot"></div>`;d.onclick=()=>{selectedDate=dStr;renderCalendar();showDailyView(i);};g.appendChild(d);} }
         async function showDailyView(day) { document.getElementById('calDetailTitle').innerText=`${selectedDate} 일정`; const div=document.getElementById('dailyEvents'); div.innerHTML=''; const evs=calendarEvents.filter(e=>e.date===selectedDate); if(evs.length===0)div.innerHTML='<div style="color:#999">일정 없음</div>'; else evs.forEach(e=>div.innerHTML+=`<div>• ${e.title}</div>`); loadAtt(); }
         async function loadAtt() { const l=document.getElementById('attList'); l.innerHTML='로딩...'; const d=await sendRequest('get_attendance'); const t=d?d.filter(a=>a.date===selectedDate):[]; l.innerHTML=''; studentList.forEach(s=>{const e=t.find(a=>a.name===s.name); const row=document.createElement('div');row.className='att-row';row.innerHTML=`<span style="width:60px">${s.name}</span><select class="att-status att-sel" data-name="${s.name}"><option ${e?.status==='출석'?'selected':''}>출석</option><option ${e?.status==='결석'?'selected':''}>결석</option><option ${e?.status==='지각'?'selected':''}>지각</option><option ${e?.status==='조퇴'?'selected':''}>조퇴</option><option ${e?.status==='결과'?'selected':''}>결과</option><option ${e?.status==='체험'?'selected':''}>체험</option></select><input type="text" class="att-memo" value="${e?.memo||''}" placeholder="비고" style="margin:0;width:80px;font-size:0.8rem">`;l.appendChild(row);}); }
         async function saveAttendance() { let l=[]; document.querySelectorAll('.att-row').forEach(r=>l.push({name:r.querySelector('.att-status').dataset.name, status:r.querySelector('.att-status').value, memo:r.querySelector('.att-memo').value})); await sendRequest('save_attendance',{date:selectedDate,data:l}); showToast("출석 저장"); }
         async function addEvent() { const t=document.getElementById('newEvent').value; if(t) { await sendRequest('save_event',{date:selectedDate,title:t}); document.getElementById('newEvent').value=''; loadGoogleEvents().then(()=>showDailyView()); } }
-        
+        // [수정] 월별 출석 통계
+        async function openMonthAttSummary() { document.getElementById('monthAttModal').classList.add('open'); document.getElementById('monthAttBody').innerHTML='로딩...'; const d=await sendRequest('get_attendance'); const m=`${curYear}-${String(curMonth+1).padStart(2,'0')}`; const t=d.filter(a=>a.date.startsWith(m)&&a.status!=='출석'); let h='<table style="width:100%;border-collapse:collapse;font-size:0.9rem"><thead><tr style="background:#eee"><th style="border:1px solid #ddd;padding:5px">날짜</th><th>이름</th><th>상태</th><th>비고</th></tr></thead><tbody>'; if(t.length===0)h='<div style="padding:20px;text-align:center">특이사항 없음</div>'; else t.forEach(r=>{h+=`<tr><td style="border:1px solid #ddd;padding:4px">${r.date.substr(5)}</td><td style="border:1px solid #ddd;text-align:center">${r.name}</td><td style="border:1px solid #ddd;text-align:center;color:red;font-weight:bold">${r.status}</td><td style="border:1px solid #ddd;padding:4px">${r.memo}</td></tr>`;}); if(t.length>0)h+='</tbody></table>'; document.getElementById('monthAttBody').innerHTML=h; }
+
         // Memo
         function setMemoMode(m) { memoMode=m; document.getElementById('btnMemoModeCal').className=m==='cal'?'btn-sm active':'btn-sm inactive'; document.getElementById('btnMemoModeList').className=m==='list'?'btn-sm active':'btn-sm inactive'; document.getElementById('memoCalView').style.display=m==='cal'?'block':'none'; document.getElementById('memoListView').style.display=m==='list'?'block':'none'; if(m==='cal')renderMemoCalendar(); else renderMemoList(); }
         async function loadMemos() { memoList=await sendRequest('get_memos')||[]; setMemoMode(memoMode); }
         function moveMemoMonth(d) { curMemoMonth+=d; if(curMemoMonth>11){curMemoMonth=0;curMemoYear++;}else if(curMemoMonth<0){curMemoMonth=11;curMemoYear--;} renderMemoCalendar(); }
         function renderMemoCalendar() { const g=document.getElementById('memoCalGrid'); g.innerHTML=''; document.getElementById('memoMonthTitle').innerText=`${curMemoYear}.${curMemoMonth+1}`; const f=new Date(curMemoYear,curMemoMonth,1); const l=new Date(curMemoYear,curMemoMonth+1,0); ['일','월','화','수','목','금','토'].forEach(d=>g.innerHTML+=`<div style="font-weight:bold">${d}</div>`); for(i=0;i<f.getDay();i++)g.appendChild(document.createElement('div')); for(i=1;i<=l.getDate();i++){const dStr=`${curMemoYear}-${String(curMemoMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; const d=document.createElement('div');d.className='cal-day';if(dStr===selectedMemoDate)d.classList.add('selected');if(memoList.some(m=>m.date===dStr))d.classList.add('has-memo');d.innerHTML=`<span>${i}</span><div class="cal-dot"></div>`;d.onclick=()=>{selectedMemoDate=dStr;renderMemoCalendar();renderMemoPreview();openMemoForm();};g.appendChild(d);} renderMemoPreview(); }
-        function renderMemoPreview() { const a=document.getElementById('memoDatePreview'); const t=memoList.filter(m=>m.date===selectedMemoDate); if(t.length===0){a.style.display='none';return;} a.style.display='block'; a.innerHTML=''; t.forEach(m=>{const d=document.createElement('div');d.className='memo-mini-item';d.innerText=(m.pinned?'★ ':'')+m.content;d.onclick=()=>openMemoForm(m);a.appendChild(d);}); }
-        function renderMemoList() { const l=document.getElementById('memoListView'); l.innerHTML=''; memoList.sort((a,b)=>new Date(b.date)-new Date(a.date)); memoList.forEach(m=>{const d=document.createElement('div');d.className='memo-mini-item';d.style.padding='15px';d.innerHTML=`<span style="color:#999;font-size:0.8rem">${m.date}</span> ${m.pinned?'★':''} ${m.content}`;d.onclick=()=>{selectedMemoDate=m.date;openMemoForm(m);};l.appendChild(d);}); }
+        // [수정] 메모 프리뷰 한줄 강제 및 완료 표시
+        function renderMemoPreview() { const a=document.getElementById('memoDatePreview'); const t=memoList.filter(m=>m.date===selectedMemoDate); if(t.length===0){a.style.display='none';return;} a.style.display='block'; a.innerHTML=''; t.forEach(m=>{const d=document.createElement('div');d.className='memo-mini-item'+(m.done?' done-memo':'');d.innerText=(m.pinned?'★ ':'')+m.content;d.onclick=()=>openMemoForm(m);a.appendChild(d);}); }
+        function renderMemoList() { const l=document.getElementById('memoListView'); l.innerHTML=''; memoList.sort((a,b)=>new Date(b.date)-new Date(a.date)); memoList.forEach(m=>{const d=document.createElement('div');d.className='memo-mini-item'+(m.done?' done-memo':'');d.style.padding='15px';d.innerHTML=`<span style="color:#999;font-size:0.8rem">${m.date}</span> ${m.pinned?'★':''} ${m.content}`;d.onclick=()=>{selectedMemoDate=m.date;openMemoForm(m);};l.appendChild(d);}); }
         function openMemoForm(i) { document.getElementById('memoDateDisp').innerText=selectedMemoDate; if(i){document.getElementById('memoContent').value=i.content;document.getElementById('memoPinned').checked=i.pinned;document.getElementById('memoDone').checked=i.done;document.getElementById('memoEditRow').value=i.row;document.getElementById('btnDelMemo').style.display='inline-block';}else clearMemoInput(); }
         function clearMemoInput() { document.getElementById('memoContent').value='';document.getElementById('memoPinned').checked=false;document.getElementById('memoDone').checked=false;document.getElementById('memoEditRow').value='';document.getElementById('btnDelMemo').style.display='none'; }
         async function saveMemo() { const c=document.getElementById('memoContent').value; if(!c)return; await sendRequest('save_memo',{row:document.getElementById('memoEditRow').value||null,content:c,pinned:document.getElementById('memoPinned').checked,done:document.getElementById('memoDone').checked}); showToast("메모 저장"); loadMemos(); }
-        async function deleteMemo() { if(confirm('삭제?')) { await sendRequest('delete_memo',{row:parseInt(document.getElementById('memoEditRow').value)}); loadMemos(); } }
+        async function deleteMemo() { reqConfirm('삭제하시겠습니까?', async()=>{ await sendRequest('delete_memo',{row:parseInt(document.getElementById('memoEditRow').value)}); loadMemos(); }); }
 
         // Utils
         function showToast(m) { const t=document.getElementById("toast");t.innerText=m;t.className="show";setTimeout(()=>{t.className=t.className.replace("show","")},3000); }
@@ -549,12 +585,13 @@
         function uploadFile() { const i=document.getElementById('uploadInput'); if(i.files.length===0)return; const f=i.files[0]; const r=new FileReader(); r.onload=async(e)=>{ await sendRequest('upload_file',{name:f.name,mimeType:f.type,data:e.target.result.split(',')[1]}); loadFiles(); }; r.readAsDataURL(f); }
         function viewTab(m) { viewTabMode=m; document.getElementById('viewSubBtn').className=m==='subject'?'btn-sm active':'btn-sm inactive'; document.getElementById('viewBehBtn').className=m==='behavior'?'btn-sm active':'btn-sm inactive'; document.getElementById('viewSubjectFilter').style.display=m==='subject'?'block':'none'; loadHistory(); }
         async function loadHistory() { if(!selectedStudentName)return; const c=document.getElementById('historyViewer'); c.innerHTML='로딩...'; const t=viewTabMode==='subject'?document.getElementById('viewSubjectFilter').value:'행동'; const h=await sendRequest('get_history',{name:selectedStudentName,type:t})||[]; c.innerHTML=''; if(h.length===0){c.innerHTML='기록 없음';return;} h.forEach(i=>{const d=document.createElement('div');d.style.borderBottom='1px solid #eee';d.style.padding='10px';d.innerHTML=`<input type="checkbox" class="hist-chk" value="${i.rowNum}"> <span style="font-size:0.8rem;color:#888">${i.date}</span> ${i.check!=='없음'?`<span style="color:var(--success);font-weight:bold">${i.check}</span>`:''} <div style="margin-top:5px">${i.txt}</div>`;c.appendChild(d);}); updateSubjectFilterOptions(); }
+        // [수정] 학생 관리에서도 과목 필터 업데이트
         function updateSubjectFilterOptions() { const s=document.getElementById('viewSubjectFilter'); s.innerHTML=''; subjectList.forEach(sub=>{const o=document.createElement('option');o.value=sub;o.innerText=sub;s.appendChild(o)}); }
-        async function deleteSelectedHistory() { const c=document.querySelectorAll('.hist-chk:checked'); if(c.length===0)return; if(confirm('삭제?')){ const r=Array.from(c).map(e=>parseInt(e.value)); const t=viewTabMode==='subject'?document.getElementById('viewSubjectFilter').value:'행동'; await sendRequest('delete_record_bulk',{type:t,rows:r}); loadHistory(); } }
+        async function deleteSelectedHistory() { const c=document.querySelectorAll('.hist-chk:checked'); if(c.length===0)return; reqConfirm(`${c.length}건 삭제하시겠습니까?`, async()=>{ const r=Array.from(c).map(e=>parseInt(e.value)); const t=viewTabMode==='subject'?document.getElementById('viewSubjectFilter').value:'행동'; await sendRequest('delete_record_bulk',{type:t,rows:r}); loadHistory(); }); }
         async function savePublicSettings() { await sendRequest('save_settings',{apiKey:document.getElementById('settingApiKey').value}); showToast("저장"); }
         async function savePersona() { aiPersona=document.getElementById('personaText').value; await sendRequest('save_settings',{persona:aiPersona}); showToast("저장"); }
-        async function archiveData() { if(confirm('초기화?')){ await sendRequest('archive_data'); location.reload(); } }
-        async function generateNeisCards() { /* NEIS Logic same as v11 - simplified for brevity */ showToast("생성 중..."); const t=document.getElementById('neisType').value; const sub=t==='subject'?document.getElementById('neisSubjectSelect').value:'행동'; const k=document.getElementById('neisKeyword').value; const len=document.getElementById('neisLen').value; const resDiv=document.getElementById('neisResultList'); resDiv.innerHTML=''; for(const s of studentList){ const r=document.createElement('div'); r.className='card'; r.style.marginBottom='10px'; r.innerHTML=`<b>${s.name}</b><textarea style="height:100px">생성 중...</textarea>`; resDiv.appendChild(r); const d=await sendRequest('generate_neis_individual',{name:s.name,type:sub,keyword:k,length:len}); r.querySelector('textarea').value=d?d.text:'실패'; } showToast("완료"); }
+        async function archiveData() { await sendRequest('archive_data'); location.reload(); }
+        async function generateNeisCards() { showToast("생성 중..."); const t=document.getElementById('neisType').value; const sub=t==='subject'?document.getElementById('neisSubjectSelect').value:'행동'; const k=document.getElementById('neisKeyword').value; const len=document.getElementById('neisLen').value; const resDiv=document.getElementById('neisResultList'); resDiv.innerHTML=''; for(const s of studentList){ const r=document.createElement('div'); r.className='card'; r.style.marginBottom='10px'; r.innerHTML=`<b>${s.name}</b><textarea style="height:100px">생성 중...</textarea>`; resDiv.appendChild(r); const d=await sendRequest('generate_neis_individual',{name:s.name,type:sub,keyword:k,length:len}); r.querySelector('textarea').value=d?d.text:'실패'; } showToast("완료"); }
         function toggleNeisType() { const t=document.getElementById('neisType').value; document.getElementById('neisSubOption').style.display=t==='subject'?'block':'none'; document.getElementById('neisBehOption').style.display=t==='behavior'?'block':'none'; }
     </script>
 </body>
