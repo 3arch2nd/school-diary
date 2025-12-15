@@ -134,16 +134,24 @@
         .student-nav-item:hover { background: #eaf6fc; color: var(--primary-dark); border-color: var(--primary-light); }
         .student-nav-item.active { background: #eaf6fc; border-color: var(--primary); font-weight: bold; color: var(--primary-dark); border-width: 2px; }
 
-        /* [수정] History Card (Edit Mode) */
-        .history-card { border-bottom: 1px solid #eee; padding: 15px 10px; display: flex; flex-direction: column; gap: 8px; }
-        .history-meta { display: flex; justify-content: space-between; font-size: 0.85rem; color: #888; margin-bottom: 5px; }
-        .history-txt-area { width: 100%; border: 1px solid #ddd; border-radius: 4px; padding: 8px; font-family: inherit; font-size: 0.95rem; resize: vertical; min-height: 60px; }
-        .history-actions { display: flex; justify-content: flex-end; gap: 5px; margin-top: 5px; }
+        /* [수정] History Card Layout (Compact) */
+        .history-card { 
+            border-bottom: 1px solid #eee; padding: 12px 5px; display: flex; gap: 10px; align-items: flex-start; 
+        }
+        .h-left { width: 90px; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; font-size: 0.85rem; color: #666; }
+        .h-date { font-weight: bold; color: var(--text-main); }
+        .h-badge { color: var(--success); font-weight: bold; font-size: 0.8rem; }
+        
+        .h-text { flex: 1; border: 1px solid #e3eff5; border-radius: 4px; padding: 8px; font-size: 0.95rem; line-height: 1.5; resize: vertical; min-height: 50px; font-family: inherit; background: #fff; }
+        .h-text:focus { border-color: var(--primary); outline: none; }
+        
+        .h-btn-area { display: flex; flex-direction: column; gap: 5px; justify-content: flex-start; }
 
-        .att-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #eee; }
+        /* [수정] 출석부 Layout (여백 확보) */
+        .att-row { display: flex; align-items: center; gap: 5px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #eee; }
         .att-name { width: 50px; font-weight: bold; font-size: 0.9rem; flex-shrink: 0; }
         .att-sel { font-size: 0.9rem; padding: 4px; width: 70px; margin-bottom: 0 !important; flex-shrink: 0; }
-        .att-memo { font-size: 0.9rem; padding: 4px; flex-grow: 1; margin-bottom: 0 !important; }
+        .att-memo { font-size: 0.9rem; padding: 4px; flex-grow: 1; margin-bottom: 0 !important; width: 100%; } /* 너비 확장 */
 
         .mobile-block-overlay { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; color: var(--text-sub); }
         .mobile-block-overlay span { font-size: 3rem; margin-bottom: 20px; }
@@ -198,7 +206,7 @@
     </div>
 
     <div class="container">
-        <header><h1>쫑알수첩 v17.0</h1></header>
+        <header><h1>쫑알수첩 v18.0</h1></header>
         <nav class="nav-tabs">
             <div class="nav-item nav-item-home active" onclick="changeSection('home')">HOME</div>
             <div class="nav-item" onclick="changeSection('record')">기록하기</div>
@@ -293,7 +301,10 @@
                 <div class="split-right">
                     <div class="card full-height scrollable">
                         <div class="card-header"><span id="viewerTitle">기록 상세</span><div style="display:flex; gap:5px;"><select id="viewSubjectFilter" style="margin-bottom:0; width:100px; padding:6px;" onchange="loadHistory()"></select><button class="btn-sm active" id="viewSubBtn" onclick="viewTab('subject')">과목</button><button class="btn-sm inactive" id="viewBehBtn" onclick="viewTab('behavior')">행동</button></div></div>
-                        <div style="margin-bottom:10px;"><button class="btn btn-sm btn-del" onclick="deleteSelectedHistory()">선택 삭제</button></div>
+                        <div style="margin-bottom:10px; display:flex; gap:10px;">
+                            <button class="btn btn-sm btn-primary" style="flex:1" onclick="saveSelectedHistory()">일괄 저장 (수정된 항목)</button>
+                            <button class="btn btn-sm btn-del" style="flex:1" onclick="deleteSelectedHistory()">선택 삭제</button>
+                        </div>
                         <div id="historyViewer"></div>
                     </div>
                 </div>
@@ -441,7 +452,7 @@
         
         let currentMode = 'subject'; let mobileMode = 'subject'; let selectedStudentName = null; let viewTabMode = 'subject';
         let studentList = []; let subjectList = ["국어", "수학", "사회", "과학", "영어", "체육", "음악", "미술"];
-        let targetSubjectToDelete = null; let aiPersona = ""; let aiJobQueue = []; let isAiQueueRunning = false;
+        let targetSubjectToDelete = null; let aiPersona = ""; let aiJobQueue = [];
         let curYear = new Date().getFullYear(); let curMonth = new Date().getMonth(); let selectedDate = formatDateYMD(new Date());
         let bmList = []; let bmFilter = null; let bmTags = ["수업", "업무", "자료", "영상"]; let selectedBmTags = [];
         let memoList = []; let memoMode = 'cal'; let curMemoMonth = new Date().getMonth(); let curMemoYear = new Date().getFullYear(); let selectedMemoDate = formatDateYMD(new Date());
@@ -505,8 +516,6 @@
              });
         }
         function toggleCheck(el) { const p=el.parentElement; const w=el.classList.contains('checked'); p.querySelectorAll('.check-circle').forEach(c=>c.classList.remove('checked')); if(!w) el.classList.add('checked'); }
-        
-        // [핵심: AI 큐 시스템 복원 및 개선]
         async function saveData() {
             const inputs=document.querySelectorAll('.st-input'); const ai=document.getElementById('aiToggle').checked;
             let type="행동"; if(currentMode==='subject'){ const t=document.querySelector('#subjectTags .tag.selected'); if(!t){showToast("과목 선택 필요");return;} type=t.innerText.split(' ')[0]; }
@@ -518,81 +527,43 @@
                 if(txt || chk!=="없음") list.push({name, text:txt, check:chk});
             });
             if(list.length===0){showToast("내용 없음");return;}
-            
-            showToast("저장 시작...");
-            // 순차 저장 및 AI 큐 진입
-            for(const item of list) {
-                // 1. Raw Data 저장
-                let period = document.getElementById('rPeriod').value;
-                let topic = document.getElementById('rTopic').value;
-                let prefix = period ? `[${period}] ` : "";
-                if(topic) prefix += `[${topic}] `;
-                let fullText = (prefix + item.text).trim();
-                
-                await sendRequest('save_record', {
-                    date: document.getElementById('rDate').value,
-                    name: item.name, type: type, text: fullText, check: item.check
-                });
-
-                // 2. AI 큐잉
-                if(ai) {
-                    aiJobQueue.push({
-                        name: item.name, type: type, 
-                        topic: topic || "없음", text: item.text, check: item.check,
-                        prefix: prefix
-                    });
-                }
+            showToast("저장 중...");
+            for(const it of list) {
+                let fullTxt = it.text; if(currentMode==='subject' && document.getElementById('rTopic').value) fullTxt = `[${document.getElementById('rTopic').value}] ` + fullTxt;
+                await sendRequest('save_record', {date:document.getElementById('rDate').value, name:it.name, type:type, text:fullTxt, check:it.check});
             }
-            
             inputs.forEach(i=>i.value=''); document.querySelectorAll('.check-circle').forEach(c=>c.classList.remove('checked')); 
             
-            if(ai && aiJobQueue.length > 0) {
+            if(ai && list.length > 0) {
+                aiJobQueue = list.map(item => ({...item, type:type, topic: document.getElementById('rTopic').value}));
                 processNextAiJob();
             } else {
-                showToast("저장 완료");
+                showToast("완료");
             }
         }
 
         async function processNextAiJob() {
-            if(aiJobQueue.length === 0) {
-                isAiQueueRunning = false;
-                document.getElementById('status-bar').className = '';
-                showToast("모든 기록 완료");
-                return;
-            }
-            isAiQueueRunning = true;
-            document.getElementById('status-bar').className = 'show';
+            if(aiJobQueue.length === 0) { showToast("모든 기록 완료"); return; }
             const job = aiJobQueue.shift();
-            document.getElementById('status-msg').innerText = `AI 작성 중... ${job.name} (남은 작업: ${aiJobQueue.length})`;
-
-            // [AI Prompt 수정]
-            const prompt = `역할: 초등학교 교사. 입력된 정보로 생기부 문장 1개 작성.
+            showToast(`AI 작성 중... (${job.name})`);
+            
+            const prompt = `역할: 초등학교 교사. 생기부 문장 1개 작성.
 입력: [주제:${job.topic}], [내용:${job.text}], [평가:${job.check}]
 조건:
-1. 활동+내용+평가를 자연스럽게 연결하여 '~함'으로 종결.
-2. 따옴표, 굵게(**), 특수문자 금지.
-3. 과도한 칭찬 지양, 담백하게 사실 위주 서술.
-예시: '구구단을 외자' 활동에서 친구들과 협력하여 즐겁게 참여하고 곱셈구구의 원리를 정확히 이해함.`;
+1. 활동+내용+평가를 자연스럽게 연결하여 '~함' 종결.
+2. 따옴표, 굵게, 특수문자 금지.
+3. 칭찬 지양, 사실 위주.`;
 
             try {
                 const aiRes = await sendRequest('call_ai', { prompt });
                 if(aiRes && aiRes.text) {
-                    // AI 결과를 다시 저장 (덮어쓰기 로직 필요하나 여기선 새 행 추가로 처리됨 - *주의*)
-                    // V17 개선: 'save_record'는 항상 새 행을 만듦. 
-                    // AI 결과를 위해 마지막 행을 업데이트하거나 새로 저장해야 함.
-                    // 간단히 구현하기 위해: AI 결과가 나오면 'AI 기록'으로 한 번 더 저장 (혹은 Backend에서 update 로직 구현 필요)
-                    // 여기서는 사용자가 'AI 결과'를 최종으로 보길 원하므로, 원본 대신 AI본을 저장하는게 맞지만, 
-                    // 비동기 처리를 위해 Raw 저장 -> (옵션) AI 저장 방식으로 둠.
-                    // *가장 좋은 방법*: AI 완료 후 '새로운 행'으로 저장. (기존 Raw 데이터는 백업 성격)
-                    let finalTxt = (job.prefix + aiRes.text).trim();
-                    // AI 완료된 텍스트로 '행동' 시트에 저장 (기존 raw 데이터와 중복될 수 있음 -> 감안)
-                    // *Backend save_record 수정 없이 사용*
+                    let prefix = job.topic ? `[${job.topic}] ` : "";
                     await sendRequest('save_record', {
                         date: document.getElementById('rDate').value,
-                        name: job.name, type: job.type, text: finalTxt, check: job.check
+                        name: job.name, type: job.type, text: (prefix + aiRes.text).trim(), check: job.check
                     });
                 }
-            } catch(e) { console.error(e); }
+            } catch(e) {}
             processNextAiJob();
         }
 
@@ -655,66 +626,99 @@
         async function deleteFile(r) { reqConfirm('삭제하시겠습니까?', async()=>{ await sendRequest('delete_file',{row:r}); loadFiles(); }); }
         
         function viewTab(m) { viewTabMode=m; document.getElementById('viewSubBtn').className=m==='subject'?'btn-sm active':'btn-sm inactive'; document.getElementById('viewBehBtn').className=m==='behavior'?'btn-sm active':'btn-sm inactive'; document.getElementById('viewSubjectFilter').style.display=m==='subject'?'block':'none'; loadHistory(); }
-        // [수정] History Load with Edit/Copy Buttons
+        
+        // [핵심] 일괄 저장 기능을 위한 History 로드 및 수정 감지 로직
+        let subjectFilterPreserved = ""; // 과목 필터 유지 변수
+
         async function loadHistory() { 
             if(!selectedStudentName)return; 
             const c=document.getElementById('historyViewer'); c.innerHTML='로딩...'; 
-            const t=viewTabMode==='subject'?document.getElementById('viewSubjectFilter').value:'행동'; 
+            
+            // 저장된 필터 값이 있으면 복구, 없으면 현재 값 사용
+            const filterEl = document.getElementById('viewSubjectFilter');
+            if (subjectFilterPreserved && filterEl.options.length > 0) {
+               // 옵션이 재생성되면서 값이 날아가므로, 값을 다시 세팅 시도
+               filterEl.value = subjectFilterPreserved; 
+            }
+            
+            const t=viewTabMode==='subject'?filterEl.value:'행동'; 
+            
             const h=await sendRequest('get_history',{name:selectedStudentName,type:t})||[]; 
             c.innerHTML=''; 
             if(h.length===0){c.innerHTML='<div style="color:#999;padding:20px;text-align:center">기록 없음</div>';return;} 
+            
             h.forEach(i=>{
                 const d=document.createElement('div'); d.className='history-card';
                 d.innerHTML=`
-                    <div class="history-meta">
-                        <label style="display:flex;align-items:center;gap:5px;font-weight:normal"><input type="checkbox" class="hist-chk" value="${i.rowNum}"> ${i.date}</label>
-                        ${i.check!=='없음'?`<span style="color:var(--success);font-weight:bold">${i.check}</span>`:''}
+                    <div class="h-left">
+                        <input type="checkbox" class="hist-chk" value="${i.rowNum}" data-org-text="${i.txt}">
+                        <span class="h-date">${i.date}</span>
+                        ${i.check!=='없음'?`<span class="h-badge">${i.check}</span>`:''}
                     </div>
-                    <textarea class="history-txt-area" id="hist_txt_${i.rowNum}">${i.txt}</textarea>
-                    <div class="history-actions">
+                    <textarea class="h-text" id="hist_txt_${i.rowNum}" oninput="markEdited(this, ${i.rowNum})">${i.txt}</textarea>
+                    <div class="h-btn-area">
                         <button class="btn-icon" onclick="copyText('hist_txt_${i.rowNum}')">복사</button>
-                        <button class="btn-icon" style="color:var(--primary);border-color:var(--primary)" onclick="updateRecord('${t}', ${i.rowNum})">저장</button>
                     </div>`;
                 c.appendChild(d);
             }); 
-            updateSubjectFilterOptions(); 
+            // 옵션을 다시 그리지 않도록 분리 (초기 1회만 그림)
+            // updateSubjectFilterOptions(); 
         }
-        async function updateRecord(type, row) {
-            const txt = document.getElementById(`hist_txt_${row}`).value;
-            reqConfirm("수정하시겠습니까?", async() => {
-                await sendRequest('update_record_row', { type: type, rowNum: row, text: txt });
-                showToast("수정 완료");
+
+        // 텍스트 수정 시 체크박스 자동 선택
+        function markEdited(el, rowNum) {
+            const chk = document.querySelector(`.hist-chk[value="${rowNum}"]`);
+            if(chk) chk.checked = true;
+        }
+
+        // 일괄 저장
+        async function saveSelectedHistory() {
+            const checkboxes = document.querySelectorAll('.hist-chk:checked');
+            if(checkboxes.length === 0) { showToast("수정된 항목이 없습니다."); return; }
+            
+            const updates = [];
+            checkboxes.forEach(chk => {
+                const row = chk.value;
+                const text = document.getElementById(`hist_txt_${row}`).value;
+                const type = viewTabMode==='subject'?document.getElementById('viewSubjectFilter').value:'행동';
+                updates.push({ type: type, row: parseInt(row), text: text });
+            });
+
+            reqConfirm(`${updates.length}건을 저장하시겠습니까?`, async() => {
+                await sendRequest('update_record_bulk', { updates: updates });
+                showToast("일괄 저장 완료");
+                loadHistory(); // 새로고침
             });
         }
+
         function copyText(id) {
             const el = document.getElementById(id);
             if(el) { navigator.clipboard.writeText(el.value).then(()=>showToast("복사됨")); }
         }
 
-        function updateSubjectFilterOptions() { const s=document.getElementById('viewSubjectFilter'); s.innerHTML=''; subjectList.forEach(sub=>{const o=document.createElement('option');o.value=sub;o.innerText=sub;s.appendChild(o)}); }
+        // [수정] 과목 필터 옵션은 페이지 로드 시 또는 과목 변경 시에만 업데이트
+        function updateSubjectFilterOptions() { 
+            const s=document.getElementById('viewSubjectFilter'); 
+            const current = s.value; // 현재 값 저장
+            s.innerHTML=''; 
+            subjectList.forEach(sub=>{const o=document.createElement('option');o.value=sub;o.innerText=sub;s.appendChild(o)}); 
+            if(current) s.value = current; // 값 복구
+            subjectFilterPreserved = s.value; // 전역 변수에도 저장
+            
+            // 필터 변경 시 이벤트 리스너
+            s.onchange = () => {
+                subjectFilterPreserved = s.value;
+                loadHistory();
+            };
+        }
+        
         function updateNeisSubjectOptions() { const s=document.getElementById('neisSubjectSelect'); s.innerHTML=''; subjectList.forEach(sub=>{const o=document.createElement('option');o.value=sub;o.innerText=sub;s.appendChild(o)}); }
+        
         async function deleteSelectedHistory() { const c=document.querySelectorAll('.hist-chk:checked'); if(c.length===0)return; reqConfirm(`${c.length}건 삭제하시겠습니까?`, async()=>{ const r=Array.from(c).map(e=>parseInt(e.value)); const t=viewTabMode==='subject'?document.getElementById('viewSubjectFilter').value:'행동'; await sendRequest('delete_record_bulk',{type:t,rows:r}); loadHistory(); }); }
         async function savePublicSettings() { await sendRequest('save_settings',{apiKey:document.getElementById('settingApiKey').value}); showToast("저장"); }
         async function savePersona() { aiPersona=document.getElementById('personaText').value; await sendRequest('save_settings',{persona:aiPersona}); showToast("저장"); }
         async function archiveData() { await sendRequest('archive_data'); location.reload(); }
-        // [수정] NEIS Copy Button
-        async function generateNeisCards() { 
-            showToast("생성 중..."); 
-            const t=document.getElementById('neisType').value; const sub=t==='subject'?document.getElementById('neisSubjectSelect').value:'행동'; const k=document.getElementById('neisKeyword').value; const len=document.getElementById('neisLen').value; 
-            const resDiv=document.getElementById('neisResultList'); resDiv.innerHTML=''; 
-            for(const s of studentList){ 
-                const r=document.createElement('div'); r.className='card'; r.style.marginBottom='10px'; 
-                const id = `neis_txt_${s.id}`;
-                r.innerHTML=`
-                    <div style="display:flex;justify-content:space-between;margin-bottom:5px"><b>${s.name}</b> <button class="btn-icon" onclick="copyText('${id}')">복사</button></div>
-                    <textarea id="${id}" style="height:100px;width:100%">생성 중...</textarea>
-                `; 
-                resDiv.appendChild(r); 
-                const d=await sendRequest('generate_neis_individual',{name:s.name,type:sub,keyword:k,length:len}); 
-                r.querySelector('textarea').value=d?d.text:'생성 실패'; 
-            } 
-            showToast("완료"); 
-        }
+        async function generateNeisCards() { showToast("생성 중..."); const t=document.getElementById('neisType').value; const sub=t==='subject'?document.getElementById('neisSubjectSelect').value:'행동'; const k=document.getElementById('neisKeyword').value; const len=document.getElementById('neisLen').value; const resDiv=document.getElementById('neisResultList'); resDiv.innerHTML=''; for(const s of studentList){ const r=document.createElement('div'); r.className='card'; r.style.marginBottom='10px'; const id = `neis_txt_${s.id}`; r.innerHTML=`<div style="display:flex;justify-content:space-between;margin-bottom:5px"><b>${s.name}</b> <button class="btn-icon" onclick="copyText('${id}')">복사</button></div><textarea id="${id}" style="height:100px;width:100%">생성 중...</textarea>`; resDiv.appendChild(r); const d=await sendRequest('generate_neis_individual',{name:s.name,type:sub,keyword:k,length:len}); r.querySelector('textarea').value=d?d.text:'생성 실패'; } showToast("완료"); }
         function toggleNeisType() { const t=document.getElementById('neisType').value; document.getElementById('neisSubOption').style.display=t==='subject'?'block':'none'; document.getElementById('neisBehOption').style.display=t==='behavior'?'block':'none'; }
     </script>
 </body>
