@@ -4,7 +4,7 @@
     <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>쫑알수첩 v10.5 (Final AI Fix)</title>
+    <title>쫑알수첩 v10.5 (Final Student Manager)</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
     <style>
         /* [기본 테마] */
@@ -42,6 +42,13 @@
         input, select, textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; background: #fcfdfd; }
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); background: white; }
 
+        /* [수정] 숫자 입력창 화살표(스피너) 제거 */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+
         /* 버튼 */
         .btn { display: inline-flex; justify-content: center; align-items: center; height: 42px; min-width: 80px; padding: 0 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 1rem; font-weight: bold; transition: 0.2s; white-space: nowrap; }
         .btn-primary { background: var(--primary); color: white; width: auto; }
@@ -62,7 +69,6 @@
         .loading-dots::after { content: ''; animation: dots 1.5s steps(4, end) infinite; }
         @keyframes dots { 0%, 20% { content: ''; } 40% { content: '.'; } 60% { content: '..'; } 80%, 100% { content: '...'; } }
 
-        /* [비활성화 상태] */
         .disabled-area { opacity: 0.6; pointer-events: none; user-select: none; }
 
         /* 하단 상태바 */
@@ -84,7 +90,6 @@
 
         .student-row { display: flex; align-items: center; gap: 15px; padding: 12px 10px; border-bottom: 1px solid var(--bg-main); background: white; }
         .st-name { width: 90px; font-weight: bold; color: var(--primary-dark); flex-shrink: 0; }
-        /* [수정] 입력창 오른쪽 여백 추가 (아이콘 겹침 방지) */
         .st-input { flex-grow: 1; margin-bottom: 0 !important; height: 40px; padding-right: 40px; }
         
         .st-check-group { display: flex; gap: 8px; width: 220px; flex-shrink: 0; justify-content: space-between; }
@@ -236,7 +241,7 @@
                     <div class="card full-height">
                         <div class="card-header">학생 명단</div>
                         <div style="margin-bottom: 15px;">
-                            <button class="btn btn-outline" style="width:100%;" onclick="openAddStudentModal()">+ 학생 추가 / 관리</button>
+                            <button class="btn btn-outline" style="width:100%;" onclick="openStudentManageModal()">+ 학생 명단 관리 (추가/수정/삭제)</button>
                         </div>
                         <div id="studentNavList" style="overflow-y: auto; max-height: 600px;"></div>
                     </div>
@@ -253,8 +258,7 @@
                         </div>
                         <div style="margin-bottom: 15px; display:flex; justify-content:space-between;">
                             <button class="btn btn-sm btn-del" onclick="deleteSelectedHistory()">선택 삭제</button>
-                            <button class="btn btn-sm btn-del" onclick="openDeleteStudentModal()">🗑️ 학생 삭제</button>
-                        </div>
+                            </div>
                         <div id="historyViewer" style="overflow-y: auto; max-height: 550px;"><div style="text-align: center; color: var(--text-sub); padding: 50px 0;">학생을 선택해주세요.</div></div>
                     </div>
                 </div>
@@ -329,19 +333,18 @@
     <div id="toast"></div>
     <div id="subjectModal" class="modal-overlay"><div class="modal-card"><div class="modal-title">새 과목 추가</div><input type="text" id="newSubjectName" placeholder="과목명"><div style="text-align:right;"><button class="btn btn-outline" onclick="closeSubjectModal()">취소</button> <button id="confirmSubjectBtn" class="btn btn-primary" onclick="confirmAddSubject()">추가</button></div></div></div>
     <div id="deleteSubjectModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="color:var(--danger)">⚠️ 과목 삭제</div><p>기록이 영구 삭제됩니다.</p><div style="text-align:right;"><button class="btn btn-outline" onclick="closeDeleteSubjectModal()">취소</button> <button class="btn btn-danger" onclick="confirmDeleteSubject()">삭제</button></div></div></div>
-    <div id="deleteStudentModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="color:var(--danger)">⚠️ 학생 삭제</div><p>명단에서 삭제됩니다.</p><div style="text-align:right;"><button class="btn btn-outline" onclick="closeDeleteStudentModal()">취소</button> <button class="btn btn-danger" id="btnDelStudent" onclick="confirmDeleteStudent()">삭제</button></div></div></div>
     
-    <div id="addStudentModal" class="modal-overlay">
+    <div id="manageStudentModal" class="modal-overlay">
         <div class="modal-card" style="width: 500px;">
             <div class="modal-title">학생 명단 관리</div>
-            <div class="modal-body" id="addStudentRows">
+            <div class="modal-body" id="manageStudentRows">
                 </div>
             <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
                 <button class="btn-sm active" onclick="addStudentRow()">+ 행 추가</button>
             </div>
             <div style="text-align:right;">
-                <button class="btn btn-outline" onclick="closeAddStudentModal()">취소</button>
-                <button class="btn btn-primary" id="btnAddStSave" onclick="confirmAddStudentsBulk()">저장</button>
+                <button class="btn btn-outline" onclick="closeStudentManageModal()">취소</button>
+                <button class="btn btn-primary" id="btnManageStSave" onclick="saveStudentManagement()">전체 저장</button>
             </div>
         </div>
     </div>
@@ -377,7 +380,6 @@
             updateNeisSubjectOptions();
             loadFiles();
             
-            // 창 닫기 방지 (AI 작업 중일 때)
             window.onbeforeunload = function(e) {
                 if(aiJobQueue.length > 0 || isAiQueueRunning) {
                     e.preventDefault();
@@ -668,7 +670,6 @@
             const job = aiJobQueue[0]; // 큐의 첫 번째 작업 확인
             document.getElementById('status-msg').innerText = `AI 변환 중... (${job.name} 학생) - 남은 작업 ${aiJobQueue.length}건`;
 
-            // [수정] 프롬프트 강화: ~함/음 필수, 합쇼체 금지
             const prompt = `
                 역할: 초등교사.
                 과제: 생기부 문장 1개 작성.
@@ -735,7 +736,6 @@
             btnEl.classList.add('loading-dots'); 
             input.disabled = true;
 
-            // [수정] 매직 버튼도 동일 프롬프트 강화 적용
             const prompt = `
                 역할: 초등교사.
                 과제: 생기부 문장 1개 작성.
@@ -830,7 +830,13 @@
         function closeDeleteSubjectModal() { document.getElementById('deleteSubjectModal').classList.remove('open'); }
         async function confirmDeleteSubject() { if(!targetSubjectToDelete) return; await sendRequest('delete_subject', {subject:targetSubjectToDelete}); subjectList=subjectList.filter(s=>s!==targetSubjectToDelete); renderSubjectTags(); closeDeleteSubjectModal(); showToast("삭제 완료"); }
 
-        async function loadStudents() { const data=await sendRequest('get_students'); if(data){ studentList=data; renderRecordList(); renderStudentNav(); } }
+        // [수정] 학생 명단 불러올 때 로딩 표시 추가
+        async function loadStudents() { 
+            const list=document.getElementById('studentNavList');
+            list.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-sub);">학생 목록 불러오는 중<span class="loading-dots"></span></div>`;
+            const data=await sendRequest('get_students'); 
+            if(data){ studentList=data; renderRecordList(); renderStudentNav(); } 
+        }
         function renderStudentNav() { const list=document.getElementById('studentNavList'); list.innerHTML=''; studentList.forEach(st=>{ const item=document.createElement('div'); item.className='student-list-item'; item.innerHTML=`${st.id}번 <b>${st.name}</b>`; item.onclick=()=>selectStudent(st.name, item); list.appendChild(item); }); }
         
         async function selectStudent(name, el) { 
@@ -845,50 +851,54 @@
             setGlobalProcessing(false); 
         }
         
-        function openAddStudentModal() {
-            document.getElementById('addStudentRows').innerHTML = '';
-            for(let i=0; i<5; i++) addStudentRow();
-            document.getElementById('addStudentModal').classList.add('open');
+        // [수정] 통합 학생 관리 모달 로직
+        function openStudentManageModal() {
+            const container = document.getElementById('manageStudentRows');
+            container.innerHTML = '';
+            
+            // 기존 학생 목록 불러오기
+            if(studentList.length > 0) {
+                studentList.forEach(st => addStudentRow(st.id, st.name));
+            } else {
+                // 없으면 빈 칸 3개
+                for(let i=0; i<3; i++) addStudentRow();
+            }
+            document.getElementById('manageStudentModal').classList.add('open');
         }
-        function closeAddStudentModal() { document.getElementById('addStudentModal').classList.remove('open'); }
-        function addStudentRow() {
+        function closeStudentManageModal() { document.getElementById('manageStudentModal').classList.remove('open'); }
+        
+        // 행 추가 함수 (값 있으면 채우기)
+        function addStudentRow(idVal='', nameVal='') {
             const div = document.createElement('div');
             div.style.display = 'flex'; div.style.gap = '10px'; div.style.marginBottom = '10px';
-            div.innerHTML = `<input type="number" placeholder="번호" class="st-add-id" style="width:80px; margin-bottom:0;"><input type="text" placeholder="이름" class="st-add-name" style="flex:1; margin-bottom:0;"><button class="btn btn-sm btn-del" onclick="this.parentElement.remove()">-</button>`;
-            document.getElementById('addStudentRows').appendChild(div);
+            div.innerHTML = `<input type="number" placeholder="번호" class="st-add-id" value="${idVal}" style="width:80px; margin-bottom:0;"><input type="text" placeholder="이름" class="st-add-name" value="${nameVal}" style="flex:1; margin-bottom:0;"><button class="btn btn-sm btn-del" onclick="this.parentElement.remove()">-</button>`;
+            document.getElementById('manageStudentRows').appendChild(div);
         }
-        async function confirmAddStudentsBulk() {
+
+        // [수정] 통합 저장 (정렬 + 동기화)
+        async function saveStudentManagement() {
             const ids = document.querySelectorAll('.st-add-id');
             const names = document.querySelectorAll('.st-add-name');
             const list = [];
+            
             for(let i=0; i<ids.length; i++) {
                 if(ids[i].value && names[i].value) {
-                    list.push({ id: ids[i].value, name: names[i].value });
+                    list.push({ id: parseInt(ids[i].value), name: names[i].value.trim() });
                 }
             }
-            if(list.length === 0) { showToast("입력된 학생이 없습니다."); return; }
             
-            const btn = document.getElementById('btnAddStSave');
-            setLoading(btn, "저장 중");
-            await sendRequest('add_student_bulk', { students: list });
-            closeAddStudentModal();
-            loadStudents();
-            showToast(`${list.length}명 추가 완료`);
-            clearLoading(btn);
-        }
+            // 번호순 정렬
+            list.sort((a, b) => a.id - b.id);
 
-        function openDeleteStudentModal() { if(!selectedStudentName) {showToast("학생 선택 필요"); return;} document.getElementById('deleteStudentModal').classList.add('open'); }
-        function closeDeleteStudentModal() { document.getElementById('deleteStudentModal').classList.remove('open'); }
-        
-        async function confirmDeleteStudent() { 
-            const btn = document.getElementById('btnDelStudent');
-            setLoading(btn, "삭제 중");
-            await sendRequest('delete_student', {name:selectedStudentName}); 
-            closeDeleteStudentModal(); 
-            selectedStudentName=null; 
-            document.getElementById('historyViewer').innerHTML=''; 
-            loadStudents(); 
-            showToast("삭제 완료"); 
+            const btn = document.getElementById('btnManageStSave');
+            setLoading(btn, "저장 중");
+            
+            // 서버에 통째로 덮어쓰기 요청
+            await sendRequest('sync_student_list', { students: list });
+            
+            closeStudentManageModal();
+            loadStudents(); // 목록 새로고침
+            showToast("명단이 반영되었습니다.");
             clearLoading(btn);
         }
 
