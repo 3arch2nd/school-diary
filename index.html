@@ -586,14 +586,28 @@
         async function deleteCurrentMemo() { if(!currentMemoRow) return; if(confirm("삭제?")) { await sendRequest('delete_memo', {row:currentMemoRow}); document.getElementById('memoInput').value=''; currentMemoRow=null; await loadMemos(); renderMemoLeft(); } }
 
         // ================= 기존 로직 (복구됨) =================
+// [수정] 학생 명단 로딩 함수 (빈 명단 처리 추가)
         async function loadStudents() { 
-            const list=document.getElementById('studentNavList'); list.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-sub);">학생 목록 불러오는 중<span class="loading-dots"></span></div>`;
-            const data=await sendRequest('get_students'); 
-            if(data){ studentList=data; renderRecordList(); renderStudentNav(); } 
+            const list = document.getElementById('studentNavList');
+            // 로딩 애니메이션 표시
+            list.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-sub);">학생 목록 불러오는 중<span class="loading-dots"></span></div>`;
+            
+            const data = await sendRequest('get_students'); 
+            
+            if (data) { 
+                studentList = data; 
+                // [핵심 수정] 데이터가 있으면 렌더링, 없으면 안내 문구 표시
+                if (studentList.length > 0) {
+                    renderRecordList(); 
+                    renderStudentNav(); 
+                } else {
+                    list.innerHTML = `<div style="text-align:center; padding:30px; color:#999;">등록된 학생이 없습니다.<br>'+ 학생 명단 관리'를 눌러 추가해주세요.</div>`;
+                }
+            } else {
+                // 통신 실패 시
+                list.innerHTML = `<div style="text-align:center; padding:20px; color:var(--danger);">목록을 불러오지 못했습니다.</div>`;
+            }
         }
-        function renderStudentNav() { const list=document.getElementById('studentNavList'); list.innerHTML=''; studentList.forEach(st=>{ const item=document.createElement('div'); item.className='student-list-item'; item.innerHTML=`${st.id}번 <b>${st.name}</b>`; item.onclick=()=>selectStudent(st.name, item); list.appendChild(item); }); }
-        function renderSubjectTags() { const container=document.getElementById('subjectTags'); const addBtn=container.querySelector('.tag-add'); container.querySelectorAll('.tag:not(.tag-add)').forEach(el=>el.remove()); subjectList.forEach(sub=>{ const tag=document.createElement('div'); tag.className='tag'; tag.innerHTML=`${sub} <span class="x-btn" onclick="openDeleteSubjectModal('${sub}', event)">x</span>`; tag.onclick=(e)=>{if(e.target.classList.contains('x-btn')) return; selSub(tag);}; if(sub==="국어") tag.classList.add('selected'); container.insertBefore(tag, addBtn); }); updateSubjectFilterOptions(); updateNeisSubjectOptions(); }
-        function selSub(el) { document.querySelectorAll('#subjectTags .tag').forEach(t => t.classList.remove('selected')); el.classList.add('selected'); }
         async function saveData() {
             const inputs = document.querySelectorAll('.st-input'); const btn = document.getElementById('btnSaveAll'); const isAI = document.getElementById('aiToggle').checked;
             let targetType = "행동"; if(currentMode === 'subject') { const selTag = document.querySelector('#subjectTags .tag.selected'); if(!selTag) { showToast("과목 선택 필요"); return; } targetType = selTag.innerText.split(' ')[0].trim(); }
