@@ -4,12 +4,13 @@
     <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>쫑알수첩 v10.5 (Hub)</title>
+    <title>쫑알수첩 v11.0 (Hub)</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
     <style>
         /* [기본 테마] */
         :root {
-            --bg-main: #f2f8fc; --card-bg: #FFFFFF;
+            --bg-main: #f2f8fc;
+            --card-bg: #FFFFFF;
             --primary-light: #9fcde8; --primary: #6ab0cf; --primary-dark: #35667a;
             --text-main: #2c3e50; --text-sub: #7f8c8d; --border-color: #e3eff5;
             --success: #27ae60; --danger: #e74c3c;
@@ -26,22 +27,20 @@
         .nav-item { flex: 1; text-align: center; padding: 12px; cursor: pointer; color: var(--text-sub); border-radius: 6px; font-weight: bold; transition: 0.2s; }
         .nav-item.active { color: var(--primary-dark); background-color: #eaf6fc; }
 
-        /* 레이아웃 */
+        /* 레이아웃 공통 */
         .pc-only { display: block; }
         .mobile-only { display: none; }
         .split-container { display: flex; gap: 20px; align-items: flex-start; }
         .split-left { width: 380px; flex-shrink: 0; display: flex; flex-direction: column; gap: 15px; }
         .split-right { flex-grow: 1; display: flex; flex-direction: column; gap: 15px; min-width: 0; }
-
-        /* 카드 & 폼 */
         .card { background: var(--card-bg); border-radius: 8px; padding: 20px; border: 1px solid var(--border-color); box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
         .card.full-height { height: 100%; min-height: 500px; }
         .card-header { font-size: 1.1rem; color: var(--primary-dark); font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid var(--bg-main); display: flex; justify-content: space-between; align-items: center; }
         
+        /* 폼 요소 */
         label { display: block; margin-bottom: 6px; color: var(--text-sub); font-size: 0.9rem; font-weight: bold; }
         input, select, textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; background: #fcfdfd; }
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); background: white; }
-        /* 숫자 입력창 화살표 제거 */
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
         /* 버튼 */
@@ -64,39 +63,56 @@
         @keyframes dots { 0%, 20% { content: ''; } 40% { content: '.'; } 60% { content: '..'; } 80%, 100% { content: '...'; } }
         .disabled-area { opacity: 0.6; pointer-events: none; user-select: none; }
 
-        /* 상태바 */
+        /* 상태바 & 토스트 */
         #status-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #2c3e50; color: white; font-size: 0.85rem; padding: 8px 15px; display: none; justify-content: space-between; align-items: center; z-index: 2500; }
         #status-bar.show { display: flex; }
+        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 30px; padding: 12px 20px; position: fixed; z-index: 3000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 0.95rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
 
-        /* [NEW] 플로팅 메뉴 & 사이드바 (PC Only) */
+        /* 플로팅 메뉴 */
         .float-btn { position: fixed; top: 20px; right: 20px; width: 50px; height: 50px; background: var(--primary); color: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 2100; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; transition: 0.3s; }
         .float-btn:hover { background: var(--primary-dark); transform: scale(1.05); }
-        
-        .sidebar { position: fixed; top: 0; right: -420px; width: 400px; height: 100%; background: white; box-shadow: -2px 0 10px rgba(0,0,0,0.1); z-index: 2200; padding: 20px; transition: right 0.3s ease; display: flex; flex-direction: column; overflow-y: auto; }
-        .sidebar.open { right: 0; }
-        .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
-        .sidebar-title { font-size: 1.2rem; font-weight: bold; color: var(--primary-dark); }
-        .sidebar-tabs { display: flex; gap: 5px; margin-bottom: 15px; }
-        .sb-tab { flex: 1; padding: 8px; text-align: center; border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; font-size: 0.9rem; }
-        .sb-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
-        .sb-content { display: none; flex-grow: 1; overflow-y: auto; }
-        .sb-content.active { display: block; }
+        .float-menu { position: fixed; top: 80px; right: 20px; display: none; flex-direction: column; gap: 10px; z-index: 2100; }
+        .float-menu.show { display: flex; animation: fadeIn 0.2s; }
+        .float-menu-item { background: white; padding: 10px 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; font-weight: bold; color: var(--text-main); text-align: right; border: 1px solid var(--border-color); transition: 0.2s; }
+        .float-menu-item:hover { background: #eaf6fc; color: var(--primary); }
 
-        /* 사이드바 내부 스타일 */
-        .bm-card, .memo-card, .event-card { background: var(--bg-main); padding: 12px; border-radius: 6px; margin-bottom: 8px; border: 1px solid var(--border-color); }
-        .bm-link { font-weight: bold; color: var(--primary-dark); text-decoration: none; display: block; margin-bottom: 4px; }
-        .bm-memo { font-size: 0.85rem; color: var(--text-sub); }
+        /* 섹션 전환 */
+        .section { display: none; }
+        .section.active { display: block; animation: fadeIn 0.2s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 북마크 */
+        .bm-card { background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .bm-main { flex: 1; }
+        .bm-link { font-weight: bold; color: var(--primary-dark); text-decoration: none; font-size: 1.05rem; display: block; margin-bottom: 5px; }
+        .bm-tag { display: inline-block; background: #eaf6fc; color: var(--primary); font-size: 0.8rem; padding: 2px 6px; border-radius: 4px; margin-right: 5px; cursor: pointer; }
+        .bm-tag.active { background: var(--primary); color: white; }
+        .bm-memo { font-size: 0.9rem; color: var(--text-sub); margin-top: 4px; }
+        
+        /* 캘린더 */
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-bottom: 15px; }
-        .cal-day { padding: 8px 4px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; }
+        .cal-day { padding: 8px 4px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; position: relative; height: 50px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
         .cal-day:hover { background: #eaf6fc; }
-        .cal-day.today { background: var(--primary); color: white; font-weight: bold; }
+        .cal-day.today { background: #fffbe6; border: 1px solid #ffd591; }
         .cal-day.selected { border: 2px solid var(--primary-dark); }
+        .cal-dot { width: 6px; height: 6px; background: var(--primary); border-radius: 50%; margin-top: 4px; display: none; }
+        .cal-day.has-memo .cal-dot { display: block; }
         .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: bold; }
         
-        .att-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; padding: 5px 0; border-bottom: 1px solid #eee; }
-        .att-sel { font-size: 0.85rem; padding: 2px; }
+        /* 메모 목록 */
+        .memo-preview-item { padding: 15px; background: white; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
+        .memo-preview-item:hover { border-color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .memo-preview-item.active { border-left: 5px solid var(--primary); background: #fbfdfe; }
+        .memo-date { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 4px; }
 
-        /* 기존 스타일들 */
+        /* 출석부 행 */
+        .att-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; padding: 8px 0; border-bottom: 1px solid #eee; }
+        .att-sel { font-size: 0.9rem; padding: 4px; width: 80px; margin-bottom: 0 !important; }
+        
+        /* 기존 스타일 (태그, 학생 등) */
         .tag-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
         .tag { position: relative; padding: 8px 30px 8px 16px; background: var(--bg-main); border-radius: 20px; font-size: 0.95rem; cursor: pointer; border: 1px solid var(--border-color); transition: 0.2s; }
         .tag.selected { background: var(--primary); color: white; border-color: var(--primary); }
@@ -117,31 +133,6 @@
         .student-list-item:hover { background: #eaf6fc; }
         .student-list-item.active { background: #eaf6fc; border: 1px solid var(--primary-light); color: var(--primary-dark); font-weight: bold;}
 
-        .history-card { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; border-bottom: 1px solid var(--bg-main); padding-bottom: 10px; }
-        .h-chk { padding-top: 15px; } 
-        .h-info { width: 90px; flex-shrink: 0; text-align: center; }
-        .h-date { font-size: 0.85rem; color: var(--text-sub); }
-        .h-badge { font-size: 0.8rem; background: #eaf6fc; color: var(--primary-dark); padding: 2px 6px; border-radius: 4px; font-weight: bold; display: inline-block; margin-top: 4px;}
-        .h-eval { font-size: 0.8rem; color: var(--success); font-weight: bold; margin-top: 4px; user-select: none; }
-        .h-textarea { flex-grow: 1; margin-bottom: 0 !important; height: 60px; resize: vertical; padding: 8px 12px; font-size: 0.95rem; background: #fff; border: 1px solid var(--border-color); border-radius: 4px; }
-        .h-btn-area { width: 60px; flex-shrink: 0; display:flex; flex-direction: column; gap: 5px; }
-
-        .neis-result-card { background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; margin-bottom: 10px; display: flex; gap:15px; }
-        .n-name { width: 80px; font-weight: bold; color: var(--primary-dark); flex-shrink: 0; padding-top:10px; }
-        .n-textarea { flex-grow: 1; height: 120px; resize: vertical; width:100%; padding:10px; border:1px solid var(--border-color); border-radius:4px;}
-        .n-btn-area { width: 60px; text-align: right; flex-shrink: 0; }
-
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 2000; display: none; align-items: center; justify-content: center; }
-        .modal-overlay.open { display: flex; } 
-        .modal-card { background: white; padding: 25px; border-radius: 12px; width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--border-color); max-height: 80vh; display: flex; flex-direction: column; }
-        .modal-title { font-size: 1.1rem; font-weight: bold; color: var(--primary-dark); margin-bottom: 15px; flex-shrink: 0;}
-        .modal-body { overflow-y: auto; flex-grow: 1; margin-bottom: 15px; }
-        
-        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 30px; padding: 12px 20px; position: fixed; z-index: 3000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 0.95rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
-        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
-        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
-
         /* 스위치 */
         .switch-container { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text-sub); }
         .switch { position: relative; display: inline-block; width: 36px; height: 20px; }
@@ -151,10 +142,14 @@
         input:checked + .slider { background-color: var(--primary); }
         input:checked + .slider:before { transform: translateX(16px); }
 
-        .section { display: none; }
-        .section.active { display: block; animation: fadeIn 0.2s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
+        /* 기타 */
+        .history-card { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; border-bottom: 1px solid var(--bg-main); padding-bottom: 10px; }
+        .h-info { width: 90px; flex-shrink: 0; text-align: center; }
+        .h-textarea { flex-grow: 1; margin-bottom: 0 !important; height: 60px; resize: vertical; padding: 8px 12px; font-size: 0.95rem; background: #fff; border: 1px solid var(--border-color); border-radius: 4px; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 2000; display: none; align-items: center; justify-content: center; }
+        .modal-overlay.open { display: flex; } 
+        .modal-card { background: white; padding: 25px; border-radius: 12px; width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--border-color); max-height: 80vh; display: flex; flex-direction: column; }
+        
         @media (max-width: 768px) {
             .container { padding: 10px; }
             .nav-item { font-size: 0.9rem; padding: 10px 5px; }
@@ -163,93 +158,38 @@
             .split-container { flex-direction: column; }
             .split-left, .split-right { width: 100%; }
             .mobile-record-card { background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; }
-            .mobile-btn-group { display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; }
-            .mobile-btn { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: white; color: var(--text-sub); font-weight: bold; font-size: 1rem; }
-            .mobile-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-            .mobile-textarea { width: 100%; height: 150px; padding: 15px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem; margin-bottom: 15px; resize: none; line-height: 1.6; }
-            .mobile-textarea:focus { border-color: var(--primary); outline: none; }
-            .mobile-helper-text { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 15px; background: #f9f9f9; padding: 10px; border-radius: 6px; text-align: left; }
-            .pc-required-msg { text-align: center; padding: 50px 20px; color: var(--text-sub); background: #fff; border-radius: 8px; border: 1px solid var(--border-color); }
-            .pc-icon { font-size: 3rem; margin-bottom: 15px; display: block; }
-            .float-btn { display: none; } /* 모바일에서 숨김 */
+            .float-btn { top: auto; bottom: 80px; } /* 모바일은 아래로 */
+            .float-menu { top: auto; bottom: 140px; }
         }
     </style>
 </head>
 <body>
-    <div class="float-btn pc-only" onclick="toggleSidebar()">+</div>
-    <div class="sidebar pc-only" id="sidebar">
-        <div class="sidebar-header">
-            <span class="sidebar-title">부가 기능</span>
-            <button class="btn-icon" onclick="toggleSidebar()">✕</button>
-        </div>
-        <div class="sidebar-tabs">
-            <div class="sb-tab active" onclick="showSbTab('bm')">🔖 북마크</div>
-            <div class="sb-tab" onclick="showSbTab('cal')">📅 달력/출석</div>
-            <div class="sb-tab" onclick="showSbTab('memo')">📝 메모</div>
-            <div class="sb-tab" onclick="window.open('https://replayer.3arch2nd.site/')">🔗 리플레이어</div>
-        </div>
-        
-        <div id="sb-bm" class="sb-content active">
-            <div style="background:#f9f9f9; padding:10px; border-radius:6px; margin-bottom:10px;">
-                <select id="bmSub" style="margin-bottom:5px; padding:6px;"><option>국어</option><option>수학</option><option>사회</option><option>과학</option><option>영어</option><option>음악</option><option>미술</option><option>체육</option><option>기타</option></select>
-                <input type="text" id="bmTitle" placeholder="사이트명" style="margin-bottom:5px; padding:6px;">
-                <input type="text" id="bmUrl" placeholder="URL" style="margin-bottom:5px; padding:6px;">
-                <input type="text" id="bmMemo" placeholder="활용 팁" style="margin-bottom:5px; padding:6px;">
-                <button class="btn-sm active" style="width:100%" onclick="saveBookmark()">추가</button>
-            </div>
-            <div id="bmList"></div>
-        </div>
-
-        <div id="sb-cal" class="sb-content">
-            <div class="cal-header">
-                <button class="btn-icon" onclick="moveMonth(-1)">◀</button>
-                <span id="calMonth"></span>
-                <button class="btn-icon" onclick="moveMonth(1)">▶</button>
-            </div>
-            <div class="cal-grid" id="calGrid"></div>
-            <hr>
-            <div id="dailyView" style="display:none;">
-                <h4 id="dailyDate" style="margin-bottom:10px; color:var(--primary-dark);"></h4>
-                <div style="margin-bottom:10px;">
-                    <div style="font-weight:bold; margin-bottom:5px;">📅 일정</div>
-                    <div id="dailyEvents"></div>
-                    <input type="text" id="newEvent" placeholder="새 일정 입력" style="width:70%; margin-right:5px; padding:6px;"><button class="btn-sm" onclick="addEvent()">등록</button>
-                </div>
-                <div>
-                    <div style="font-weight:bold; margin-bottom:5px;">🎓 출석 체크</div>
-                    <div id="attList" style="max-height:200px; overflow-y:auto;"></div>
-                    <button class="btn-sm active" style="width:100%; margin-top:5px;" onclick="saveAttendance()">출석 저장</button>
-                </div>
-            </div>
-            <div id="monthViewInfo" style="text-align:center; color:#999; margin-top:20px;">날짜를 클릭하여 일정/출석 관리</div>
-            <button class="btn-sm" style="width:100%; margin-top:20px;" onclick="openMonthAttSummary()">📊 월별 출석 현황 보기</button>
-        </div>
-
-        <div id="sb-memo" class="sb-content">
-            <div style="display:flex; gap:5px; margin-bottom:10px;">
-                <input type="text" id="newMemoContent" placeholder="할 일 / 메모 입력" style="flex:1; margin-bottom:0; padding:8px;">
-                <button class="btn-sm active" onclick="addMemo()">등록</button>
-            </div>
-            <div id="memoList"></div>
-        </div>
+    <div class="float-btn" onclick="toggleFloatMenu()">+</div>
+    <div class="float-menu" id="floatMenu">
+        <div class="float-menu-item" onclick="changeSection('bookmarks')">🔖 북마크 (자료)</div>
+        <div class="float-menu-item" onclick="changeSection('calendar')">📅 달력/일정</div>
+        <div class="float-menu-item" onclick="changeSection('memo')">📝 메모/할일</div>
     </div>
 
     <div class="container">
-        <header><h1>쫑알수첩 v10.5</h1></header>
+        <header><h1>쫑알수첩 v11.0</h1></header>
         <nav class="nav-tabs">
-            <div class="nav-item active" onclick="showSection('record')">기록하기</div>
-            <div class="nav-item" onclick="showSection('students')">학생관리</div>
-            <div class="nav-item" onclick="showSection('neis')">NEIS</div>
-            <div class="nav-item" onclick="showSection('data')">설정</div>
+            <div class="nav-item active" onclick="changeSection('record')">기록하기</div>
+            <div class="nav-item" onclick="changeSection('students')">학생관리</div>
+            <div class="nav-item" onclick="changeSection('neis')">NEIS</div>
+            <div class="nav-item" onclick="changeSection('data')">설정</div>
         </nav>
 
         <div id="record" class="section active">
             <div class="mobile-only">
                 <div class="mobile-record-card">
                     <label style="text-align:left;">날짜 선택</label><input type="date" id="mDate" style="margin-bottom:20px;">
-                    <div class="mobile-btn-group"><button class="mobile-btn active" id="mBtnSub" onclick="setMobileMode('subject')">과목</button><button class="mobile-btn" id="mBtnBeh" onclick="setMobileMode('behavior')">행동</button></div>
-                    <div class="mobile-helper-text" id="mHelper">💡 예시: <b>김철수/수학/발표 잘함</b></div>
-                    <textarea id="mInput" class="mobile-textarea" placeholder="입력..."></textarea>
+                    <div style="display:flex; gap:10px; margin-bottom:15px; justify-content:center;">
+                        <button class="btn active" id="mBtnSub" onclick="setMobileMode('subject')">과목</button>
+                        <button class="btn" id="mBtnBeh" onclick="setMobileMode('behavior')">행동</button>
+                    </div>
+                    <div style="font-size:0.85rem; color:var(--text-sub); margin-bottom:15px; background:#f9f9f9; padding:10px; border-radius:6px; text-align:left;">💡 예시: <b>김철수/수학/발표 잘함</b></div>
+                    <textarea id="mInput" style="width:100%; height:150px; padding:15px; border:1px solid var(--border-color); border-radius:8px; font-size:1rem; margin-bottom:15px; resize:none;" placeholder="입력..."></textarea>
                     <button class="btn btn-primary" style="width:100%; height:50px;" onclick="saveMobileRecord()">AI 저장 ✨</button>
                 </div>
             </div>
@@ -279,7 +219,7 @@
                 <div class="split-left">
                     <div class="card full-height">
                         <div class="card-header">학생 명단</div>
-                        <div style="margin-bottom: 15px;"><button class="btn btn-outline" style="width:100%;" onclick="openStudentManageModal()">+ 학생 명단 관리 (추가/수정/삭제)</button></div>
+                        <div style="margin-bottom: 15px;"><button class="btn btn-outline" style="width:100%;" onclick="openStudentManageModal()">+ 학생 명단 관리</button></div>
                         <div id="studentNavList" style="overflow-y: auto; max-height: 600px;"></div>
                     </div>
                 </div>
@@ -295,7 +235,7 @@
 
         <div id="neis" class="section">
             <div class="pc-only">
-                 <div class="split-container">
+                <div class="split-container">
                     <div class="split-left">
                         <div class="card">
                             <div class="card-header">NEIS 옵션</div>
@@ -312,24 +252,141 @@
         </div>
 
         <div id="data" class="section">
-            <div class="pc-only">
-                <div class="split-container">
-                    <div class="split-left">
-                        <div class="card full-height"><div class="card-header">참고 자료</div><input type="file" id="uploadInput" style="margin-bottom:10px;"><button class="btn btn-outline" id="btnUpload" style="width:100%; margin-bottom:15px;" onclick="uploadFile()">파일 업로드 (Drive)</button><div id="fileList" style="overflow-y:auto; max-height:400px; font-size:0.95rem;"></div></div>
+             <div class="split-container">
+                 <div class="split-left pc-only">
+                    <div class="card full-height"><div class="card-header">참고 자료</div><input type="file" id="uploadInput" style="margin-bottom:10px;"><button class="btn btn-outline" id="btnUpload" style="width:100%; margin-bottom:15px;" onclick="uploadFile()">파일 업로드 (Drive)</button><div id="fileList" style="overflow-y:auto; max-height:400px; font-size:0.95rem;"></div></div>
+                </div>
+                <div class="split-right">
+                    <div class="card full-height">
+                        <div class="card-header">설정</div>
+                        <div id="publicModeSettings" style="display:none; margin-bottom:20px; background:#f9f9f9; padding:15px; border-radius:8px;"><label>Gemini API Key</label><input type="password" id="settingApiKey" placeholder="AIza..."><button class="btn btn-sm active" style="width:100%;" onclick="savePublicSettings()">저장</button></div>
+                        <label>AI 페르소나</label><textarea id="personaText" style="height:150px;" placeholder="예: 초등학교 교사 말투..."></textarea><div style="text-align:right;"><button class="btn btn-primary" id="btnPersona" onclick="savePersona()">저장</button></div>
                     </div>
-                    <div class="split-right">
-                        <div class="card full-height">
-                            <div class="card-header">설정</div>
-                            <div id="publicModeSettings" style="display:none; margin-bottom:20px; background:#f9f9f9; padding:15px; border-radius:8px;"><label>Gemini API Key</label><input type="password" id="settingApiKey" placeholder="AIza..."><button class="btn btn-sm active" style="width:100%;" onclick="savePublicSettings()">저장</button></div>
-                            <label>AI 페르소나</label><textarea id="personaText" style="height:150px;" placeholder="예: 초등학교 교사 말투..."></textarea><div style="text-align:right;"><button class="btn btn-primary" id="btnPersona" onclick="savePersona()">저장</button></div>
+                </div>
+             </div>
+        </div>
+
+        <div id="bookmarks" class="section">
+            <div class="split-container">
+                <div class="split-left">
+                    <div class="card">
+                        <div class="card-header">북마크 추가</div>
+                        <input type="hidden" id="bmEditRow" value="">
+                        <label>URL (붙여넣기 시 제목 자동완성)</label>
+                        <div style="display:flex; gap:5px; margin-bottom:15px;">
+                            <input type="text" id="bmUrl" placeholder="https://..." style="margin-bottom:0; flex:1;" onpaste="setTimeout(autoFillBmTitle, 100)">
+                            <button class="btn-sm active" onclick="autoFillBmTitle()">🔍</button>
+                        </div>
+                        <label>제목</label><input type="text" id="bmTitle" placeholder="사이트명">
+                        <label>과목 태그</label>
+                        <div id="bmTagArea" class="tag-container" style="margin-bottom:15px;">
+                            </div>
+                        <label>메모/활용팁</label><textarea id="bmMemo" style="height:80px;" placeholder="간단한 활용 팁..."></textarea>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn btn-outline" style="flex:1" onclick="clearBmInput()">초기화</button>
+                            <button class="btn btn-primary" style="flex:1" onclick="saveBookmark()" id="btnSaveBm">저장</button>
+                        </div>
+                        <div style="margin-top:20px; text-align:center;">
+                            <button class="btn-sm inactive" onclick="window.open('https://replayer.3arch2nd.site/')">🔗 리플레이어 바로가기</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="split-right">
+                    <div class="card full-height">
+                        <div class="card-header">
+                            <span>북마크 목록</span>
+                            <div id="bmFilterDisp" style="font-size:0.9rem; color:var(--primary); font-weight:normal; display:none;">필터: <span></span> <button class="btn-icon" onclick="filterBookmark(null)">x</button></div>
+                        </div>
+                        <div id="bmList" style="overflow-y:auto; max-height:600px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="calendar" class="section">
+            <div class="split-container">
+                <div class="split-left">
+                    <div class="card">
+                         <div class="cal-header">
+                            <button class="btn-icon" onclick="moveMonth(-1)">◀</button>
+                            <span id="calMonth"></span>
+                            <button class="btn-icon" onclick="moveMonth(1)">▶</button>
+                        </div>
+                        <div class="cal-grid" id="calGrid"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">📌 오늘 할 일</div>
+                        <div id="todayTodoList" style="font-size:0.95rem; color:var(--text-sub);">일정 없음</div>
+                    </div>
+                </div>
+                <div class="split-right">
+                    <div class="card full-height">
+                        <div class="card-header"><span id="calDetailTitle">선택한 날짜 일정</span></div>
+                        <label>새 일정 등록</label>
+                        <div style="display:flex; gap:5px; margin-bottom:15px;">
+                            <input type="text" id="newEvent" placeholder="일정 내용" style="margin-bottom:0;">
+                            <button class="btn-primary" onclick="addEvent()" style="width:80px; border-radius:6px;">등록</button>
+                        </div>
+                        <div id="dailyEvents" style="margin-bottom:20px;"></div>
+                        
+                        <div class="pc-only">
+                            <hr style="border:0; border-top:1px dashed #eee; margin:20px 0;">
+                            <div style="font-weight:bold; margin-bottom:10px; color:var(--primary-dark);">🎓 출석 체크</div>
+                            <div id="attList" style="max-height:300px; overflow-y:auto; margin-bottom:10px;"></div>
+                            <button class="btn btn-outline" style="width:100%;" onclick="saveAttendance()">출석 저장</button>
+                            <button class="btn-sm" style="width:100%; margin-top:10px;" onclick="openMonthAttSummary()">📊 월별 출석 현황 보기</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div id="status-bar"><span id="status-msg">AI 처리 대기중...</span><div class="loading-dots" style="color:white; font-weight:bold;"></div></div>
+        <div id="memo" class="section">
+             <div class="split-container">
+                <div class="split-left">
+                    <div class="card full-height">
+                        <div class="card-header">
+                            <span>메모 보기</span>
+                            <div style="display:flex; gap:5px;">
+                                <button class="btn-sm active" id="btnMemoModeCal" onclick="setMemoMode('cal')">달력</button>
+                                <button class="btn-sm inactive" id="btnMemoModeList" onclick="setMemoMode('list')">목록</button>
+                            </div>
+                        </div>
+                        <div id="memoCalView">
+                            <div class="cal-header">
+                                <button class="btn-icon" onclick="moveMemoMonth(-1)">◀</button>
+                                <span id="memoMonthTitle"></span>
+                                <button class="btn-icon" onclick="moveMemoMonth(1)">▶</button>
+                            </div>
+                            <div class="cal-grid" id="memoCalGrid"></div>
+                            <div style="text-align:center; font-size:0.85rem; color:#999;">날짜를 누르면 메모가 표시됩니다.</div>
+                        </div>
+                        <div id="memoListView" style="display:none; overflow-y:auto; max-height:500px;"></div>
+                    </div>
+                </div>
+                <div class="split-right">
+                    <div class="card full-height">
+                        <div class="card-header">메모 작성</div>
+                        <input type="hidden" id="memoEditRow" value="">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                             <span id="memoDateDisp" style="font-weight:bold; color:var(--primary);">오늘</span>
+                             <button class="btn-sm" onclick="clearMemoInput()">+ 새 메모</button>
+                        </div>
+                        <textarea id="memoContent" style="height:300px;" placeholder="내용을 입력하세요..."></textarea>
+                        <div style="display:flex; gap:15px; align-items:center; margin-bottom:15px;">
+                            <label style="margin:0;"><input type="checkbox" id="memoPinned"> 중요(★)</label>
+                            <label style="margin:0;"><input type="checkbox" id="memoDone"> 완료됨</label>
+                        </div>
+                        <div style="text-align:right;">
+                            <button class="btn btn-danger" id="btnDelMemo" style="display:none; margin-right:10px;" onclick="deleteMemo()">삭제</button>
+                            <button class="btn btn-primary" onclick="saveMemo()">저장</button>
+                        </div>
+                    </div>
+                </div>
+             </div>
+        </div>
+
+    </div> <div id="status-bar"><span id="status-msg">대기중...</span><div class="loading-dots" style="color:white; font-weight:bold;"></div></div>
     <div id="toast"></div>
     <div id="subjectModal" class="modal-overlay"><div class="modal-card"><div class="modal-title">새 과목 추가</div><input type="text" id="newSubjectName" placeholder="과목명"><div style="text-align:right;"><button class="btn btn-outline" onclick="closeSubjectModal()">취소</button> <button id="confirmSubjectBtn" class="btn btn-primary" onclick="confirmAddSubject()">추가</button></div></div></div>
     <div id="deleteSubjectModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="color:var(--danger)">⚠️ 과목 삭제</div><p>기록이 영구 삭제됩니다.</p><div style="text-align:right;"><button class="btn btn-outline" onclick="closeDeleteSubjectModal()">취소</button> <button class="btn btn-danger" onclick="confirmDeleteSubject()">삭제</button></div></div></div>
@@ -341,7 +398,6 @@
         const PRO_BACKEND_URL = "https://script.google.com/macros/s/AKfycbxn2nB0ZNXwXSdfx4-XVUWTD3Z_GCb_L2_SkhLyiKu5qrZrpwGTLM9Y4BhQRbveIk4o8Q/exec"; 
         const IS_GAS_ENV = window.location.hostname.includes('script.google.com');
         const IS_PRO_MODE = !IS_GAS_ENV && PRO_BACKEND_URL !== "";
-
         let currentMode = 'subject';
         let mobileMode = 'subject';
         let selectedStudentName = null;
@@ -350,14 +406,26 @@
         let subjectList = ["국어", "수학", "사회", "과학", "영어", "체육", "음악", "미술"];
         let targetSubjectToDelete = null;
         let aiPersona = "";
-        let isGlobalProcessing = false; 
         let aiJobQueue = [];
         let isAiQueueRunning = false;
+        let isGlobalProcessing = false;
         
-        // 부가기능 상태
+        // 부가기능 상태 변수
         let curYear = new Date().getFullYear();
         let curMonth = new Date().getMonth();
-        let selectedDate = null;
+        let selectedDate = formatDateYMD(new Date());
+        
+        // 북마크
+        let bmList = [];
+        let bmFilter = null;
+        let selectedBmTag = "기타";
+
+        // 메모
+        let memoList = [];
+        let memoMode = 'cal'; // cal or list
+        let curMemoMonth = new Date().getMonth();
+        let curMemoYear = new Date().getFullYear();
+        let selectedMemoDate = formatDateYMD(new Date());
 
         window.onload = () => {
             document.getElementById('rDate').valueAsDate = new Date();
@@ -367,24 +435,51 @@
             renderSubjectTags();
             updateNeisSubjectOptions();
             loadFiles();
-            renderCalendar(); // 초기 달력 렌더링
+            renderBmTags(); // 북마크 태그 렌더링
             
             window.onbeforeunload = function(e) {
-                if(aiJobQueue.length > 0 || isAiQueueRunning) { e.preventDefault(); e.returnValue = ''; return "AI 변환 작업이 진행 중입니다. 정말 닫으시겠습니까?"; }
+                if(aiJobQueue.length > 0 || isAiQueueRunning) { e.preventDefault(); e.returnValue = ''; return "AI 변환 작업이 진행 중입니다."; }
             };
         };
 
         // UI Helpers
         function setLoading(el, text) { if(!el) return; el.dataset.orgText = el.innerText; el.innerText = text; el.classList.add('loading-dots'); el.disabled = true; }
         function clearLoading(el) { if(!el) return; el.innerText = el.dataset.orgText || "완료"; el.classList.remove('loading-dots'); el.disabled = false; }
-        function setGlobalProcessing(processing) { isGlobalProcessing = processing; const nav = document.getElementById('studentNavList'); if(processing) nav.classList.add('disabled-area'); else nav.classList.remove('disabled-area'); }
         function showToast(msg) { const t = document.getElementById("toast"); t.innerText = msg; t.className = "show"; setTimeout(() => { t.className = t.className.replace("show", ""); }, 3000); }
+        function formatDateYMD(dateObj) { 
+            if (!dateObj) return ""; const d = new Date(dateObj); 
+            const year = d.getFullYear(); const month = String(d.getMonth() + 1).padStart(2, '0'); const day = String(d.getDate()).padStart(2, '0'); 
+            return `${year}-${month}-${day}`; 
+        }
 
+        // --- 네비게이션 & 섹션 ---
+        function changeSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            
+            // 상단 탭 활성화 처리 (메인 메뉴만)
+            document.querySelectorAll('.nav-tabs .nav-item').forEach(e => e.classList.remove('active'));
+            const navItem = document.querySelector(`.nav-tabs .nav-item[onclick="changeSection('${id}')"]`);
+            if(navItem) navItem.classList.add('active');
+
+            // 플로팅 메뉴 닫기
+            document.getElementById('floatMenu').classList.remove('show');
+
+            // 섹션별 초기 로딩
+            if(id === 'bookmarks') loadBookmarks();
+            else if(id === 'calendar') { renderCalendar(); showDailyView(new Date().getDate()); }
+            else if(id === 'memo') { loadMemos(); }
+        }
+
+        function toggleFloatMenu() {
+            document.getElementById('floatMenu').classList.toggle('show');
+        }
+
+        // --- 통신 ---
         function initEnvironment() {
             if (IS_PRO_MODE) { document.getElementById('publicModeSettings').style.display = 'none'; } 
             else { document.getElementById('publicModeSettings').style.display = 'block'; sendRequest('load_settings').then(res => { if(res) { document.getElementById('settingApiKey').value = res.apiKey || ""; document.getElementById('personaText').value = res.persona || ""; aiPersona = res.persona || ""; } }); }
         }
-
         function sendRequest(action, payload = {}) {
             if (IS_PRO_MODE) {
                 payload.action = action;
@@ -394,177 +489,284 @@
             }
         }
 
-        // ================= 사이드바 & 부가기능 =================
-        function toggleSidebar() { const sb = document.getElementById('sidebar'); sb.classList.toggle('open'); if(sb.classList.contains('open')) loadBookmarks(); }
-        function showSbTab(id) { document.querySelectorAll('.sb-content').forEach(e => e.classList.remove('active')); document.getElementById('sb-'+id).classList.add('active'); document.querySelectorAll('.sb-tab').forEach(e => e.classList.remove('active')); event.currentTarget.classList.add('active'); 
-            if(id==='bm') loadBookmarks(); else if(id==='cal') renderCalendar(); else if(id==='memo') loadMemos();
+        // ================= 1. 북마크 =================
+        function renderBmTags() {
+            const area = document.getElementById('bmTagArea'); area.innerHTML = '';
+            const tags = [...subjectList, "기타"];
+            tags.forEach(t => {
+                const tag = document.createElement('div'); tag.className = 'bm-tag'; 
+                tag.innerText = t; 
+                if(t === selectedBmTag) tag.classList.add('active');
+                tag.onclick = () => { selectedBmTag = t; renderBmTags(); };
+                area.appendChild(tag);
+            });
         }
-
-        // 1. 북마크
+        async function autoFillBmTitle() {
+            const url = document.getElementById('bmUrl').value;
+            if(!url || !url.startsWith('http')) return;
+            const res = await sendRequest('get_url_info', {url});
+            if(res && res.title) { document.getElementById('bmTitle').value = res.title; }
+        }
         async function loadBookmarks() {
-            const list = document.getElementById('bmList'); list.innerHTML = '로딩중...';
-            const data = await sendRequest('get_bookmarks');
-            list.innerHTML = '';
-            if(data) {
-                data.forEach(bm => {
-                    const d = document.createElement('div'); d.className='bm-card';
-                    d.innerHTML = `<a href="${bm.url}" target="_blank" class="bm-link">[${bm.subject}] ${bm.title}</a><div class="bm-memo">${bm.memo}</div><button class="btn-icon btn-del" style="float:right; margin-top:-20px;" onclick="deleteBookmark(${bm.row})">🗑️</button>`;
-                    list.appendChild(d);
-                });
-            }
+            const list = document.getElementById('bmList'); list.innerHTML = '<div class="loading-dots"></div>';
+            bmList = await sendRequest('get_bookmarks') || [];
+            renderBmList();
         }
+        function renderBmList() {
+            const list = document.getElementById('bmList'); list.innerHTML = '';
+            const filtered = bmFilter ? bmList.filter(b => b.subject === bmFilter) : bmList;
+            
+            if(filtered.length === 0) list.innerHTML = '<div style="text-align:center; padding:20px; color:#999;">북마크가 없습니다.</div>';
+            
+            filtered.forEach(b => {
+                const card = document.createElement('div'); card.className = 'bm-card';
+                card.innerHTML = `
+                    <div class="bm-main">
+                        <a href="${b.url}" target="_blank" class="bm-link">${b.title}</a>
+                        <div><span class="bm-tag" onclick="filterBookmark('${b.subject}')">${b.subject}</span></div>
+                        <div class="bm-memo">${b.memo}</div>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:5px;">
+                        <button class="btn-icon btn-edit" onclick="editBookmark(${b.row})">✏️</button>
+                        <button class="btn-icon btn-del" onclick="deleteBookmark(${b.row})">🗑️</button>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+            const disp = document.getElementById('bmFilterDisp');
+            if(bmFilter) { disp.style.display = 'inline-block'; disp.querySelector('span').innerText = bmFilter; }
+            else { disp.style.display = 'none'; }
+        }
+        function filterBookmark(subj) { bmFilter = subj; renderBmList(); }
+        
         async function saveBookmark() {
-            const sub = document.getElementById('bmSub').value; const title = document.getElementById('bmTitle').value; const url = document.getElementById('bmUrl').value; const memo = document.getElementById('bmMemo').value;
-            if(!title || !url) { showToast('제목과 URL 입력 필요'); return; }
-            await sendRequest('save_bookmark', {subject:sub, title, url, memo});
-            document.getElementById('bmTitle').value=''; document.getElementById('bmUrl').value=''; document.getElementById('bmMemo').value=''; loadBookmarks();
+            const url = document.getElementById('bmUrl').value;
+            const title = document.getElementById('bmTitle').value;
+            const memo = document.getElementById('bmMemo').value;
+            const row = document.getElementById('bmEditRow').value;
+            
+            if(!url) { showToast("URL은 필수입니다."); return; }
+            const btn = document.getElementById('btnSaveBm'); setLoading(btn, "저장 중");
+            
+            await sendRequest('save_bookmark', { row: row ? parseInt(row) : null, subject: selectedBmTag, title: title||"제목없음", url, memo });
+            clearBmInput(); loadBookmarks(); clearLoading(btn); showToast("저장 완료");
         }
-        async function deleteBookmark(row) { if(confirm('삭제?')) { await sendRequest('delete_bookmark', {row}); loadBookmarks(); } }
+        function editBookmark(row) {
+            const item = bmList.find(b => b.row === row);
+            if(!item) return;
+            document.getElementById('bmUrl').value = item.url;
+            document.getElementById('bmTitle').value = item.title;
+            document.getElementById('bmMemo').value = item.memo;
+            document.getElementById('bmEditRow').value = item.row;
+            selectedBmTag = item.subject; renderBmTags();
+            document.getElementById('bmUrl').focus();
+        }
+        function clearBmInput() {
+            document.getElementById('bmUrl').value = ''; document.getElementById('bmTitle').value = '';
+            document.getElementById('bmMemo').value = ''; document.getElementById('bmEditRow').value = '';
+            selectedBmTag = "기타"; renderBmTags();
+        }
+        async function deleteBookmark(row) { if(confirm('삭제하시겠습니까?')) { await sendRequest('delete_bookmark', {row}); loadBookmarks(); } }
 
-        // 2. 캘린더/출석
-        function renderCalendar() {
+
+        // ================= 2. 달력/일정 =================
+        function moveMonth(dir) { curMonth += dir; if(curMonth>11) { curMonth=0; curYear++; } else if(curMonth<0) { curMonth=11; curYear--; } renderCalendar(); }
+        
+        async function renderCalendar() {
             const grid = document.getElementById('calGrid'); grid.innerHTML='';
-            const monthTitle = document.getElementById('calMonth');
+            document.getElementById('calMonth').innerText = `${curYear}년 ${curMonth+1}월`;
+            
             const firstDay = new Date(curYear, curMonth, 1);
             const lastDay = new Date(curYear, curMonth+1, 0);
-            monthTitle.innerText = `${curYear}년 ${curMonth+1}월`;
-            
-            // 요일 헤더
             const days = ['일','월','화','수','목','금','토'];
             days.forEach(d => { const div=document.createElement('div'); div.innerText=d; div.style.fontWeight='bold'; grid.appendChild(div); });
-
-            // 빈칸
-            for(let i=0; i<firstDay.getDay(); i++) { grid.appendChild(document.createElement('div')); }
+            for(let i=0; i<firstDay.getDay(); i++) grid.appendChild(document.createElement('div'));
             
-            // 날짜
             for(let i=1; i<=lastDay.getDate(); i++) {
-                const d = document.createElement('div'); d.className='cal-day'; d.innerText=i;
+                const d = document.createElement('div'); d.className='cal-day'; d.innerHTML=`<span>${i}</span><div class="cal-dot"></div>`;
+                const dateStr = `${curYear}-${String(curMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                
+                if(dateStr === selectedDate) d.classList.add('selected');
                 const today = new Date();
-                if(curYear===today.getFullYear() && curMonth===today.getMonth() && i===today.getDate()) d.classList.add('today');
-                d.onclick = () => showDailyView(i);
+                if(today.getFullYear()===curYear && today.getMonth()===curMonth && today.getDate()===i) d.classList.add('today');
+                
+                d.onclick = () => { selectedDate = dateStr; renderCalendar(); showDailyView(i); };
                 grid.appendChild(d);
             }
         }
-        function moveMonth(dir) { curMonth += dir; if(curMonth>11) { curMonth=0; curYear++; } else if(curMonth<0) { curMonth=11; curYear--; } renderCalendar(); }
-        
+
         async function showDailyView(day) {
-            document.querySelectorAll('.cal-day').forEach(e => e.classList.remove('selected')); event.target.classList.add('selected');
-            document.getElementById('monthViewInfo').style.display='none';
-            document.getElementById('dailyView').style.display='block';
-            selectedDate = `${curYear}-${String(curMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-            document.getElementById('dailyDate').innerText = `${selectedDate} 일정 및 출석`;
-            
-            // 일정 로드
+            document.getElementById('calDetailTitle').innerText = `${selectedDate} 일정`;
             const evDiv = document.getElementById('dailyEvents'); evDiv.innerHTML='로딩...';
-            const events = await sendRequest('get_events'); // 전체 가져와서 필터링 (최적화 가능)
+            
+            const events = await sendRequest('get_events'); 
             evDiv.innerHTML='';
             if(events) {
-                events.filter(e => e.date === selectedDate).forEach(e => {
-                    const d = document.createElement('div'); d.className='event-card'; 
+                const todays = events.filter(e => e.date === selectedDate);
+                todays.forEach(e => {
+                    const d = document.createElement('div'); d.style.padding="8px"; d.style.borderBottom="1px solid #eee"; d.style.display="flex"; d.style.justifyContent="space-between";
                     d.innerHTML = `<span>${e.title}</span> <button class="btn-icon btn-del" onclick="deleteEvent(${e.row})">x</button>`;
                     evDiv.appendChild(d);
                 });
+                if(todays.length === 0) evDiv.innerHTML = '<div style="color:#999; padding:10px;">일정이 없습니다.</div>';
+                
+                // 오늘 할일(좌측 하단) 업데이트
+                const todayStr = formatDateYMD(new Date());
+                const todoDiv = document.getElementById('todayTodoList');
+                const todayEvents = events.filter(e => e.date === todayStr);
+                if(todayEvents.length > 0) todoDiv.innerHTML = todayEvents.map(e => `• ${e.title}`).join('<br>');
+                else todoDiv.innerText = "일정 없음";
             }
 
-            // 출석 로드 (기존 데이터 있으면 반영)
+            // 출석 로드
             const attDiv = document.getElementById('attList'); attDiv.innerHTML='로딩...';
             const attData = await sendRequest('get_attendance');
-            const todayAtt = attData ? attData.filter(a => a.date === selectedDate) : [];
-            
+            const existAtt = attData ? attData.filter(a => a.date === selectedDate) : [];
             attDiv.innerHTML='';
             studentList.forEach(st => {
-                const exist = todayAtt.find(a => a.name === st.name);
+                const exist = existAtt.find(a => a.name === st.name);
                 const status = exist ? exist.status : '출석';
                 const memo = exist ? exist.memo : '';
                 const row = document.createElement('div'); row.className='att-row';
-                row.innerHTML = `
-                    <span style="width:60px; font-weight:bold;">${st.name}</span>
-                    <select class="att-status att-sel" data-name="${st.name}">
-                        <option ${status==='출석'?'selected':''}>출석</option>
-                        <option ${status==='결석'?'selected':''}>결석</option>
-                        <option ${status==='지각'?'selected':''}>지각</option>
-                        <option ${status==='조퇴'?'selected':''}>조퇴</option>
-                        <option ${status==='결과'?'selected':''}>결과</option>
-                        <option ${status==='체험'?'selected':''}>체험</option>
-                    </select>
-                    <input type="text" class="att-memo" placeholder="사유" value="${memo}" style="width:100px; margin-bottom:0; font-size:0.8rem; padding:4px;">
-                `;
+                row.innerHTML = `<span style="width:60px; font-weight:bold;">${st.name}</span><select class="att-status att-sel" data-name="${st.name}"><option ${status==='출석'?'selected':''}>출석</option><option ${status==='결석'?'selected':''}>결석</option><option ${status==='지각'?'selected':''}>지각</option><option ${status==='조퇴'?'selected':''}>조퇴</option><option ${status==='결과'?'selected':''}>결과</option><option ${status==='체험'?'selected':''}>체험</option></select><input type="text" class="att-memo" placeholder="사유" value="${memo}" style="width:100px; margin-bottom:0; font-size:0.8rem; padding:4px;">`;
                 attDiv.appendChild(row);
             });
         }
+
         async function addEvent() {
-            const title = document.getElementById('newEvent').value;
-            if(!title) return;
+            const title = document.getElementById('newEvent').value; if(!title) return;
             await sendRequest('save_event', {date:selectedDate, title, type:'일반'});
             document.getElementById('newEvent').value=''; showDailyView(new Date(selectedDate).getDate());
         }
         async function deleteEvent(row) { if(confirm('삭제?')) { await sendRequest('delete_event', {row}); showDailyView(new Date(selectedDate).getDate()); } }
         async function saveAttendance() {
             const list = [];
-            document.querySelectorAll('.att-row').forEach(row => {
-                list.push({
-                    name: row.querySelector('.att-status').dataset.name,
-                    status: row.querySelector('.att-status').value,
-                    memo: row.querySelector('.att-memo').value
-                });
-            });
-            await sendRequest('save_attendance', {date:selectedDate, data:list});
-            showToast('출석 저장 완료');
+            document.querySelectorAll('.att-row').forEach(row => { list.push({ name: row.querySelector('.att-status').dataset.name, status: row.querySelector('.att-status').value, memo: row.querySelector('.att-memo').value }); });
+            await sendRequest('save_attendance', {date:selectedDate, data:list}); showToast('출석 저장 완료');
         }
         async function openMonthAttSummary() {
             const modal = document.getElementById('monthAttModal'); modal.classList.add('open');
             const body = document.getElementById('monthAttBody'); body.innerHTML = '로딩중...';
             const attData = await sendRequest('get_attendance');
             if(!attData) { body.innerHTML='데이터 없음'; return; }
-            
-            // 이번달 데이터 필터링
             const thisMonthPrefix = `${curYear}-${String(curMonth+1).padStart(2,'0')}`;
-            const monthData = attData.filter(a => a.date.startsWith(thisMonthPrefix) && a.status !== '출석'); // 결석 등 특이사항만 표시
-            
+            const monthData = attData.filter(a => a.date.startsWith(thisMonthPrefix) && a.status !== '출석');
             let html = '<table style="width:100%; border-collapse:collapse; font-size:0.9rem;"><thead><tr style="background:#eee;"><th style="border:1px solid #ddd; padding:5px;">날짜</th><th style="border:1px solid #ddd;">이름</th><th style="border:1px solid #ddd;">상태</th><th style="border:1px solid #ddd;">비고</th></tr></thead><tbody>';
-            monthData.forEach(d => {
-                html += `<tr><td style="border:1px solid #ddd; padding:5px;">${d.date.substring(5)}</td><td style="border:1px solid #ddd;">${d.name}</td><td style="border:1px solid #ddd; color:red; font-weight:bold;">${d.status}</td><td style="border:1px solid #ddd;">${d.memo}</td></tr>`;
-            });
+            monthData.forEach(d => { html += `<tr><td style="border:1px solid #ddd; padding:5px;">${d.date.substring(5)}</td><td style="border:1px solid #ddd;">${d.name}</td><td style="border:1px solid #ddd; color:red; font-weight:bold;">${d.status}</td><td style="border:1px solid #ddd;">${d.memo}</td></tr>`; });
             html += '</tbody></table>';
             if(monthData.length === 0) html = '<div style="text-align:center; padding:20px;">특이사항(결석 등) 없음</div>';
             body.innerHTML = html;
         }
 
-        // 3. 메모
+        // ================= 3. 메모 =================
+        function setMemoMode(mode) {
+            memoMode = mode;
+            document.getElementById('btnMemoModeCal').className = mode === 'cal' ? 'btn-sm active' : 'btn-sm inactive';
+            document.getElementById('btnMemoModeList').className = mode === 'list' ? 'btn-sm active' : 'btn-sm inactive';
+            document.getElementById('memoCalView').style.display = mode === 'cal' ? 'block' : 'none';
+            document.getElementById('memoListView').style.display = mode === 'list' ? 'block' : 'none';
+            if(mode === 'cal') renderMemoCalendar(); else renderMemoList();
+        }
+        
         async function loadMemos() {
-            const list = document.getElementById('memoList'); list.innerHTML='로딩...';
-            const data = await sendRequest('get_memos');
-            list.innerHTML='';
-            if(data) {
-                // 중요(pinned) 위로 정렬
-                data.sort((a, b) => b.pinned - a.pinned);
-                data.forEach(m => {
-                    const d = document.createElement('div'); d.className='memo-card'; if(m.pinned) d.style.borderLeft='4px solid var(--danger)';
-                    d.innerHTML = `
-                        <div style="display:flex; justify-content:space-between;">
-                            <span style="font-weight:bold; cursor:pointer;" onclick="togglePin(${m.row}, ${!m.pinned})">${m.pinned?'★':'☆'}</span>
-                            <span style="font-size:0.8rem; color:#999;">${m.date}</span>
-                        </div>
-                        <div style="margin:5px 0;">${m.content}</div>
-                        <button class="btn-icon btn-del" style="float:right;" onclick="deleteMemo(${m.row})">🗑️</button>
-                    `;
-                    list.appendChild(d);
-                });
+            memoList = await sendRequest('get_memos') || [];
+            // 기본은 오늘 날짜 선택
+            selectedMemoDate = formatDateYMD(new Date());
+            setMemoMode(memoMode);
+        }
+        
+        function moveMemoMonth(dir) { curMemoMonth += dir; if(curMemoMonth>11) { curMemoMonth=0; curMemoYear++; } else if(curMemoMonth<0) { curMemoMonth=11; curMemoYear--; } renderMemoCalendar(); }
+
+        function renderMemoCalendar() {
+            const grid = document.getElementById('memoCalGrid'); grid.innerHTML='';
+            document.getElementById('memoMonthTitle').innerText = `${curMemoYear}년 ${curMemoMonth+1}월`;
+            
+            const first = new Date(curMemoYear, curMemoMonth, 1);
+            const last = new Date(curMemoYear, curMemoMonth+1, 0);
+            const days = ['일','월','화','수','목','금','토'];
+            days.forEach(d => { const div=document.createElement('div'); div.innerText=d; div.style.fontWeight='bold'; grid.appendChild(div); });
+            for(let i=0; i<first.getDay(); i++) grid.appendChild(document.createElement('div'));
+            
+            for(let i=1; i<=last.getDate(); i++) {
+                const dateStr = `${curMemoYear}-${String(curMemoMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                const hasMemo = memoList.some(m => m.date === dateStr);
+                
+                const d = document.createElement('div'); d.className='cal-day'; 
+                if(hasMemo) d.classList.add('has-memo');
+                if(dateStr === selectedMemoDate) d.classList.add('selected');
+                
+                d.innerHTML = `<span>${i}</span><div class="cal-dot"></div>`;
+                d.onclick = () => { selectedMemoDate = dateStr; renderMemoCalendar(); openMemoForm(); };
+                grid.appendChild(d);
             }
         }
-        async function addMemo() {
-            const content = document.getElementById('newMemoContent').value; if(!content) return;
-            await sendRequest('save_memo', {content, pinned:false});
-            document.getElementById('newMemoContent').value=''; loadMemos();
+
+        function renderMemoList() {
+            const list = document.getElementById('memoListView'); list.innerHTML='';
+            const sorted = [...memoList].sort((a,b) => new Date(b.date) - new Date(a.date));
+            sorted.forEach(m => {
+                const item = document.createElement('div'); item.className = 'memo-preview-item';
+                item.innerHTML = `<div class="memo-date">${m.date} ${m.pinned?'★':''}</div><div style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.content}</div>`;
+                item.onclick = () => { selectedMemoDate = m.date; openMemoForm(m); };
+                list.appendChild(item);
+            });
         }
-        async function togglePin(row, pinned) { await sendRequest('toggle_memo_pin', {row, pinned}); loadMemos(); }
-        async function deleteMemo(row) { if(confirm('삭제?')) { await sendRequest('delete_memo', {row}); loadMemos(); } }
 
+        function openMemoForm(memoItem = null) {
+            document.getElementById('memoDateDisp').innerText = selectedMemoDate;
+            document.getElementById('btnDelMemo').style.display = 'none';
+            if(memoItem) {
+                // 특정 메모 선택 (수정 모드)
+                // 만약 날짜만 선택하고 데이터가 없으면? -> 리스트에서 찾아서 표시
+                document.getElementById('memoContent').value = memoItem.content;
+                document.getElementById('memoPinned').checked = memoItem.pinned;
+                document.getElementById('memoDone').checked = memoItem.done;
+                document.getElementById('memoEditRow').value = memoItem.row;
+                document.getElementById('btnDelMemo').style.display = 'inline-block';
+            } else {
+                // 날짜 클릭 시 해당 날짜의 첫번째 메모 로드 or 빈칸
+                const memoOnDate = memoList.find(m => m.date === selectedMemoDate);
+                if(memoOnDate) {
+                    openMemoForm(memoOnDate);
+                } else {
+                    clearMemoInput();
+                }
+            }
+        }
 
-        // ================= 기존 로직 (수정됨) =================
-        function setMobileMode(mode) { mobileMode = mode; document.getElementById('mBtnSub').className = mode === 'subject' ? 'mobile-btn active' : 'mobile-btn'; document.getElementById('mBtnBeh').className = mode === 'behavior' ? 'mobile-btn active' : 'mobile-btn'; }
+        function clearMemoInput() {
+            document.getElementById('memoContent').value = '';
+            document.getElementById('memoPinned').checked = false;
+            document.getElementById('memoDone').checked = false;
+            document.getElementById('memoEditRow').value = '';
+            document.getElementById('btnDelMemo').style.display = 'none';
+            // 날짜는 유지
+        }
+
+        async function saveMemo() {
+            const content = document.getElementById('memoContent').value;
+            const pinned = document.getElementById('memoPinned').checked;
+            const done = document.getElementById('memoDone').checked;
+            const row = document.getElementById('memoEditRow').value;
+            
+            if(!content) { showToast("내용 입력 필요"); return; }
+            await sendRequest('save_memo', { row: row?parseInt(row):null, content, pinned, done });
+            showToast("메모 저장됨"); loadMemos();
+        }
+        
+        async function deleteMemo() {
+             const row = document.getElementById('memoEditRow').value;
+             if(row && confirm("삭제하시겠습니까?")) {
+                 await sendRequest('delete_memo', {row: parseInt(row)});
+                 showToast("삭제됨"); loadMemos();
+             }
+        }
+
+        // ================= 기존 로직 (기록, 설정 등) =================
+        function setMobileMode(mode) { mobileMode = mode; document.getElementById('mBtnSub').className = mode === 'subject' ? 'btn active' : 'btn'; document.getElementById('mBtnBeh').className = mode === 'behavior' ? 'btn active' : 'btn'; }
         async function saveMobileRecord() {
-            const text = document.getElementById('mInput').value.trim(); if(!text) { showToast("내용 입력 필요"); return; }
+            const text = document.getElementById('mInput').value.trim();
+            if(!text) { showToast("내용 입력 필요"); return; }
             const btn = document.querySelector('.mobile-record-card .btn-primary'); setLoading(btn, "AI 분석 중");
             const prompt = `사용자 입력 JSON 추출. 모드:${mobileMode}. 입력:"${text}". 규칙: 이름/과목/내용 분리. 평어체(~함/음). 따옴표 금지. 출력JSON:{"name":"이름","type":"과목","text":"내용"}`;
             try {
@@ -580,12 +782,7 @@
 
         async function savePublicSettings() { const key = document.getElementById('settingApiKey').value.trim(); if(!key) return; await sendRequest('save_settings', { apiKey: key }); showToast("저장 완료"); }
         async function savePersona() { const p = document.getElementById('personaText').value; aiPersona = p; const btn = document.getElementById('btnPersona'); setLoading(btn, "저장 중"); if(!IS_PRO_MODE) await sendRequest('save_persona', { persona: p }); showToast("저장 완료"); clearLoading(btn); }
-        function uploadFile() {
-            const input = document.getElementById('uploadInput'); if(input.files.length === 0) return;
-            const file = input.files[0]; const reader = new FileReader(); const btn = document.getElementById('btnUpload');
-            reader.onload = async function(e) { const base64 = e.target.result.split(',')[1]; setLoading(btn, "업로드 중"); const res = await sendRequest('upload_file', { name: file.name, mimeType: file.type, data: base64 }); if(res) { showToast("완료"); loadFiles(); input.value = ''; } clearLoading(btn); };
-            reader.readAsDataURL(file);
-        }
+        function uploadFile() { const input = document.getElementById('uploadInput'); if(input.files.length === 0) return; const file = input.files[0]; const reader = new FileReader(); const btn = document.getElementById('btnUpload'); reader.onload = async function(e) { const base64 = e.target.result.split(',')[1]; setLoading(btn, "업로드 중"); const res = await sendRequest('upload_file', { name: file.name, mimeType: file.type, data: base64 }); if(res) { showToast("완료"); loadFiles(); input.value = ''; } clearLoading(btn); }; reader.readAsDataURL(file); }
         async function loadFiles() { const list = document.getElementById('fileList'); list.innerHTML = '로딩...'; const files = await sendRequest('get_files'); list.innerHTML = ''; if(files) files.forEach(f => { const div = document.createElement('div'); div.style.padding = "10px"; div.style.borderBottom = "1px solid #eee"; div.innerHTML = `<a href="${f.url}" target="_blank" style="text-decoration:none; color:var(--primary); font-weight:bold;">📄 ${f.name}</a>`; list.appendChild(div); }); }
 
         function setMode(mode) { currentMode = mode; document.getElementById('btnSubject').className = mode === 'subject' ? 'btn-sm active' : 'btn-sm inactive'; document.getElementById('btnBehavior').className = mode === 'behavior' ? 'btn-sm active' : 'btn-sm inactive'; document.getElementById('subjectArea').style.display = mode === 'subject' ? 'block' : 'none'; document.getElementById('checkHeader').style.visibility = mode === 'subject' ? 'visible' : 'hidden'; renderRecordList(); }
@@ -600,10 +797,10 @@
             toggleAIMode();
         }
         function toggleCheck(el) { const p = el.parentElement; const was = el.classList.contains('checked'); p.querySelectorAll('.check-circle').forEach(c => c.classList.remove('checked')); if(!was) el.classList.add('checked'); }
-
         async function saveData() {
             const inputs = document.querySelectorAll('.st-input'); const btn = document.getElementById('btnSaveAll'); const isAI = document.getElementById('aiToggle').checked;
-            let targetType = "행동"; if(currentMode === 'subject') { const selTag = document.querySelector('#subjectTags .tag.selected'); if(!selTag) { showToast("과목 선택 필요"); return; } targetType = selTag.innerText.split(' ')[0].trim(); }
+            let targetType = "행동";
+            if(currentMode === 'subject') { const selTag = document.querySelector('#subjectTags .tag.selected'); if(!selTag) { showToast("과목 선택 필요"); return; } targetType = selTag.innerText.split(' ')[0].trim(); }
             setLoading(btn, "저장 중");
             let itemsToSave = [];
             inputs.forEach(input => {
@@ -615,13 +812,13 @@
             if (itemsToSave.length === 0) { showToast("저장할 내용 없음"); clearLoading(btn); return; }
             for (const item of itemsToSave) {
                 let period = document.getElementById('rPeriod').value; const topic = document.getElementById('rTopic').value.trim(); let periodPrefix = period ? `[${period}]` : "";
-                let rawBody = topic ? `[${topic}] ${item.text}` : item.text; if(item.text.length === 0) rawBody = topic ? `[${topic}] 활동에 참여함` : `수업 활동에 참여함`; rawBody = `${periodPrefix} ${rawBody}`.trim();
+                let rawBody = topic ? `[${topic}] ${item.text}` : item.text; if(item.text.length === 0) rawBody = topic ? `[${topic}] 활동에 참여함` : `수업 활동에 참여함`;
+                rawBody = `${periodPrefix} ${rawBody}`.trim();
                 const res = await sendRequest('save_record', { date: document.getElementById('rDate').value, name: item.name, type: targetType, text: rawBody, check: item.checkVal });
                 if (isAI && res && res.rowNum) aiJobQueue.push({ rowNum: res.rowNum, type: targetType, topic: topic, text: item.text, check: item.checkVal, name: item.name, periodPrefix: periodPrefix });
             }
             clearLoading(btn); inputs.forEach(el => el.value = ''); document.querySelectorAll('.check-circle').forEach(el => el.classList.remove('checked')); showToast("저장 완료 (AI 변환 대기)"); processNextAiJob();
         }
-
         async function processNextAiJob() {
             if (aiJobQueue.length === 0) { isAiQueueRunning = false; document.getElementById('status-bar').className = ''; return; }
             isAiQueueRunning = true; document.getElementById('status-bar').className = 'show';
@@ -676,57 +873,29 @@
             await sendRequest('delete_record_bulk', { type: reqType, rows: rowNums }); clearLoading(btn); loadHistory(); showToast("삭제됨");
         }
         function quietCopy(btn, txt) { navigator.clipboard.writeText(txt).then(() => { const org = btn.innerText; btn.innerText = "완료"; btn.classList.add('copied'); setTimeout(()=> { btn.innerText = org; btn.classList.remove('copied'); }, 1000); }); }
-
         function updateSubjectFilterOptions() { const filter=document.getElementById('viewSubjectFilter'); filter.innerHTML=''; subjectList.forEach(sub=>{ const opt=document.createElement('option'); opt.value=sub; opt.innerText=sub; filter.appendChild(opt); }); }
         function updateNeisSubjectOptions() { const sel=document.getElementById('neisSubjectSelect'); sel.innerHTML=''; subjectList.forEach(sub=>{ const opt=document.createElement('option'); opt.value=sub; opt.innerText=sub; sel.appendChild(opt); }); }
         function renderSubjectTags() { const container=document.getElementById('subjectTags'); const addBtn=container.querySelector('.tag-add'); container.querySelectorAll('.tag:not(.tag-add)').forEach(el=>el.remove()); subjectList.forEach(sub=>{ const tag=document.createElement('div'); tag.className='tag'; tag.innerHTML=`${sub} <span class="x-btn" onclick="openDeleteSubjectModal('${sub}', event)">x</span>`; tag.onclick=(e)=>{if(e.target.classList.contains('x-btn')) return; selSub(tag);}; if(sub==="국어") tag.classList.add('selected'); container.insertBefore(tag, addBtn); }); updateSubjectFilterOptions(); updateNeisSubjectOptions(); }
         function selSub(el) { document.querySelectorAll('.tag').forEach(t => t.classList.remove('selected')); el.classList.add('selected'); }
-        async function confirmAddSubject() { const name=document.getElementById('newSubjectName').value.trim(); if(!name || subjectList.includes(name)) return; const btn=document.getElementById('confirmSubjectBtn'); setLoading(btn, "추가 중"); await sendRequest('add_subject', {subject:name}); subjectList.push(name); renderSubjectTags(); closeSubjectModal(); clearLoading(btn); showToast("추가됨"); }
+        async function confirmAddSubject() { const name=document.getElementById('newSubjectName').value.trim(); if(!name || subjectList.includes(name)) return; const btn=document.getElementById('confirmSubjectBtn'); setLoading(btn, "추가 중"); await sendRequest('add_subject', {subject:name}); subjectList.push(name); renderSubjectTags(); renderBmTags(); closeSubjectModal(); clearLoading(btn); showToast("추가됨"); }
         function openSubjectModal() { document.getElementById('newSubjectName').value=''; document.getElementById('subjectModal').classList.add('open'); document.getElementById('newSubjectName').focus(); }
         function closeSubjectModal() { document.getElementById('subjectModal').classList.remove('open'); }
         function openDeleteSubjectModal(sub, e) { if(e) e.stopPropagation(); targetSubjectToDelete=sub; document.getElementById('deleteSubjectModal').classList.add('open'); }
         function closeDeleteSubjectModal() { document.getElementById('deleteSubjectModal').classList.remove('open'); }
-        async function confirmDeleteSubject() { if(!targetSubjectToDelete) return; await sendRequest('delete_subject', {subject:targetSubjectToDelete}); subjectList=subjectList.filter(s=>s!==targetSubjectToDelete); renderSubjectTags(); closeDeleteSubjectModal(); showToast("삭제됨"); }
-
-        // [수정] 학생 명단 로딩 & 관리
-        async function loadStudents() { 
-            const list=document.getElementById('studentNavList'); list.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-sub);">학생 목록 불러오는 중<span class="loading-dots"></span></div>`;
-            const data=await sendRequest('get_students'); 
-            if(data){ studentList=data; renderRecordList(); renderStudentNav(); } 
-        }
+        async function confirmDeleteSubject() { if(!targetSubjectToDelete) return; await sendRequest('delete_subject', {subject:targetSubjectToDelete}); subjectList=subjectList.filter(s=>s!==targetSubjectToDelete); renderSubjectTags(); renderBmTags(); closeDeleteSubjectModal(); showToast("삭제됨"); }
+        async function loadStudents() { const list=document.getElementById('studentNavList'); list.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-sub);">학생 목록 불러오는 중<span class="loading-dots"></span></div>`; const data=await sendRequest('get_students'); if(data){ studentList=data; renderRecordList(); renderStudentNav(); } }
         function renderStudentNav() { const list=document.getElementById('studentNavList'); list.innerHTML=''; studentList.forEach(st=>{ const item=document.createElement('div'); item.className='student-list-item'; item.innerHTML=`${st.id}번 <b>${st.name}</b>`; item.onclick=()=>selectStudent(st.name, item); list.appendChild(item); }); }
-        
         async function selectStudent(name, el) { if(isGlobalProcessing) return; selectedStudentName=name; document.querySelectorAll('.student-list-item').forEach(i=>i.classList.remove('active')); el.classList.add('active'); setGlobalProcessing(true); await loadHistory(); setGlobalProcessing(false); }
-        
         function openStudentManageModal() { const container = document.getElementById('manageStudentRows'); container.innerHTML = ''; if(studentList.length > 0) { studentList.forEach(st => addStudentRow(st.id, st.name)); } else { for(let i=0; i<3; i++) addStudentRow(); } document.getElementById('manageStudentModal').classList.add('open'); }
         function closeStudentManageModal() { document.getElementById('manageStudentModal').classList.remove('open'); }
         function addStudentRow(idVal='', nameVal='') { const div = document.createElement('div'); div.style.display = 'flex'; div.style.gap = '10px'; div.style.marginBottom = '10px'; div.innerHTML = `<input type="number" placeholder="번호" class="st-add-id" value="${idVal}" style="width:80px; margin-bottom:0;"><input type="text" placeholder="이름" class="st-add-name" value="${nameVal}" style="flex:1; margin-bottom:0;"><button class="btn btn-sm btn-del" onclick="this.parentElement.remove()">-</button>`; document.getElementById('manageStudentRows').appendChild(div); }
-        async function saveStudentManagement() {
-            const ids = document.querySelectorAll('.st-add-id'); const names = document.querySelectorAll('.st-add-name'); const list = [];
-            for(let i=0; i<ids.length; i++) { if(ids[i].value && names[i].value) list.push({ id: parseInt(ids[i].value), name: names[i].value.trim() }); }
-            const btn = document.getElementById('btnManageStSave'); setLoading(btn, "저장 중");
-            await sendRequest('sync_student_list', { students: list });
-            closeStudentManageModal(); loadStudents(); showToast("명단 반영됨"); clearLoading(btn);
-        }
-
+        async function saveStudentManagement() { const ids = document.querySelectorAll('.st-add-id'); const names = document.querySelectorAll('.st-add-name'); const list = []; for(let i=0; i<ids.length; i++) { if(ids[i].value && names[i].value) list.push({ id: parseInt(ids[i].value), name: names[i].value.trim() }); } const btn = document.getElementById('btnManageStSave'); setLoading(btn, "저장 중"); await sendRequest('sync_student_list', { students: list }); closeStudentManageModal(); loadStudents(); showToast("명단 반영됨"); clearLoading(btn); }
         function openDeleteStudentModal() { if(!selectedStudentName) {showToast("학생 선택 필요"); return;} document.getElementById('deleteStudentModal').classList.add('open'); }
         function closeDeleteStudentModal() { document.getElementById('deleteStudentModal').classList.remove('open'); }
         async function confirmDeleteStudent() { const btn = document.getElementById('btnDelStudent'); setLoading(btn, "삭제 중"); await sendRequest('delete_student', {name:selectedStudentName}); closeDeleteStudentModal(); selectedStudentName=null; document.getElementById('historyViewer').innerHTML=''; loadStudents(); showToast("삭제됨"); clearLoading(btn); }
-
         function toggleNeisType() { const t=document.getElementById('neisType').value; document.getElementById('neisSubOption').style.display=t==='subject'?'block':'none'; document.getElementById('neisBehOption').style.display=t==='behavior'?'block':'none'; }
-        async function generateNeisCards() {
-            const container = document.getElementById('neisResultList'); if(studentList.length === 0) return;
-            const btn = document.getElementById('btnGenNeis'); setLoading(btn, "생성 중"); container.innerHTML = ""; 
-            const typeMode = document.getElementById('neisType').value; let targetType = typeMode === 'subject' ? document.getElementById('neisSubjectSelect').value : '행동'; let keyword = typeMode === 'behavior' ? document.getElementById('neisKeyword').value : ""; let len = document.getElementById('neisLen').value;
-            for(const st of studentList) {
-                const card = document.createElement('div'); card.className = 'neis-result-card'; card.innerHTML = `<div class="n-name">${st.name}</div><textarea class="n-textarea">작성 중...</textarea><div class="n-btn-area"><button class="btn-copy">복사</button></div>`; container.appendChild(card);
-                const data = await sendRequest('generate_neis_individual', { name: st.name, type: targetType, keyword, length: len });
-                const textarea = card.querySelector('textarea'); textarea.value = data ? data.text.replace(/['"]/g, "").replace(/\*\*/g, "").replace(/##/g, "") : "실패";
-                card.querySelector('.btn-copy').onclick = () => { navigator.clipboard.writeText(textarea.value); showToast("복사됨"); };
-            }
-            clearLoading(btn); showToast("완료");
-        }
-        function showSection(id) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active')); event.currentTarget.classList.add('active'); if(id === 'students') updateSubjectFilterOptions(); }
+        async function generateNeisCards() { const container = document.getElementById('neisResultList'); if(studentList.length === 0) return; const btn = document.getElementById('btnGenNeis'); setLoading(btn, "생성 중"); container.innerHTML = ""; const typeMode = document.getElementById('neisType').value; let targetType = typeMode === 'subject' ? document.getElementById('neisSubjectSelect').value : '행동'; let keyword = typeMode === 'behavior' ? document.getElementById('neisKeyword').value : ""; let len = document.getElementById('neisLen').value; for(const st of studentList) { const card = document.createElement('div'); card.className = 'neis-result-card'; card.innerHTML = `<div class="n-name">${st.name}</div><textarea class="n-textarea">작성 중...</textarea><div class="n-btn-area"><button class="btn-copy">복사</button></div>`; container.appendChild(card); const data = await sendRequest('generate_neis_individual', { name: st.name, type: targetType, keyword, length: len }); const textarea = card.querySelector('textarea'); textarea.value = data ? data.text.replace(/['"]/g, "").replace(/\*\*/g, "").replace(/##/g, "") : "실패"; card.querySelector('.btn-copy').onclick = () => { navigator.clipboard.writeText(textarea.value); showToast("복사됨"); }; } clearLoading(btn); showToast("완료"); }
+        function setGlobalProcessing(processing) { isGlobalProcessing = processing; const nav = document.getElementById('studentNavList'); if(processing) nav.classList.add('disabled-area'); else nav.classList.remove('disabled-area'); }
     </script>
 </body>
 </html>
