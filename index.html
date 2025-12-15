@@ -4,7 +4,7 @@
     <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>쫑알수첩 v11.0 (Hub)</title>
+    <title>쫑알수첩 v11.5 (Clean)</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
     <style>
         /* [기본 테마] */
@@ -88,9 +88,11 @@
         .bm-card { background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start; }
         .bm-main { flex: 1; }
         .bm-link { font-weight: bold; color: var(--primary-dark); text-decoration: none; font-size: 1.05rem; display: block; margin-bottom: 5px; }
-        .bm-tag { display: inline-block; background: #eaf6fc; color: var(--primary); font-size: 0.8rem; padding: 2px 6px; border-radius: 4px; margin-right: 5px; cursor: pointer; }
-        .bm-tag.active { background: var(--primary); color: white; }
+        .bm-tag-disp { display: inline-block; background: #eaf6fc; color: var(--primary); font-size: 0.8rem; padding: 2px 6px; border-radius: 4px; margin-right: 5px; cursor: pointer; }
         .bm-memo { font-size: 0.9rem; color: var(--text-sub); margin-top: 4px; }
+        /* 북마크 전용 태그 버튼 */
+        .bm-tag-btn { display: inline-block; padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 20px; font-size: 0.9rem; margin-right: 5px; margin-bottom: 5px; cursor: pointer; background: white; }
+        .bm-tag-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
         
         /* 캘린더 */
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-bottom: 15px; }
@@ -107,6 +109,11 @@
         .memo-preview-item:hover { border-color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .memo-preview-item.active { border-left: 5px solid var(--primary); background: #fbfdfe; }
         .memo-date { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 4px; }
+        
+        /* 메모 달력 프리뷰 영역 */
+        #memoDatePreview { margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 15px; }
+        .memo-mini-item { padding: 8px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 0.9rem; }
+        .memo-mini-item:hover { background: #f9f9f9; color: var(--primary); }
 
         /* 출석부 행 */
         .att-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; padding: 8px 0; border-bottom: 1px solid #eee; }
@@ -126,7 +133,7 @@
         .st-check-group { display: flex; gap: 8px; width: 220px; flex-shrink: 0; justify-content: space-between; }
         .check-circle { width: 28px; height: 28px; border: 2px solid var(--border-color); border-radius: 50%; cursor: pointer; position: relative; background: var(--bg-main); }
         .check-circle.checked { border-color: var(--primary); background: var(--primary); }
-        .check-circle.checked::after { content: '✔'; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; }
+        .check-circle.checked::after { content: 'v'; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; font-weight:bold; }
         .ai-magic { position: absolute; right: 10px; top: 5px; cursor: pointer; display: none; font-size: 1.2rem; z-index: 5; }
         
         .student-list-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 15px; border-bottom: 1px solid var(--bg-main); cursor: pointer; border-radius: 6px; transition: 0.2s; }
@@ -158,7 +165,7 @@
             .split-container { flex-direction: column; }
             .split-left, .split-right { width: 100%; }
             .mobile-record-card { background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; }
-            .float-btn { top: auto; bottom: 80px; } /* 모바일은 아래로 */
+            .float-btn { top: auto; bottom: 80px; }
             .float-menu { top: auto; bottom: 140px; }
         }
     </style>
@@ -166,13 +173,13 @@
 <body>
     <div class="float-btn" onclick="toggleFloatMenu()">+</div>
     <div class="float-menu" id="floatMenu">
-        <div class="float-menu-item" onclick="changeSection('bookmarks')">🔖 북마크 (자료)</div>
-        <div class="float-menu-item" onclick="changeSection('calendar')">📅 달력/일정</div>
-        <div class="float-menu-item" onclick="changeSection('memo')">📝 메모/할일</div>
+        <div class="float-menu-item" onclick="changeSection('bookmarks')">북마크 (자료)</div>
+        <div class="float-menu-item" onclick="changeSection('calendar')">달력/일정</div>
+        <div class="float-menu-item" onclick="changeSection('memo')">메모/할일</div>
     </div>
 
     <div class="container">
-        <header><h1>쫑알수첩 v11.0</h1></header>
+        <header><h1>쫑알수첩 v11.5</h1></header>
         <nav class="nav-tabs">
             <div class="nav-item active" onclick="changeSection('record')">기록하기</div>
             <div class="nav-item" onclick="changeSection('students')">학생관리</div>
@@ -188,9 +195,9 @@
                         <button class="btn active" id="mBtnSub" onclick="setMobileMode('subject')">과목</button>
                         <button class="btn" id="mBtnBeh" onclick="setMobileMode('behavior')">행동</button>
                     </div>
-                    <div style="font-size:0.85rem; color:var(--text-sub); margin-bottom:15px; background:#f9f9f9; padding:10px; border-radius:6px; text-align:left;">💡 예시: <b>김철수/수학/발표 잘함</b></div>
+                    <div style="font-size:0.85rem; color:var(--text-sub); margin-bottom:15px; background:#f9f9f9; padding:10px; border-radius:6px; text-align:left;">[팁] 예시: <b>김철수/수학/발표 잘함</b></div>
                     <textarea id="mInput" style="width:100%; height:150px; padding:15px; border:1px solid var(--border-color); border-radius:8px; font-size:1rem; margin-bottom:15px; resize:none;" placeholder="입력..."></textarea>
-                    <button class="btn btn-primary" style="width:100%; height:50px;" onclick="saveMobileRecord()">AI 저장 ✨</button>
+                    <button class="btn btn-primary" style="width:100%; height:50px;" onclick="saveMobileRecord()">AI 저장</button>
                 </div>
             </div>
             <div class="pc-only">
@@ -272,22 +279,27 @@
                     <div class="card">
                         <div class="card-header">북마크 추가</div>
                         <input type="hidden" id="bmEditRow" value="">
-                        <label>URL (붙여넣기 시 제목 자동완성)</label>
-                        <div style="display:flex; gap:5px; margin-bottom:15px;">
-                            <input type="text" id="bmUrl" placeholder="https://..." style="margin-bottom:0; flex:1;" onpaste="setTimeout(autoFillBmTitle, 100)">
-                            <button class="btn-sm active" onclick="autoFillBmTitle()">🔍</button>
-                        </div>
-                        <label>제목</label><input type="text" id="bmTitle" placeholder="사이트명">
-                        <label>과목 태그</label>
-                        <div id="bmTagArea" class="tag-container" style="margin-bottom:15px;">
+                        <label>URL</label>
+                        <input type="text" id="bmUrl" placeholder="https://..." style="margin-bottom:15px;">
+                        
+                        <label>제목 (비워두면 AI 자동완성)</label>
+                        <input type="text" id="bmTitle" placeholder="선택 입력 사항">
+                        
+                        <label>과목 태그 (다중 선택 가능)</label>
+                        <div id="bmTagArea" style="margin-bottom:15px;">
                             </div>
+                        <div style="margin-bottom:15px; display:flex; gap:5px;">
+                            <input type="text" id="newBmTagInput" placeholder="새 태그 이름" style="margin-bottom:0; flex:1;">
+                            <button class="btn-sm active" onclick="addNewBmTag()">+</button>
+                        </div>
+
                         <label>메모/활용팁</label><textarea id="bmMemo" style="height:80px;" placeholder="간단한 활용 팁..."></textarea>
                         <div style="display:flex; gap:10px;">
                             <button class="btn btn-outline" style="flex:1" onclick="clearBmInput()">초기화</button>
                             <button class="btn btn-primary" style="flex:1" onclick="saveBookmark()" id="btnSaveBm">저장</button>
                         </div>
                         <div style="margin-top:20px; text-align:center;">
-                            <button class="btn-sm inactive" onclick="window.open('https://replayer.3arch2nd.site/')">🔗 리플레이어 바로가기</button>
+                            <button class="btn-sm inactive" onclick="window.open('https://replayer.3arch2nd.site/')">리플레이어 바로가기</button>
                         </div>
                     </div>
                 </div>
@@ -308,20 +320,22 @@
                 <div class="split-left">
                     <div class="card">
                          <div class="cal-header">
-                            <button class="btn-icon" onclick="moveMonth(-1)">◀</button>
+                            <button class="btn-icon" onclick="moveMonth(-1)">[이전]</button>
                             <span id="calMonth"></span>
-                            <button class="btn-icon" onclick="moveMonth(1)">▶</button>
+                            <button class="btn-icon" onclick="moveMonth(1)">[다음]</button>
                         </div>
                         <div class="cal-grid" id="calGrid"></div>
                     </div>
                     <div class="card">
-                        <div class="card-header">📌 오늘 할 일</div>
+                        <div class="card-header">오늘 할 일</div>
                         <div id="todayTodoList" style="font-size:0.95rem; color:var(--text-sub);">일정 없음</div>
                     </div>
                 </div>
                 <div class="split-right">
                     <div class="card full-height">
-                        <div class="card-header"><span id="calDetailTitle">선택한 날짜 일정</span></div>
+                        <div class="card-header">
+                            <span id="calDetailTitle">선택한 날짜 일정</span>
+                        </div>
                         <label>새 일정 등록</label>
                         <div style="display:flex; gap:5px; margin-bottom:15px;">
                             <input type="text" id="newEvent" placeholder="일정 내용" style="margin-bottom:0;">
@@ -331,10 +345,14 @@
                         
                         <div class="pc-only">
                             <hr style="border:0; border-top:1px dashed #eee; margin:20px 0;">
-                            <div style="font-weight:bold; margin-bottom:10px; color:var(--primary-dark);">🎓 출석 체크</div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                                <div style="font-weight:bold; color:var(--primary-dark);">출석 체크</div>
+                                <div style="display:flex; gap:5px;">
+                                    <button class="btn-sm" onclick="openMonthAttSummary()">월별 현황</button>
+                                    <button class="btn-sm active" onclick="saveAttendance()">출석 저장</button>
+                                </div>
+                            </div>
                             <div id="attList" style="max-height:300px; overflow-y:auto; margin-bottom:10px;"></div>
-                            <button class="btn btn-outline" style="width:100%;" onclick="saveAttendance()">출석 저장</button>
-                            <button class="btn-sm" style="width:100%; margin-top:10px;" onclick="openMonthAttSummary()">📊 월별 출석 현황 보기</button>
                         </div>
                     </div>
                 </div>
@@ -354,12 +372,15 @@
                         </div>
                         <div id="memoCalView">
                             <div class="cal-header">
-                                <button class="btn-icon" onclick="moveMemoMonth(-1)">◀</button>
+                                <button class="btn-icon" onclick="moveMemoMonth(-1)">[이전]</button>
                                 <span id="memoMonthTitle"></span>
-                                <button class="btn-icon" onclick="moveMemoMonth(1)">▶</button>
+                                <button class="btn-icon" onclick="moveMemoMonth(1)">[다음]</button>
                             </div>
                             <div class="cal-grid" id="memoCalGrid"></div>
-                            <div style="text-align:center; font-size:0.85rem; color:#999;">날짜를 누르면 메모가 표시됩니다.</div>
+                            <div id="memoDatePreview" style="display:none;">
+                                <div style="font-size:0.9rem; font-weight:bold; margin-bottom:5px; color:var(--primary);">선택한 날짜 메모</div>
+                                <div id="memoDatePreviewList"></div>
+                            </div>
                         </div>
                         <div id="memoListView" style="display:none; overflow-y:auto; max-height:500px;"></div>
                     </div>
@@ -374,7 +395,7 @@
                         </div>
                         <textarea id="memoContent" style="height:300px;" placeholder="내용을 입력하세요..."></textarea>
                         <div style="display:flex; gap:15px; align-items:center; margin-bottom:15px;">
-                            <label style="margin:0;"><input type="checkbox" id="memoPinned"> 중요(★)</label>
+                            <label style="margin:0;"><input type="checkbox" id="memoPinned"> 중요</label>
                             <label style="margin:0;"><input type="checkbox" id="memoDone"> 완료됨</label>
                         </div>
                         <div style="text-align:right;">
@@ -389,8 +410,8 @@
     </div> <div id="status-bar"><span id="status-msg">대기중...</span><div class="loading-dots" style="color:white; font-weight:bold;"></div></div>
     <div id="toast"></div>
     <div id="subjectModal" class="modal-overlay"><div class="modal-card"><div class="modal-title">새 과목 추가</div><input type="text" id="newSubjectName" placeholder="과목명"><div style="text-align:right;"><button class="btn btn-outline" onclick="closeSubjectModal()">취소</button> <button id="confirmSubjectBtn" class="btn btn-primary" onclick="confirmAddSubject()">추가</button></div></div></div>
-    <div id="deleteSubjectModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="color:var(--danger)">⚠️ 과목 삭제</div><p>기록이 영구 삭제됩니다.</p><div style="text-align:right;"><button class="btn btn-outline" onclick="closeDeleteSubjectModal()">취소</button> <button class="btn btn-danger" onclick="confirmDeleteSubject()">삭제</button></div></div></div>
-    <div id="deleteStudentModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="color:var(--danger)">⚠️ 학생 삭제</div><p>명단에서 삭제됩니다.</p><div style="text-align:right;"><button class="btn btn-outline" onclick="closeDeleteStudentModal()">취소</button> <button class="btn btn-danger" id="btnDelStudent" onclick="confirmDeleteStudent()">삭제</button></div></div></div>
+    <div id="deleteSubjectModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="color:var(--danger)">과목 삭제</div><p>기록이 영구 삭제됩니다.</p><div style="text-align:right;"><button class="btn btn-outline" onclick="closeDeleteSubjectModal()">취소</button> <button class="btn btn-danger" onclick="confirmDeleteSubject()">삭제</button></div></div></div>
+    <div id="deleteStudentModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="color:var(--danger)">학생 삭제</div><p>명단에서 삭제됩니다.</p><div style="text-align:right;"><button class="btn btn-outline" onclick="closeDeleteStudentModal()">취소</button> <button class="btn btn-danger" id="btnDelStudent" onclick="confirmDeleteStudent()">삭제</button></div></div></div>
     <div id="manageStudentModal" class="modal-overlay"><div class="modal-card" style="width:500px;"><div class="modal-title">학생 명단 관리</div><div class="modal-body" id="manageStudentRows"></div><div style="display:flex; justify-content:space-between; margin-bottom:15px;"><button class="btn-sm active" onclick="addStudentRow()">+ 행 추가</button></div><div style="text-align:right;"><button class="btn btn-outline" onclick="closeStudentManageModal()">취소</button> <button class="btn btn-primary" id="btnManageStSave" onclick="saveStudentManagement()">전체 저장</button></div></div></div>
     <div id="monthAttModal" class="modal-overlay"><div class="modal-card" style="width:600px;"><div class="modal-title">월별 출석 현황</div><div class="modal-body" id="monthAttBody"></div><div style="text-align:right;"><button class="btn btn-outline" onclick="document.getElementById('monthAttModal').classList.remove('open')">닫기</button></div></div></div>
 
@@ -410,7 +431,6 @@
         let isAiQueueRunning = false;
         let isGlobalProcessing = false;
         
-        // 부가기능 상태 변수
         let curYear = new Date().getFullYear();
         let curMonth = new Date().getMonth();
         let selectedDate = formatDateYMD(new Date());
@@ -418,11 +438,12 @@
         // 북마크
         let bmList = [];
         let bmFilter = null;
-        let selectedBmTag = "기타";
+        let bmTags = ["국어", "수학", "사회", "과학", "영어", "체육", "음악", "미술", "자료", "영상"]; // 북마크 전용 태그풀
+        let selectedBmTags = []; // 다중 선택된 태그
 
         // 메모
         let memoList = [];
-        let memoMode = 'cal'; // cal or list
+        let memoMode = 'cal';
         let curMemoMonth = new Date().getMonth();
         let curMemoYear = new Date().getFullYear();
         let selectedMemoDate = formatDateYMD(new Date());
@@ -435,7 +456,7 @@
             renderSubjectTags();
             updateNeisSubjectOptions();
             loadFiles();
-            renderBmTags(); // 북마크 태그 렌더링
+            renderBmTags();
             
             window.onbeforeunload = function(e) {
                 if(aiJobQueue.length > 0 || isAiQueueRunning) { e.preventDefault(); e.returnValue = ''; return "AI 변환 작업이 진행 중입니다."; }
@@ -457,23 +478,18 @@
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             
-            // 상단 탭 활성화 처리 (메인 메뉴만)
             document.querySelectorAll('.nav-tabs .nav-item').forEach(e => e.classList.remove('active'));
             const navItem = document.querySelector(`.nav-tabs .nav-item[onclick="changeSection('${id}')"]`);
             if(navItem) navItem.classList.add('active');
 
-            // 플로팅 메뉴 닫기
             document.getElementById('floatMenu').classList.remove('show');
 
-            // 섹션별 초기 로딩
             if(id === 'bookmarks') loadBookmarks();
             else if(id === 'calendar') { renderCalendar(); showDailyView(new Date().getDate()); }
             else if(id === 'memo') { loadMemos(); }
         }
 
-        function toggleFloatMenu() {
-            document.getElementById('floatMenu').classList.toggle('show');
-        }
+        function toggleFloatMenu() { document.getElementById('floatMenu').classList.toggle('show'); }
 
         // --- 통신 ---
         function initEnvironment() {
@@ -492,21 +508,31 @@
         // ================= 1. 북마크 =================
         function renderBmTags() {
             const area = document.getElementById('bmTagArea'); area.innerHTML = '';
-            const tags = [...subjectList, "기타"];
-            tags.forEach(t => {
-                const tag = document.createElement('div'); tag.className = 'bm-tag'; 
-                tag.innerText = t; 
-                if(t === selectedBmTag) tag.classList.add('active');
-                tag.onclick = () => { selectedBmTag = t; renderBmTags(); };
-                area.appendChild(tag);
+            bmTags.forEach(t => {
+                const btn = document.createElement('div'); btn.className = 'bm-tag-btn';
+                btn.innerHTML = `${t} <span onclick="removeBmTag('${t}', event)" style="margin-left:5px; font-size:0.7rem; color:#999;">x</span>`;
+                if(selectedBmTags.includes(t)) btn.classList.add('selected');
+                btn.onclick = (e) => { 
+                    if(e.target.tagName === 'SPAN') return;
+                    toggleBmTag(t); 
+                };
+                area.appendChild(btn);
             });
         }
-        async function autoFillBmTitle() {
-            const url = document.getElementById('bmUrl').value;
-            if(!url || !url.startsWith('http')) return;
-            const res = await sendRequest('get_url_info', {url});
-            if(res && res.title) { document.getElementById('bmTitle').value = res.title; }
+        function toggleBmTag(t) {
+            if(selectedBmTags.includes(t)) selectedBmTags = selectedBmTags.filter(item => item !== t);
+            else selectedBmTags.push(t);
+            renderBmTags();
         }
+        function addNewBmTag() {
+            const val = document.getElementById('newBmTagInput').value.trim();
+            if(val && !bmTags.includes(val)) { bmTags.push(val); document.getElementById('newBmTagInput').value=''; renderBmTags(); }
+        }
+        function removeBmTag(t, e) {
+            e.stopPropagation();
+            if(confirm('태그 목록에서 삭제하시겠습니까?')) { bmTags = bmTags.filter(item => item !== t); renderBmTags(); }
+        }
+
         async function loadBookmarks() {
             const list = document.getElementById('bmList'); list.innerHTML = '<div class="loading-dots"></div>';
             bmList = await sendRequest('get_bookmarks') || [];
@@ -514,21 +540,25 @@
         }
         function renderBmList() {
             const list = document.getElementById('bmList'); list.innerHTML = '';
-            const filtered = bmFilter ? bmList.filter(b => b.subject === bmFilter) : bmList;
+            const filtered = bmFilter ? bmList.filter(b => b.tags && b.tags.includes(bmFilter)) : bmList;
             
             if(filtered.length === 0) list.innerHTML = '<div style="text-align:center; padding:20px; color:#999;">북마크가 없습니다.</div>';
             
             filtered.forEach(b => {
                 const card = document.createElement('div'); card.className = 'bm-card';
+                // 태그 렌더링
+                const tagArr = b.tags ? b.tags.split(',') : [];
+                let tagHtml = tagArr.map(t => `<span class="bm-tag-disp" onclick="filterBookmark('${t.trim()}')">${t.trim()}</span>`).join('');
+                
                 card.innerHTML = `
                     <div class="bm-main">
                         <a href="${b.url}" target="_blank" class="bm-link">${b.title}</a>
-                        <div><span class="bm-tag" onclick="filterBookmark('${b.subject}')">${b.subject}</span></div>
+                        <div style="margin-bottom:4px;">${tagHtml}</div>
                         <div class="bm-memo">${b.memo}</div>
                     </div>
                     <div style="display:flex; flex-direction:column; gap:5px;">
-                        <button class="btn-icon btn-edit" onclick="editBookmark(${b.row})">✏️</button>
-                        <button class="btn-icon btn-del" onclick="deleteBookmark(${b.row})">🗑️</button>
+                        <button class="btn-icon btn-edit" onclick="editBookmark(${b.row})">[수정]</button>
+                        <button class="btn-icon btn-del" onclick="deleteBookmark(${b.row})">[삭제]</button>
                     </div>
                 `;
                 list.appendChild(card);
@@ -544,12 +574,29 @@
             const title = document.getElementById('bmTitle').value;
             const memo = document.getElementById('bmMemo').value;
             const row = document.getElementById('bmEditRow').value;
+            const tagsStr = selectedBmTags.join(', ');
             
             if(!url) { showToast("URL은 필수입니다."); return; }
             const btn = document.getElementById('btnSaveBm'); setLoading(btn, "저장 중");
             
-            await sendRequest('save_bookmark', { row: row ? parseInt(row) : null, subject: selectedBmTag, title: title||"제목없음", url, memo });
-            clearBmInput(); loadBookmarks(); clearLoading(btn); showToast("저장 완료");
+            // 1. 저장 (빈칸이라도 우선 저장)
+            const res = await sendRequest('save_bookmark', { row: row ? parseInt(row) : null, tags: tagsStr, title: title||"", url, memo });
+            
+            // 2. AI 후처리 (제목이 없거나 태그가 없으면)
+            if (!title || selectedBmTags.length === 0) {
+                showToast("저장됨. AI가 자동 분류 중...");
+                clearBmInput(); // UI 초기화
+                loadBookmarks(); // 목록 갱신 (빈칸으로 뜸)
+                
+                // 후처리 요청
+                sendRequest('process_bookmark_ai', { row: res.rowNum, url: url, availableTags: bmTags }).then(aiRes => {
+                    if(aiRes.title) showToast(`자동 업데이트: ${aiRes.title}`);
+                    loadBookmarks(); // AI 완료 후 재로드
+                    clearLoading(btn);
+                });
+            } else {
+                clearBmInput(); loadBookmarks(); clearLoading(btn); showToast("저장 완료");
+            }
         }
         function editBookmark(row) {
             const item = bmList.find(b => b.row === row);
@@ -558,16 +605,17 @@
             document.getElementById('bmTitle').value = item.title;
             document.getElementById('bmMemo').value = item.memo;
             document.getElementById('bmEditRow').value = item.row;
-            selectedBmTag = item.subject; renderBmTags();
+            // 태그 복원
+            selectedBmTags = item.tags ? item.tags.split(',').map(s=>s.trim()) : [];
+            renderBmTags();
             document.getElementById('bmUrl').focus();
         }
         function clearBmInput() {
             document.getElementById('bmUrl').value = ''; document.getElementById('bmTitle').value = '';
             document.getElementById('bmMemo').value = ''; document.getElementById('bmEditRow').value = '';
-            selectedBmTag = "기타"; renderBmTags();
+            selectedBmTags = []; renderBmTags();
         }
         async function deleteBookmark(row) { if(confirm('삭제하시겠습니까?')) { await sendRequest('delete_bookmark', {row}); loadBookmarks(); } }
-
 
         // ================= 2. 달력/일정 =================
         function moveMonth(dir) { curMonth += dir; if(curMonth>11) { curMonth=0; curYear++; } else if(curMonth<0) { curMonth=11; curYear--; } renderCalendar(); }
@@ -585,11 +633,9 @@
             for(let i=1; i<=lastDay.getDate(); i++) {
                 const d = document.createElement('div'); d.className='cal-day'; d.innerHTML=`<span>${i}</span><div class="cal-dot"></div>`;
                 const dateStr = `${curYear}-${String(curMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-                
                 if(dateStr === selectedDate) d.classList.add('selected');
                 const today = new Date();
                 if(today.getFullYear()===curYear && today.getMonth()===curMonth && today.getDate()===i) d.classList.add('today');
-                
                 d.onclick = () => { selectedDate = dateStr; renderCalendar(); showDailyView(i); };
                 grid.appendChild(d);
             }
@@ -598,7 +644,6 @@
         async function showDailyView(day) {
             document.getElementById('calDetailTitle').innerText = `${selectedDate} 일정`;
             const evDiv = document.getElementById('dailyEvents'); evDiv.innerHTML='로딩...';
-            
             const events = await sendRequest('get_events'); 
             evDiv.innerHTML='';
             if(events) {
@@ -610,7 +655,6 @@
                 });
                 if(todays.length === 0) evDiv.innerHTML = '<div style="color:#999; padding:10px;">일정이 없습니다.</div>';
                 
-                // 오늘 할일(좌측 하단) 업데이트
                 const todayStr = formatDateYMD(new Date());
                 const todoDiv = document.getElementById('todayTodoList');
                 const todayEvents = events.filter(e => e.date === todayStr);
@@ -618,7 +662,6 @@
                 else todoDiv.innerText = "일정 없음";
             }
 
-            // 출석 로드
             const attDiv = document.getElementById('attList'); attDiv.innerHTML='로딩...';
             const attData = await sendRequest('get_attendance');
             const existAtt = attData ? attData.filter(a => a.date === selectedDate) : [];
@@ -670,7 +713,6 @@
         
         async function loadMemos() {
             memoList = await sendRequest('get_memos') || [];
-            // 기본은 오늘 날짜 선택
             selectedMemoDate = formatDateYMD(new Date());
             setMemoMode(memoMode);
         }
@@ -696,8 +738,38 @@
                 if(dateStr === selectedMemoDate) d.classList.add('selected');
                 
                 d.innerHTML = `<span>${i}</span><div class="cal-dot"></div>`;
-                d.onclick = () => { selectedMemoDate = dateStr; renderMemoCalendar(); openMemoForm(); };
+                // [수정] 날짜 클릭 시 프리뷰 렌더링
+                d.onclick = () => { 
+                    selectedMemoDate = dateStr; 
+                    renderMemoCalendar(); // 선택 효과 갱신
+                    renderMemoDatePreview(); // 하단 프리뷰 표시
+                    clearMemoInput(); // 입력창은 리셋하되 날짜는 유지
+                    document.getElementById('memoDateDisp').innerText = selectedMemoDate;
+                };
                 grid.appendChild(d);
+            }
+            // 초기 로딩 시 프리뷰도 같이
+            renderMemoDatePreview();
+        }
+        
+        // [NEW] 달력 모드 프리뷰
+        function renderMemoDatePreview() {
+            const previewArea = document.getElementById('memoDatePreview');
+            const previewList = document.getElementById('memoDatePreviewList');
+            const targetMemos = memoList.filter(m => m.date === selectedMemoDate);
+            
+            if(targetMemos.length === 0) {
+                previewArea.style.display = 'none';
+            } else {
+                previewArea.style.display = 'block';
+                previewList.innerHTML = '';
+                targetMemos.forEach(m => {
+                   const div = document.createElement('div');
+                   div.className = 'memo-mini-item';
+                   div.innerHTML = `${m.pinned ? '★ ' : ''}${m.content}`;
+                   div.onclick = () => openMemoForm(m);
+                   previewList.appendChild(div);
+                });
             }
         }
 
@@ -716,21 +788,13 @@
             document.getElementById('memoDateDisp').innerText = selectedMemoDate;
             document.getElementById('btnDelMemo').style.display = 'none';
             if(memoItem) {
-                // 특정 메모 선택 (수정 모드)
-                // 만약 날짜만 선택하고 데이터가 없으면? -> 리스트에서 찾아서 표시
                 document.getElementById('memoContent').value = memoItem.content;
                 document.getElementById('memoPinned').checked = memoItem.pinned;
                 document.getElementById('memoDone').checked = memoItem.done;
                 document.getElementById('memoEditRow').value = memoItem.row;
                 document.getElementById('btnDelMemo').style.display = 'inline-block';
             } else {
-                // 날짜 클릭 시 해당 날짜의 첫번째 메모 로드 or 빈칸
-                const memoOnDate = memoList.find(m => m.date === selectedMemoDate);
-                if(memoOnDate) {
-                    openMemoForm(memoOnDate);
-                } else {
-                    clearMemoInput();
-                }
+                clearMemoInput();
             }
         }
 
@@ -740,7 +804,6 @@
             document.getElementById('memoDone').checked = false;
             document.getElementById('memoEditRow').value = '';
             document.getElementById('btnDelMemo').style.display = 'none';
-            // 날짜는 유지
         }
 
         async function saveMemo() {
@@ -783,7 +846,7 @@
         async function savePublicSettings() { const key = document.getElementById('settingApiKey').value.trim(); if(!key) return; await sendRequest('save_settings', { apiKey: key }); showToast("저장 완료"); }
         async function savePersona() { const p = document.getElementById('personaText').value; aiPersona = p; const btn = document.getElementById('btnPersona'); setLoading(btn, "저장 중"); if(!IS_PRO_MODE) await sendRequest('save_persona', { persona: p }); showToast("저장 완료"); clearLoading(btn); }
         function uploadFile() { const input = document.getElementById('uploadInput'); if(input.files.length === 0) return; const file = input.files[0]; const reader = new FileReader(); const btn = document.getElementById('btnUpload'); reader.onload = async function(e) { const base64 = e.target.result.split(',')[1]; setLoading(btn, "업로드 중"); const res = await sendRequest('upload_file', { name: file.name, mimeType: file.type, data: base64 }); if(res) { showToast("완료"); loadFiles(); input.value = ''; } clearLoading(btn); }; reader.readAsDataURL(file); }
-        async function loadFiles() { const list = document.getElementById('fileList'); list.innerHTML = '로딩...'; const files = await sendRequest('get_files'); list.innerHTML = ''; if(files) files.forEach(f => { const div = document.createElement('div'); div.style.padding = "10px"; div.style.borderBottom = "1px solid #eee"; div.innerHTML = `<a href="${f.url}" target="_blank" style="text-decoration:none; color:var(--primary); font-weight:bold;">📄 ${f.name}</a>`; list.appendChild(div); }); }
+        async function loadFiles() { const list = document.getElementById('fileList'); list.innerHTML = '로딩...'; const files = await sendRequest('get_files'); list.innerHTML = ''; if(files) files.forEach(f => { const div = document.createElement('div'); div.style.padding = "10px"; div.style.borderBottom = "1px solid #eee"; div.innerHTML = `<a href="${f.url}" target="_blank" style="text-decoration:none; color:var(--primary); font-weight:bold;">[파일] ${f.name}</a>`; list.appendChild(div); }); }
 
         function setMode(mode) { currentMode = mode; document.getElementById('btnSubject').className = mode === 'subject' ? 'btn-sm active' : 'btn-sm inactive'; document.getElementById('btnBehavior').className = mode === 'behavior' ? 'btn-sm active' : 'btn-sm inactive'; document.getElementById('subjectArea').style.display = mode === 'subject' ? 'block' : 'none'; document.getElementById('checkHeader').style.visibility = mode === 'subject' ? 'visible' : 'hidden'; renderRecordList(); }
         function renderRecordList() {
@@ -791,7 +854,7 @@
             studentList.forEach(st => {
                 const row = document.createElement('div'); row.className = 'student-row';
                 let checkHtml = currentMode === 'subject' ? `<div class="st-check-group"><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div></div>` : '';
-                row.innerHTML = `<div class="st-name">${st.id}. ${st.name}</div><div style="flex-grow:1; position:relative;"><input type="text" class="st-input" id="input_${st.id}" placeholder="${currentMode==='subject'?'관찰/특기사항':'행동특성'}"><span class="ai-magic" onclick="runAI('${st.id}', this)">✨</span></div>${checkHtml}`;
+                row.innerHTML = `<div class="st-name">${st.id}. ${st.name}</div><div style="flex-grow:1; position:relative;"><input type="text" class="st-input" id="input_${st.id}" placeholder="${currentMode==='subject'?'관찰/특기사항':'행동특성'}"><span class="ai-magic" onclick="runAI('${st.id}', this)">AI</span></div>${checkHtml}`;
                 list.appendChild(row);
             });
             toggleAIMode();
@@ -851,6 +914,7 @@
         }
 
         function viewTab(mode) { viewTabMode = mode; document.getElementById('viewSubBtn').className = mode === 'subject' ? 'btn-sm active' : 'btn-sm inactive'; document.getElementById('viewBehBtn').className = mode === 'behavior' ? 'btn-sm active' : 'btn-sm inactive'; document.getElementById('viewSubjectFilter').style.display = mode === 'subject' ? 'block' : 'none'; loadHistory(); }
+        
         async function loadHistory() {
             if(!selectedStudentName) return;
             const container = document.getElementById('historyViewer'); container.innerHTML = '로딩중...';
@@ -860,11 +924,13 @@
             if(!history || history.length === 0) { container.innerHTML = `<div style="text-align:center;color:var(--text-sub);padding:50px 0;">기록이 없습니다.</div>`; return; }
             history.forEach(item => {
                 const card = document.createElement('div'); card.className = 'history-card';
-                let evalHtml = item.check && item.check !== "없음" ? `<div class="h-eval">${item.check}</div>` : "";
-                card.innerHTML = `<div class="h-chk"><input type="checkbox" class="hist-chk" value="${item.rowNum}"></div><div class="h-info"><div class="h-date">${item.date}</div><div class="h-badge">${item.type}</div>${evalHtml}</div><textarea id="hist_txt_${item.rowNum}" class="h-textarea">${item.txt}</textarea><div class="h-btn-area"><button class="btn-icon btn-edit" onclick="updateRecord('${reqType}', ${item.rowNum})">수정</button><button class="btn-copy" onclick="quietCopy(this, '${item.txt}')">복사</button></div>`;
+                // [수정] 학생 상세 보기에서 과목명(item.type) 배지 제거
+                let evalHtml = item.check && item.check !== "없음" ? `<div class="h-eval" style="color:var(--success); font-weight:bold; font-size:0.85rem;">${item.check}</div>` : "";
+                card.innerHTML = `<div class="h-chk"><input type="checkbox" class="hist-chk" value="${item.rowNum}"></div><div class="h-info"><div class="h-date">${item.date}</div>${evalHtml}</div><textarea id="hist_txt_${item.rowNum}" class="h-textarea">${item.txt}</textarea><div class="h-btn-area"><button class="btn-icon btn-edit" onclick="updateRecord('${reqType}', ${item.rowNum})">[수정]</button><button class="btn-copy" onclick="quietCopy(this, '${item.txt}')">[복사]</button></div>`;
                 container.appendChild(card);
             });
         }
+        
         async function updateRecord(sheetName, rowNum) { const newText = document.getElementById(`hist_txt_${rowNum}`).value; if(!confirm("수정?")) return; await sendRequest('update_record_row', { type: sheetName, rowNum, text: newText }); showToast("수정됨"); }
         async function deleteSelectedHistory() {
             const chks = document.querySelectorAll('.hist-chk:checked'); if(chks.length === 0) return; if(!confirm(`${chks.length}건 삭제?`)) return;
@@ -877,12 +943,12 @@
         function updateNeisSubjectOptions() { const sel=document.getElementById('neisSubjectSelect'); sel.innerHTML=''; subjectList.forEach(sub=>{ const opt=document.createElement('option'); opt.value=sub; opt.innerText=sub; sel.appendChild(opt); }); }
         function renderSubjectTags() { const container=document.getElementById('subjectTags'); const addBtn=container.querySelector('.tag-add'); container.querySelectorAll('.tag:not(.tag-add)').forEach(el=>el.remove()); subjectList.forEach(sub=>{ const tag=document.createElement('div'); tag.className='tag'; tag.innerHTML=`${sub} <span class="x-btn" onclick="openDeleteSubjectModal('${sub}', event)">x</span>`; tag.onclick=(e)=>{if(e.target.classList.contains('x-btn')) return; selSub(tag);}; if(sub==="국어") tag.classList.add('selected'); container.insertBefore(tag, addBtn); }); updateSubjectFilterOptions(); updateNeisSubjectOptions(); }
         function selSub(el) { document.querySelectorAll('.tag').forEach(t => t.classList.remove('selected')); el.classList.add('selected'); }
-        async function confirmAddSubject() { const name=document.getElementById('newSubjectName').value.trim(); if(!name || subjectList.includes(name)) return; const btn=document.getElementById('confirmSubjectBtn'); setLoading(btn, "추가 중"); await sendRequest('add_subject', {subject:name}); subjectList.push(name); renderSubjectTags(); renderBmTags(); closeSubjectModal(); clearLoading(btn); showToast("추가됨"); }
+        async function confirmAddSubject() { const name=document.getElementById('newSubjectName').value.trim(); if(!name || subjectList.includes(name)) return; const btn=document.getElementById('confirmSubjectBtn'); setLoading(btn, "추가 중"); await sendRequest('add_subject', {subject:name}); subjectList.push(name); renderSubjectTags(); closeSubjectModal(); clearLoading(btn); showToast("추가됨"); }
         function openSubjectModal() { document.getElementById('newSubjectName').value=''; document.getElementById('subjectModal').classList.add('open'); document.getElementById('newSubjectName').focus(); }
         function closeSubjectModal() { document.getElementById('subjectModal').classList.remove('open'); }
         function openDeleteSubjectModal(sub, e) { if(e) e.stopPropagation(); targetSubjectToDelete=sub; document.getElementById('deleteSubjectModal').classList.add('open'); }
         function closeDeleteSubjectModal() { document.getElementById('deleteSubjectModal').classList.remove('open'); }
-        async function confirmDeleteSubject() { if(!targetSubjectToDelete) return; await sendRequest('delete_subject', {subject:targetSubjectToDelete}); subjectList=subjectList.filter(s=>s!==targetSubjectToDelete); renderSubjectTags(); renderBmTags(); closeDeleteSubjectModal(); showToast("삭제됨"); }
+        async function confirmDeleteSubject() { if(!targetSubjectToDelete) return; await sendRequest('delete_subject', {subject:targetSubjectToDelete}); subjectList=subjectList.filter(s=>s!==targetSubjectToDelete); renderSubjectTags(); closeDeleteSubjectModal(); showToast("삭제됨"); }
         async function loadStudents() { const list=document.getElementById('studentNavList'); list.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-sub);">학생 목록 불러오는 중<span class="loading-dots"></span></div>`; const data=await sendRequest('get_students'); if(data){ studentList=data; renderRecordList(); renderStudentNav(); } }
         function renderStudentNav() { const list=document.getElementById('studentNavList'); list.innerHTML=''; studentList.forEach(st=>{ const item=document.createElement('div'); item.className='student-list-item'; item.innerHTML=`${st.id}번 <b>${st.name}</b>`; item.onclick=()=>selectStudent(st.name, item); list.appendChild(item); }); }
         async function selectStudent(name, el) { if(isGlobalProcessing) return; selectedStudentName=name; document.querySelectorAll('.student-list-item').forEach(i=>i.classList.remove('active')); el.classList.add('active'); setGlobalProcessing(true); await loadHistory(); setGlobalProcessing(false); }
@@ -894,7 +960,7 @@
         function closeDeleteStudentModal() { document.getElementById('deleteStudentModal').classList.remove('open'); }
         async function confirmDeleteStudent() { const btn = document.getElementById('btnDelStudent'); setLoading(btn, "삭제 중"); await sendRequest('delete_student', {name:selectedStudentName}); closeDeleteStudentModal(); selectedStudentName=null; document.getElementById('historyViewer').innerHTML=''; loadStudents(); showToast("삭제됨"); clearLoading(btn); }
         function toggleNeisType() { const t=document.getElementById('neisType').value; document.getElementById('neisSubOption').style.display=t==='subject'?'block':'none'; document.getElementById('neisBehOption').style.display=t==='behavior'?'block':'none'; }
-        async function generateNeisCards() { const container = document.getElementById('neisResultList'); if(studentList.length === 0) return; const btn = document.getElementById('btnGenNeis'); setLoading(btn, "생성 중"); container.innerHTML = ""; const typeMode = document.getElementById('neisType').value; let targetType = typeMode === 'subject' ? document.getElementById('neisSubjectSelect').value : '행동'; let keyword = typeMode === 'behavior' ? document.getElementById('neisKeyword').value : ""; let len = document.getElementById('neisLen').value; for(const st of studentList) { const card = document.createElement('div'); card.className = 'neis-result-card'; card.innerHTML = `<div class="n-name">${st.name}</div><textarea class="n-textarea">작성 중...</textarea><div class="n-btn-area"><button class="btn-copy">복사</button></div>`; container.appendChild(card); const data = await sendRequest('generate_neis_individual', { name: st.name, type: targetType, keyword, length: len }); const textarea = card.querySelector('textarea'); textarea.value = data ? data.text.replace(/['"]/g, "").replace(/\*\*/g, "").replace(/##/g, "") : "실패"; card.querySelector('.btn-copy').onclick = () => { navigator.clipboard.writeText(textarea.value); showToast("복사됨"); }; } clearLoading(btn); showToast("완료"); }
+        async function generateNeisCards() { const container = document.getElementById('neisResultList'); if(studentList.length === 0) return; const btn = document.getElementById('btnGenNeis'); setLoading(btn, "생성 중"); container.innerHTML = ""; const typeMode = document.getElementById('neisType').value; let targetType = typeMode === 'subject' ? document.getElementById('neisSubjectSelect').value : '행동'; let keyword = typeMode === 'behavior' ? document.getElementById('neisKeyword').value : ""; let len = document.getElementById('neisLen').value; for(const st of studentList) { const card = document.createElement('div'); card.className = 'neis-result-card'; card.innerHTML = `<div class="n-name">${st.name}</div><textarea class="n-textarea">작성 중...</textarea><div class="n-btn-area"><button class="btn-copy">[복사]</button></div>`; container.appendChild(card); const data = await sendRequest('generate_neis_individual', { name: st.name, type: targetType, keyword, length: len }); const textarea = card.querySelector('textarea'); textarea.value = data ? data.text.replace(/['"]/g, "").replace(/\*\*/g, "").replace(/##/g, "") : "실패"; card.querySelector('.btn-copy').onclick = () => { navigator.clipboard.writeText(textarea.value); showToast("복사됨"); }; } clearLoading(btn); showToast("완료"); }
         function setGlobalProcessing(processing) { isGlobalProcessing = processing; const nav = document.getElementById('studentNavList'); if(processing) nav.classList.add('disabled-area'); else nav.classList.remove('disabled-area'); }
     </script>
 </body>
