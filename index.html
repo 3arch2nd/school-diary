@@ -7,7 +7,6 @@
     <title>쫑알수첩 Pro (Personal)</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
     <style>
-        /* [기본 테마] */
         :root {
             --bg-main: #f2f8fc;
             --card-bg: #FFFFFF;
@@ -55,7 +54,6 @@
         .card.scrollable { overflow-y: auto; }
         .card-header { font-size: 1.1rem; color: var(--primary-dark); font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; flex-shrink: 0; border-bottom: 2px solid var(--bg-main); display: flex; justify-content: space-between; align-items: center; }
 
-        /* UI Components */
         .tag-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
         .tag { position: relative; padding: 8px 30px 8px 16px; background: var(--bg-main); border-radius: 20px; font-size: 0.95rem; cursor: pointer; border: 1px solid var(--border-color); transition: 0.2s; user-select: none; }
         .tag.selected { background: var(--primary); color: white; border-color: var(--primary); }
@@ -120,7 +118,22 @@
         .cal-dot { width: 6px; height: 6px; background: var(--primary); border-radius: 50%; margin-top: 4px; display: none; }
         .cal-day.has-memo .cal-dot { display: block; }
         
-        .memo-mini-item { padding: 8px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%; }
+        /* [수정] 메모 한줄 강제 처리 (엄격 모드) */
+        .memo-mini-item { 
+            padding: 10px 8px; 
+            border-bottom: 1px solid #eee; 
+            cursor: pointer; 
+            font-size: 0.9rem; 
+            color: var(--text-main);
+            /* 한 줄 말줄임 핵심 */
+            display: block;
+            width: 100%;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            height: 40px; /* 높이 고정 */
+            line-height: 20px; /* 텍스트 수직 정렬 보조 */
+        }
         .memo-mini-item:hover { color: var(--primary); }
         .memo-mini-item.done-memo { text-decoration: line-through; opacity: 0.6; color: #aaa; }
         
@@ -134,24 +147,14 @@
         .student-nav-item:hover { background: #eaf6fc; color: var(--primary-dark); border-color: var(--primary-light); }
         .student-nav-item.active { background: #eaf6fc; border-color: var(--primary); font-weight: bold; color: var(--primary-dark); border-width: 2px; }
 
-        /* [수정] History Card Layout (Compact) */
-        .history-card { 
-            border-bottom: 1px solid #eee; padding: 12px 5px; display: flex; gap: 10px; align-items: flex-start; 
-        }
-        .h-left { width: 90px; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; font-size: 0.85rem; color: #666; }
-        .h-date { font-weight: bold; color: var(--text-main); }
-        .h-badge { color: var(--success); font-weight: bold; font-size: 0.8rem; }
-        
-        .h-text { flex: 1; border: 1px solid #e3eff5; border-radius: 4px; padding: 8px; font-size: 0.95rem; line-height: 1.5; resize: vertical; min-height: 50px; font-family: inherit; background: #fff; }
-        .h-text:focus { border-color: var(--primary); outline: none; }
-        
-        .h-btn-area { display: flex; flex-direction: column; gap: 5px; justify-content: flex-start; }
+        .history-card { border-bottom: 1px solid #eee; padding: 15px 10px; display: flex; gap: 10px; align-items: flex-start; }
+        .history-chk { padding-top: 2px; }
+        .history-content { flex: 1; }
 
-        /* [수정] 출석부 Layout (여백 확보) */
-        .att-row { display: flex; align-items: center; gap: 5px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #eee; }
+        .att-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #eee; }
         .att-name { width: 50px; font-weight: bold; font-size: 0.9rem; flex-shrink: 0; }
         .att-sel { font-size: 0.9rem; padding: 4px; width: 70px; margin-bottom: 0 !important; flex-shrink: 0; }
-        .att-memo { font-size: 0.9rem; padding: 4px; flex-grow: 1; margin-bottom: 0 !important; width: 100%; } /* 너비 확장 */
+        .att-memo { font-size: 0.9rem; padding: 4px; flex-grow: 1; margin-bottom: 0 !important; }
 
         .mobile-block-overlay { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; color: var(--text-sub); }
         .mobile-block-overlay span { font-size: 3rem; margin-bottom: 20px; }
@@ -206,7 +209,7 @@
     </div>
 
     <div class="container">
-        <header><h1>쫑알수첩 v18.0</h1></header>
+        <header><h1>쫑알수첩 v18.1</h1></header>
         <nav class="nav-tabs">
             <div class="nav-item nav-item-home active" onclick="changeSection('home')">HOME</div>
             <div class="nav-item" onclick="changeSection('record')">기록하기</div>
@@ -474,7 +477,15 @@
             if(nav) nav.classList.add('active');
             if(id==='bookmarks') loadBookmarks(); else if(id==='calendar') { renderCalendar(); showDailyView(new Date().getDate()); } else if(id==='memo') loadMemos();
         }
-        function reqConfirm(msg, callback) { document.getElementById('confirmMsg').innerText = msg; document.getElementById('confirmModal').classList.add('open'); document.getElementById('btnConfirmYes').onclick = () => { document.getElementById('confirmModal').classList.remove('open'); callback(); }; }
+        
+        function reqConfirm(msg, callback) {
+            document.getElementById('confirmMsg').innerText = msg;
+            document.getElementById('confirmModal').classList.add('open');
+            document.getElementById('btnConfirmYes').onclick = () => {
+                document.getElementById('confirmModal').classList.remove('open');
+                callback();
+            };
+        }
 
         // [HOME Logic]
         async function loadHomeData() { const d=await sendRequest('get_home_data'); if(d){ if(d.image) { document.getElementById('homeMainImg').src=d.image; document.getElementById('homeMainImg').style.display='block'; document.querySelector('.home-image-msg').style.display='none'; } homeQuickLinks=d.links||[]; renderQuickLinks(); } }
@@ -488,18 +499,8 @@
 
         // [Record Logic]
         function setMode(m) { currentMode=m; document.getElementById('btnSubject').className=m==='subject'?'btn-sm active':'btn-sm inactive'; document.getElementById('btnBehavior').className=m==='behavior'?'btn-sm active':'btn-sm inactive'; document.getElementById('subjectArea').style.display=m==='subject'?'block':'none'; document.getElementById('checkHeader').style.visibility=m==='subject'?'visible':'hidden'; renderRecordList(); }
-        function renderSubjectTags() { 
-            const c=document.getElementById('subjectTags'); c.innerHTML=''; 
-            subjectList.forEach(s=>{ 
-                const t=document.createElement('div'); t.className='tag'; t.innerHTML=`${s} <span class="x-btn">x</span>`; 
-                t.querySelector('.x-btn').onclick = (e) => openDelSub(s, e);
-                t.onclick=(e)=>{if(e.target.classList.contains('x-btn'))return; selectSub(t);}; 
-                if(s==="국어") t.classList.add('selected'); c.appendChild(t); 
-            }); 
-            const addBtn = document.createElement('div'); addBtn.className = 'tag tag-add'; addBtn.innerText = '+'; addBtn.onclick = openSubjectModal;
-            c.appendChild(addBtn);
-            updateSubjectFilterOptions(); updateNeisSubjectOptions(); 
-        }
+        // [수정: 클릭 이벤트 개선]
+        function renderSubjectTags() { const c=document.getElementById('subjectTags'); c.innerHTML=''; subjectList.forEach(s=>{ const t=document.createElement('div'); t.className='tag'; t.innerHTML=`${s} <span class="x-btn">x</span>`; t.querySelector('.x-btn').onclick = (e) => openDelSub(s, e); t.onclick=(e)=>{if(e.target.classList.contains('x-btn'))return; selectSub(t);}; if(s==="국어") t.classList.add('selected'); c.appendChild(t); }); const addBtn = document.createElement('div'); addBtn.className = 'tag tag-add'; addBtn.innerText = '+'; addBtn.onclick = openSubjectModal; c.appendChild(addBtn); updateSubjectFilterOptions(); updateNeisSubjectOptions(); }
         function selectSub(el) { if(el.classList.contains('selected')) {el.classList.remove('selected');} else {document.querySelectorAll('#subjectTags .tag').forEach(t=>t.classList.remove('selected')); el.classList.add('selected');} }
         function openDelSub(s,e) { e.stopPropagation(); targetSubjectToDelete=s; document.getElementById('deleteSubjectModal').classList.add('open'); }
         async function confirmDeleteSubject() { await sendRequest('delete_subject',{subject:targetSubjectToDelete}); subjectList=subjectList.filter(s=>s!==targetSubjectToDelete); renderSubjectTags(); document.getElementById('deleteSubjectModal').classList.remove('open'); }
@@ -569,6 +570,7 @@
 
         // [Student Manager]
         async function loadStudents() { studentList=await sendRequest('get_students')||[]; renderRecordList(); renderStudentNav(); }
+        // [수정] 학생 명단 스타일 (박스)
         function renderStudentNav() { const l=document.getElementById('studentNavList'); l.innerHTML=''; studentList.forEach(s=>{const d=document.createElement('div');d.className='student-nav-item';d.innerHTML=`<span>${s.id}. <b>${s.name}</b></span><span>></span>`;d.onclick=()=>{selectedStudentName=s.name;loadHistory();};l.appendChild(d);}); }
         function openStudentManageModal() { const c=document.getElementById('manageStudentRows'); c.innerHTML=''; if(studentList.length>0)studentList.forEach(s=>addStudentRow(s.id,s.name)); else for(i=0;i<3;i++)addStudentRow(); document.getElementById('manageStudentModal').classList.add('open'); }
         function closeStudentManageModal() { document.getElementById('manageStudentModal').classList.remove('open'); }
@@ -608,9 +610,13 @@
         function setMemoMode(m) { memoMode=m; document.getElementById('btnMemoModeCal').className=m==='cal'?'btn-sm active':'btn-sm inactive'; document.getElementById('btnMemoModeList').className=m==='list'?'btn-sm active':'btn-sm inactive'; document.getElementById('memoCalView').style.display=m==='cal'?'block':'none'; document.getElementById('memoListView').style.display=m==='list'?'block':'none'; if(m==='cal')renderMemoCalendar(); else renderMemoList(); }
         async function loadMemos() { memoList=await sendRequest('get_memos')||[]; setMemoMode(memoMode); }
         function moveMemoMonth(d) { curMemoMonth+=d; if(curMemoMonth>11){curMemoMonth=0;curMemoYear++;}else if(curMemoMonth<0){curMemoMonth=11;curMemoYear--;} renderMemoCalendar(); }
-        function renderMemoCalendar() { const g=document.getElementById('memoCalGrid'); g.innerHTML=''; document.getElementById('memoMonthTitle').innerText=`${curMemoYear}.${curMemoMonth+1}`; const f=new Date(curMemoYear,curMemoMonth,1); const l=new Date(curMemoYear,curMemoMonth+1,0); ['일','월','화','수','목','금','토'].forEach(d=>g.innerHTML+=`<div style="font-weight:bold">${d}</div>`); for(i=0;i<f.getDay();i++)g.appendChild(document.createElement('div')); for(i=1;i<=l.getDate();i++){const dStr=`${curMemoYear}-${String(curMemoMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; const d=document.createElement('div');d.className='cal-day';if(dStr===selectedMemoDate)d.classList.add('selected');if(memoList.some(m=>m.date===dStr))d.classList.add('has-memo');d.innerHTML=`<span>${i}</span><div class="cal-dot"></div>`;d.onclick=()=>{selectedMemoDate=dStr;renderMemoCalendar();renderMemoPreview();openMemoForm();};g.appendChild(d);} renderMemoPreview(); }
+        function renderMemoCalendar() { const g=document.getElementById('memoCalGrid'); g.innerHTML=''; document.getElementById('memoMonthTitle').innerText=`${curMemoYear}.${curMemoMonth+1}`; const f=new Date(curMemoYear,curMemoMonth,1); const l=new Date(curYear,curMemoMonth+1,0); ['일','월','화','수','목','금','토'].forEach(d=>g.innerHTML+=`<div style="font-weight:bold">${d}</div>`); for(i=0;i<f.getDay();i++)g.appendChild(document.createElement('div')); for(i=1;i<=l.getDate();i++){const dStr=`${curMemoYear}-${String(curMemoMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; const d=document.createElement('div');d.className='cal-day';if(dStr===selectedMemoDate)d.classList.add('selected');if(memoList.some(m=>m.date===dStr))d.classList.add('has-memo');d.innerHTML=`<span>${i}</span><div class="cal-dot"></div>`;d.onclick=()=>{selectedMemoDate=dStr;renderMemoCalendar();renderMemoPreview();openMemoForm();};g.appendChild(d);} renderMemoPreview(); }
+        
+        // [수정] 달력 프리뷰 (한 줄)
         function renderMemoPreview() { const a=document.getElementById('memoDatePreview'); const t=memoList.filter(m=>m.date===selectedMemoDate); if(t.length===0){a.style.display='none';return;} a.style.display='block'; a.innerHTML=''; t.forEach(m=>{const d=document.createElement('div');d.className='memo-mini-item'+(m.done?' done-memo':'');d.innerText=(m.pinned?'★ ':'')+m.content;d.onclick=()=>openMemoForm(m);a.appendChild(d);}); }
+        // [수정] 목록형 (카드)
         function renderMemoList() { const l=document.getElementById('memoListView'); l.innerHTML=''; memoList.sort((a,b)=>new Date(b.date)-new Date(a.date)); memoList.forEach(m=>{const d=document.createElement('div');d.className='memo-list-item'+(m.done?' done-memo':'');d.innerHTML=`<div class="memo-list-date"><span>${m.date}</span><span>${m.pinned?'★':''}</span></div><div class="memo-list-content">${m.content}</div>`;d.onclick=()=>{selectedMemoDate=m.date;openMemoForm(m);};l.appendChild(d);}); }
+        
         function openMemoForm(i) { document.getElementById('memoDateDisp').innerText=selectedMemoDate; if(i){document.getElementById('memoContent').value=i.content;document.getElementById('memoPinned').checked=i.pinned;document.getElementById('memoDone').checked=i.done;document.getElementById('memoEditRow').value=i.row;document.getElementById('btnDelMemo').style.display='inline-block';}else clearMemoInput(); }
         function clearMemoInput() { document.getElementById('memoContent').value='';document.getElementById('memoPinned').checked=false;document.getElementById('memoDone').checked=false;document.getElementById('memoEditRow').value='';document.getElementById('btnDelMemo').style.display='none'; }
         async function saveMemo() { const c=document.getElementById('memoContent').value; if(!c)return; await sendRequest('save_memo',{row:document.getElementById('memoEditRow').value||null,content:c,pinned:document.getElementById('memoPinned').checked,done:document.getElementById('memoDone').checked}); showToast("메모 저장"); loadMemos(); }
@@ -621,104 +627,20 @@
         function formatDateYMD(d) { if(!d)return""; const D=new Date(d); return `${D.getFullYear()}-${String(D.getMonth()+1).padStart(2,'0')}-${String(D.getDate()).padStart(2,'0')}`; }
         function initEnvironment() { if(IS_PRO_MODE) document.getElementById('publicModeSettings').style.display='none'; else { document.getElementById('publicModeSettings').style.display='block'; sendRequest('load_settings').then(res=>{if(res)document.getElementById('settingApiKey').value=res.apiKey}); } }
         function sendRequest(a,p={}) { if(IS_PRO_MODE){p.action=a;return fetch(PRO_BACKEND_URL,{method:'POST',mode:'cors',body:JSON.stringify(p)}).then(r=>r.json()).then(j=>j.data).catch(e=>null);}else return new Promise(r=>{google.script.run.withSuccessHandler(res=>r(res.data)).withFailureHandler(e=>r(null)).dispatch(a,p)});}
+        // [수정] 파일 삭제 버튼 추가
         async function loadFiles() { const l=document.getElementById('fileList'); l.innerHTML='로딩...'; const f=await sendRequest('get_files')||[]; l.innerHTML=''; if(f.length===0) l.innerHTML='<div style="color:#999;font-size:0.9rem">파일 없음</div>'; f.forEach(d=>{ const r=document.createElement('div'); r.style.display='flex'; r.style.justifyContent='space-between'; r.style.marginBottom='5px'; r.innerHTML=`<a href="${d.url}" target="_blank" style="text-decoration:none;color:var(--primary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.name}</a> <button class="btn-sm btn-del" onclick="deleteFile(${d.row})">삭제</button>`; l.appendChild(r); }); }
         function uploadFile() { const i=document.getElementById('uploadInput'); if(i.files.length===0)return; const f=i.files[0]; const r=new FileReader(); r.onload=async(e)=>{ await sendRequest('upload_file',{name:f.name,mimeType:f.type,data:e.target.result.split(',')[1]}); loadFiles(); }; r.readAsDataURL(f); }
         async function deleteFile(r) { reqConfirm('삭제하시겠습니까?', async()=>{ await sendRequest('delete_file',{row:r}); loadFiles(); }); }
         
         function viewTab(m) { viewTabMode=m; document.getElementById('viewSubBtn').className=m==='subject'?'btn-sm active':'btn-sm inactive'; document.getElementById('viewBehBtn').className=m==='behavior'?'btn-sm active':'btn-sm inactive'; document.getElementById('viewSubjectFilter').style.display=m==='subject'?'block':'none'; loadHistory(); }
-        
-        // [핵심] 일괄 저장 기능을 위한 History 로드 및 수정 감지 로직
-        let subjectFilterPreserved = ""; // 과목 필터 유지 변수
-
-        async function loadHistory() { 
-            if(!selectedStudentName)return; 
-            const c=document.getElementById('historyViewer'); c.innerHTML='로딩...'; 
-            
-            // 저장된 필터 값이 있으면 복구, 없으면 현재 값 사용
-            const filterEl = document.getElementById('viewSubjectFilter');
-            if (subjectFilterPreserved && filterEl.options.length > 0) {
-               // 옵션이 재생성되면서 값이 날아가므로, 값을 다시 세팅 시도
-               filterEl.value = subjectFilterPreserved; 
-            }
-            
-            const t=viewTabMode==='subject'?filterEl.value:'행동'; 
-            
-            const h=await sendRequest('get_history',{name:selectedStudentName,type:t})||[]; 
-            c.innerHTML=''; 
-            if(h.length===0){c.innerHTML='<div style="color:#999;padding:20px;text-align:center">기록 없음</div>';return;} 
-            
-            h.forEach(i=>{
-                const d=document.createElement('div'); d.className='history-card';
-                d.innerHTML=`
-                    <div class="h-left">
-                        <input type="checkbox" class="hist-chk" value="${i.rowNum}" data-org-text="${i.txt}">
-                        <span class="h-date">${i.date}</span>
-                        ${i.check!=='없음'?`<span class="h-badge">${i.check}</span>`:''}
-                    </div>
-                    <textarea class="h-text" id="hist_txt_${i.rowNum}" oninput="markEdited(this, ${i.rowNum})">${i.txt}</textarea>
-                    <div class="h-btn-area">
-                        <button class="btn-icon" onclick="copyText('hist_txt_${i.rowNum}')">복사</button>
-                    </div>`;
-                c.appendChild(d);
-            }); 
-            // 옵션을 다시 그리지 않도록 분리 (초기 1회만 그림)
-            // updateSubjectFilterOptions(); 
-        }
-
-        // 텍스트 수정 시 체크박스 자동 선택
-        function markEdited(el, rowNum) {
-            const chk = document.querySelector(`.hist-chk[value="${rowNum}"]`);
-            if(chk) chk.checked = true;
-        }
-
-        // 일괄 저장
-        async function saveSelectedHistory() {
-            const checkboxes = document.querySelectorAll('.hist-chk:checked');
-            if(checkboxes.length === 0) { showToast("수정된 항목이 없습니다."); return; }
-            
-            const updates = [];
-            checkboxes.forEach(chk => {
-                const row = chk.value;
-                const text = document.getElementById(`hist_txt_${row}`).value;
-                const type = viewTabMode==='subject'?document.getElementById('viewSubjectFilter').value:'행동';
-                updates.push({ type: type, row: parseInt(row), text: text });
-            });
-
-            reqConfirm(`${updates.length}건을 저장하시겠습니까?`, async() => {
-                await sendRequest('update_record_bulk', { updates: updates });
-                showToast("일괄 저장 완료");
-                loadHistory(); // 새로고침
-            });
-        }
-
-        function copyText(id) {
-            const el = document.getElementById(id);
-            if(el) { navigator.clipboard.writeText(el.value).then(()=>showToast("복사됨")); }
-        }
-
-        // [수정] 과목 필터 옵션은 페이지 로드 시 또는 과목 변경 시에만 업데이트
-        function updateSubjectFilterOptions() { 
-            const s=document.getElementById('viewSubjectFilter'); 
-            const current = s.value; // 현재 값 저장
-            s.innerHTML=''; 
-            subjectList.forEach(sub=>{const o=document.createElement('option');o.value=sub;o.innerText=sub;s.appendChild(o)}); 
-            if(current) s.value = current; // 값 복구
-            subjectFilterPreserved = s.value; // 전역 변수에도 저장
-            
-            // 필터 변경 시 이벤트 리스너
-            s.onchange = () => {
-                subjectFilterPreserved = s.value;
-                loadHistory();
-            };
-        }
-        
+        async function loadHistory() { if(!selectedStudentName)return; const c=document.getElementById('historyViewer'); c.innerHTML='로딩...'; const t=viewTabMode==='subject'?document.getElementById('viewSubjectFilter').value:'행동'; const h=await sendRequest('get_history',{name:selectedStudentName,type:t})||[]; c.innerHTML=''; if(h.length===0){c.innerHTML='기록 없음';return;} h.forEach(i=>{const d=document.createElement('div');d.className='history-card';d.innerHTML=`<div class="history-chk"><input type="checkbox" class="hist-chk" value="${i.rowNum}"></div><div class="history-content"><span style="font-size:0.8rem;color:#888">${i.date}</span> ${i.check!=='없음'?`<span style="color:var(--success);font-weight:bold">${i.check}</span>`:''} <div style="margin-top:5px">${i.txt}</div></div>`;c.appendChild(d);}); updateSubjectFilterOptions(); }
+        function updateSubjectFilterOptions() { const s=document.getElementById('viewSubjectFilter'); s.innerHTML=''; subjectList.forEach(sub=>{const o=document.createElement('option');o.value=sub;o.innerText=sub;s.appendChild(o)}); }
         function updateNeisSubjectOptions() { const s=document.getElementById('neisSubjectSelect'); s.innerHTML=''; subjectList.forEach(sub=>{const o=document.createElement('option');o.value=sub;o.innerText=sub;s.appendChild(o)}); }
-        
         async function deleteSelectedHistory() { const c=document.querySelectorAll('.hist-chk:checked'); if(c.length===0)return; reqConfirm(`${c.length}건 삭제하시겠습니까?`, async()=>{ const r=Array.from(c).map(e=>parseInt(e.value)); const t=viewTabMode==='subject'?document.getElementById('viewSubjectFilter').value:'행동'; await sendRequest('delete_record_bulk',{type:t,rows:r}); loadHistory(); }); }
         async function savePublicSettings() { await sendRequest('save_settings',{apiKey:document.getElementById('settingApiKey').value}); showToast("저장"); }
         async function savePersona() { aiPersona=document.getElementById('personaText').value; await sendRequest('save_settings',{persona:aiPersona}); showToast("저장"); }
         async function archiveData() { await sendRequest('archive_data'); location.reload(); }
-        async function generateNeisCards() { showToast("생성 중..."); const t=document.getElementById('neisType').value; const sub=t==='subject'?document.getElementById('neisSubjectSelect').value:'행동'; const k=document.getElementById('neisKeyword').value; const len=document.getElementById('neisLen').value; const resDiv=document.getElementById('neisResultList'); resDiv.innerHTML=''; for(const s of studentList){ const r=document.createElement('div'); r.className='card'; r.style.marginBottom='10px'; const id = `neis_txt_${s.id}`; r.innerHTML=`<div style="display:flex;justify-content:space-between;margin-bottom:5px"><b>${s.name}</b> <button class="btn-icon" onclick="copyText('${id}')">복사</button></div><textarea id="${id}" style="height:100px;width:100%">생성 중...</textarea>`; resDiv.appendChild(r); const d=await sendRequest('generate_neis_individual',{name:s.name,type:sub,keyword:k,length:len}); r.querySelector('textarea').value=d?d.text:'생성 실패'; } showToast("완료"); }
+        async function generateNeisCards() { showToast("생성 중..."); const t=document.getElementById('neisType').value; const sub=t==='subject'?document.getElementById('neisSubjectSelect').value:'행동'; const k=document.getElementById('neisKeyword').value; const len=document.getElementById('neisLen').value; const resDiv=document.getElementById('neisResultList'); resDiv.innerHTML=''; for(const s of studentList){ const r=document.createElement('div'); r.className='card'; r.style.marginBottom='10px'; r.innerHTML=`<b>${s.name}</b><textarea style="height:100px">생성 중...</textarea>`; resDiv.appendChild(r); const d=await sendRequest('generate_neis_individual',{name:s.name,type:sub,keyword:k,length:len}); r.querySelector('textarea').value=d?d.text:'실패'; } showToast("완료"); }
         function toggleNeisType() { const t=document.getElementById('neisType').value; document.getElementById('neisSubOption').style.display=t==='subject'?'block':'none'; document.getElementById('neisBehOption').style.display=t==='behavior'?'block':'none'; }
     </script>
 </body>
