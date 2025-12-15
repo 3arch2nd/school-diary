@@ -23,19 +23,16 @@
         header { text-align: center; margin-bottom: 15px; flex-shrink: 0; }
         h1 { color: var(--primary-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: -0.5px; }
 
-        /* 잠금 화면 */
         #lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-main); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         #lockCard { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; width: 320px; }
         #lockInput { font-size: 1.2rem; text-align: center; margin-bottom: 5px; letter-spacing: 2px; }
         .lock-msg { font-size: 0.8rem; color: var(--danger); min-height: 20px; margin-bottom: 10px;}
 
-        /* 탭 메뉴 */
         .nav-tabs { display: flex; flex-shrink: 0; background: var(--card-bg); border-radius: 8px; margin-bottom: 15px; padding: 4px; border: 1px solid var(--border-color); }
         .nav-item { flex: 1; text-align: center; padding: 12px; cursor: pointer; color: var(--text-sub); border-radius: 6px; font-weight: bold; transition: 0.2s; }
         .nav-item.active { color: var(--primary-dark); background-color: #eaf6fc; }
         .nav-item-home { flex: 0.5; min-width: 60px; color: var(--primary-dark); }
 
-        /* 플로팅 메뉴 */
         .float-btn { position: fixed; top: 20px; right: 20px; width: 50px; height: 50px; background: var(--primary); color: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 2100; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; transition: 0.3s; }
         .float-btn:hover { background: var(--primary-dark); transform: scale(1.05); }
         .float-menu { position: fixed; top: 80px; right: 20px; display: none; flex-direction: column; gap: 10px; z-index: 2100; }
@@ -43,7 +40,6 @@
         .float-menu-item { background: white; padding: 10px 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; font-weight: bold; color: var(--text-main); text-align: right; border: 1px solid var(--border-color); transition: 0.2s; }
         .float-menu-item:hover { background: #eaf6fc; color: var(--primary); }
 
-        /* 섹션 및 레이아웃 */
         .section { display: none; flex: 1; overflow: hidden; height: 100%; }
         .section.active { display: block; animation: fadeIn 0.2s; display: flex; flex-direction: column; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -59,7 +55,7 @@
         .card.scrollable { overflow-y: auto; }
         .card-header { font-size: 1.1rem; color: var(--primary-dark); font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; flex-shrink: 0; border-bottom: 2px solid var(--bg-main); display: flex; justify-content: space-between; align-items: center; }
 
-        /* 태그 스타일 */
+        /* UI Components */
         .tag-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
         .tag { position: relative; padding: 8px 30px 8px 16px; background: var(--bg-main); border-radius: 20px; font-size: 0.95rem; cursor: pointer; border: 1px solid var(--border-color); transition: 0.2s; user-select: none; }
         .tag.selected { background: var(--primary); color: white; border-color: var(--primary); }
@@ -67,7 +63,6 @@
         .tag .x-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; line-height: 16px; text-align: center; border-radius: 50%; font-size: 0.8rem; background: rgba(0,0,0,0.1); color: inherit; display: none; }
         .tag:hover .x-btn { display: block; }
         
-        /* 스위치 */
         .switch-container { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text-sub); }
         .switch { position: relative; display: inline-block; width: 36px; height: 20px; margin-bottom: 0; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -76,7 +71,6 @@
         input:checked + .slider { background-color: var(--primary); }
         input:checked + .slider:before { transform: translateX(16px); }
 
-        /* 학생 평가 체크 */
         .student-row { display: flex; align-items: center; gap: 15px; padding: 12px 10px; border-bottom: 1px solid var(--bg-main); background: white; }
         .st-name { width: 90px; font-weight: bold; color: var(--primary-dark); flex-shrink: 0; }
         .st-input { flex-grow: 1; margin-bottom: 0 !important; height: 40px; }
@@ -86,8 +80,6 @@
         .check-circle.checked::after { content: 'v'; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; font-weight:bold; }
         
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-
-        /* 폼 공통 */
         label { display: block; margin-bottom: 6px; color: var(--text-sub); font-size: 0.9rem; font-weight: bold; }
         input, select, textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; background: #fcfdfd; }
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); background: white; }
@@ -102,7 +94,6 @@
         .btn-sm.inactive { background: white; color: var(--text-sub); border-color: var(--border-color); }
         .btn-icon { font-size: 0.8rem; background: none; border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-left: 5px; }
 
-        /* HOME */
         .home-image-area { width: 100%; aspect-ratio: 4 / 3; background: #fafafa; border: 2px dashed #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; position: relative; }
         .home-image-area img { width: 100%; height: 100%; object-fit: cover; }
         .home-image-msg { color: #aaa; font-weight: bold; pointer-events: none; }
@@ -112,7 +103,6 @@
         .ql-emoji { font-size: 2rem; margin-bottom: 5px; }
         .ql-name { font-size: 0.85rem; color: var(--text-main); font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
 
-        /* 북마크 */
         #bmList { display: grid; gap: 15px; padding-right: 5px; }
         @media (min-width: 1200px) { #bmList { grid-template-columns: repeat(3, 1fr); } }
         @media (min-width: 800px) and (max-width: 1199px) { #bmList { grid-template-columns: repeat(2, 1fr); } }
@@ -122,7 +112,6 @@
         .bm-star.active { color: #f1c40f; }
         .bm-link { font-weight: bold; color: var(--primary-dark); text-decoration: none; font-size: 1.05rem; display: block; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* 달력 */
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-bottom: 10px; }
         .cal-day { padding: 4px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; height: 50px; display: flex; flex-direction: column; align-items: center; }
         .cal-day:hover { background: #eaf6fc; }
@@ -131,35 +120,26 @@
         .cal-dot { width: 6px; height: 6px; background: var(--primary); border-radius: 50%; margin-top: 4px; display: none; }
         .cal-day.has-memo .cal-dot { display: block; }
         
-        /* 메모 */
-        .memo-mini-item { 
-            padding: 8px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 0.95rem; 
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%;
-        }
+        .memo-mini-item { padding: 8px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%; }
         .memo-mini-item:hover { color: var(--primary); }
         .memo-mini-item.done-memo { text-decoration: line-through; opacity: 0.6; color: #aaa; }
         
-        .memo-list-item { 
-            background: white; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; padding: 15px; 
-        }
+        .memo-list-item { background: white; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; padding: 15px; }
         .memo-list-item:hover { border-color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .memo-list-date { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 5px; display: flex; justify-content: space-between;}
         .memo-list-content { font-size: 1rem; color: var(--text-main); line-height: 1.4; word-break: break-all; }
         .memo-list-item.done-memo .memo-list-content { text-decoration: line-through; opacity: 0.6; }
 
-        /* 학생 명단 (박스형) */
-        .student-nav-item {
-            background: white; border: 1px solid var(--border-color); padding: 12px 15px; border-radius: 8px; cursor: pointer; margin-bottom: 8px; transition: 0.2s; font-size: 0.95rem;
-            display: flex; justify-content: space-between; align-items: center;
-        }
+        .student-nav-item { background: white; border: 1px solid var(--border-color); padding: 12px 15px; border-radius: 8px; cursor: pointer; margin-bottom: 8px; transition: 0.2s; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center; }
         .student-nav-item:hover { background: #eaf6fc; color: var(--primary-dark); border-color: var(--primary-light); }
         .student-nav-item.active { background: #eaf6fc; border-color: var(--primary); font-weight: bold; color: var(--primary-dark); border-width: 2px; }
 
-        .history-card { border-bottom: 1px solid #eee; padding: 15px 10px; display: flex; gap: 10px; align-items: flex-start; }
-        .history-chk { padding-top: 2px; }
-        .history-content { flex: 1; }
+        /* [수정] History Card (Edit Mode) */
+        .history-card { border-bottom: 1px solid #eee; padding: 15px 10px; display: flex; flex-direction: column; gap: 8px; }
+        .history-meta { display: flex; justify-content: space-between; font-size: 0.85rem; color: #888; margin-bottom: 5px; }
+        .history-txt-area { width: 100%; border: 1px solid #ddd; border-radius: 4px; padding: 8px; font-family: inherit; font-size: 0.95rem; resize: vertical; min-height: 60px; }
+        .history-actions { display: flex; justify-content: flex-end; gap: 5px; margin-top: 5px; }
 
-        /* 출석부 */
         .att-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #eee; }
         .att-name { width: 50px; font-weight: bold; font-size: 0.9rem; flex-shrink: 0; }
         .att-sel { font-size: 0.9rem; padding: 4px; width: 70px; margin-bottom: 0 !important; flex-shrink: 0; }
@@ -218,7 +198,7 @@
     </div>
 
     <div class="container">
-        <header><h1>쫑알수첩 v16.1</h1></header>
+        <header><h1>쫑알수첩 v17.0</h1></header>
         <nav class="nav-tabs">
             <div class="nav-item nav-item-home active" onclick="changeSection('home')">HOME</div>
             <div class="nav-item" onclick="changeSection('record')">기록하기</div>
@@ -461,7 +441,7 @@
         
         let currentMode = 'subject'; let mobileMode = 'subject'; let selectedStudentName = null; let viewTabMode = 'subject';
         let studentList = []; let subjectList = ["국어", "수학", "사회", "과학", "영어", "체육", "음악", "미술"];
-        let targetSubjectToDelete = null; let aiPersona = ""; let aiJobQueue = [];
+        let targetSubjectToDelete = null; let aiPersona = ""; let aiJobQueue = []; let isAiQueueRunning = false;
         let curYear = new Date().getFullYear(); let curMonth = new Date().getMonth(); let selectedDate = formatDateYMD(new Date());
         let bmList = []; let bmFilter = null; let bmTags = ["수업", "업무", "자료", "영상"]; let selectedBmTags = [];
         let memoList = []; let memoMode = 'cal'; let curMemoMonth = new Date().getMonth(); let curMemoYear = new Date().getFullYear(); let selectedMemoDate = formatDateYMD(new Date());
@@ -483,15 +463,7 @@
             if(nav) nav.classList.add('active');
             if(id==='bookmarks') loadBookmarks(); else if(id==='calendar') { renderCalendar(); showDailyView(new Date().getDate()); } else if(id==='memo') loadMemos();
         }
-        
-        function reqConfirm(msg, callback) {
-            document.getElementById('confirmMsg').innerText = msg;
-            document.getElementById('confirmModal').classList.add('open');
-            document.getElementById('btnConfirmYes').onclick = () => {
-                document.getElementById('confirmModal').classList.remove('open');
-                callback();
-            };
-        }
+        function reqConfirm(msg, callback) { document.getElementById('confirmMsg').innerText = msg; document.getElementById('confirmModal').classList.add('open'); document.getElementById('btnConfirmYes').onclick = () => { document.getElementById('confirmModal').classList.remove('open'); callback(); }; }
 
         // [HOME Logic]
         async function loadHomeData() { const d=await sendRequest('get_home_data'); if(d){ if(d.image) { document.getElementById('homeMainImg').src=d.image; document.getElementById('homeMainImg').style.display='block'; document.querySelector('.home-image-msg').style.display='none'; } homeQuickLinks=d.links||[]; renderQuickLinks(); } }
@@ -505,8 +477,6 @@
 
         // [Record Logic]
         function setMode(m) { currentMode=m; document.getElementById('btnSubject').className=m==='subject'?'btn-sm active':'btn-sm inactive'; document.getElementById('btnBehavior').className=m==='behavior'?'btn-sm active':'btn-sm inactive'; document.getElementById('subjectArea').style.display=m==='subject'?'block':'none'; document.getElementById('checkHeader').style.visibility=m==='subject'?'visible':'hidden'; renderRecordList(); }
-        
-        // [수정] 과목 선택 로직 (innerHTML 이슈 해결)
         function renderSubjectTags() { 
             const c=document.getElementById('subjectTags'); c.innerHTML=''; 
             subjectList.forEach(s=>{ 
@@ -515,7 +485,6 @@
                 t.onclick=(e)=>{if(e.target.classList.contains('x-btn'))return; selectSub(t);}; 
                 if(s==="국어") t.classList.add('selected'); c.appendChild(t); 
             }); 
-            // [중요] appendChild로 버튼 추가
             const addBtn = document.createElement('div'); addBtn.className = 'tag tag-add'; addBtn.innerText = '+'; addBtn.onclick = openSubjectModal;
             c.appendChild(addBtn);
             updateSubjectFilterOptions(); updateNeisSubjectOptions(); 
@@ -536,6 +505,8 @@
              });
         }
         function toggleCheck(el) { const p=el.parentElement; const w=el.classList.contains('checked'); p.querySelectorAll('.check-circle').forEach(c=>c.classList.remove('checked')); if(!w) el.classList.add('checked'); }
+        
+        // [핵심: AI 큐 시스템 복원 및 개선]
         async function saveData() {
             const inputs=document.querySelectorAll('.st-input'); const ai=document.getElementById('aiToggle').checked;
             let type="행동"; if(currentMode==='subject'){ const t=document.querySelector('#subjectTags .tag.selected'); if(!t){showToast("과목 선택 필요");return;} type=t.innerText.split(' ')[0]; }
@@ -547,12 +518,82 @@
                 if(txt || chk!=="없음") list.push({name, text:txt, check:chk});
             });
             if(list.length===0){showToast("내용 없음");return;}
-            showToast("저장 중...");
-            for(const it of list) {
-                let fullTxt = it.text; if(currentMode==='subject' && document.getElementById('rTopic').value) fullTxt = `[${document.getElementById('rTopic').value}] ` + fullTxt;
-                await sendRequest('save_record', {date:document.getElementById('rDate').value, name:it.name, type:type, text:fullTxt, check:it.check});
+            
+            showToast("저장 시작...");
+            // 순차 저장 및 AI 큐 진입
+            for(const item of list) {
+                // 1. Raw Data 저장
+                let period = document.getElementById('rPeriod').value;
+                let topic = document.getElementById('rTopic').value;
+                let prefix = period ? `[${period}] ` : "";
+                if(topic) prefix += `[${topic}] `;
+                let fullText = (prefix + item.text).trim();
+                
+                await sendRequest('save_record', {
+                    date: document.getElementById('rDate').value,
+                    name: item.name, type: type, text: fullText, check: item.check
+                });
+
+                // 2. AI 큐잉
+                if(ai) {
+                    aiJobQueue.push({
+                        name: item.name, type: type, 
+                        topic: topic || "없음", text: item.text, check: item.check,
+                        prefix: prefix
+                    });
+                }
             }
-            inputs.forEach(i=>i.value=''); document.querySelectorAll('.check-circle').forEach(c=>c.classList.remove('checked')); showToast("완료");
+            
+            inputs.forEach(i=>i.value=''); document.querySelectorAll('.check-circle').forEach(c=>c.classList.remove('checked')); 
+            
+            if(ai && aiJobQueue.length > 0) {
+                processNextAiJob();
+            } else {
+                showToast("저장 완료");
+            }
+        }
+
+        async function processNextAiJob() {
+            if(aiJobQueue.length === 0) {
+                isAiQueueRunning = false;
+                document.getElementById('status-bar').className = '';
+                showToast("모든 기록 완료");
+                return;
+            }
+            isAiQueueRunning = true;
+            document.getElementById('status-bar').className = 'show';
+            const job = aiJobQueue.shift();
+            document.getElementById('status-msg').innerText = `AI 작성 중... ${job.name} (남은 작업: ${aiJobQueue.length})`;
+
+            // [AI Prompt 수정]
+            const prompt = `역할: 초등학교 교사. 입력된 정보로 생기부 문장 1개 작성.
+입력: [주제:${job.topic}], [내용:${job.text}], [평가:${job.check}]
+조건:
+1. 활동+내용+평가를 자연스럽게 연결하여 '~함'으로 종결.
+2. 따옴표, 굵게(**), 특수문자 금지.
+3. 과도한 칭찬 지양, 담백하게 사실 위주 서술.
+예시: '구구단을 외자' 활동에서 친구들과 협력하여 즐겁게 참여하고 곱셈구구의 원리를 정확히 이해함.`;
+
+            try {
+                const aiRes = await sendRequest('call_ai', { prompt });
+                if(aiRes && aiRes.text) {
+                    // AI 결과를 다시 저장 (덮어쓰기 로직 필요하나 여기선 새 행 추가로 처리됨 - *주의*)
+                    // V17 개선: 'save_record'는 항상 새 행을 만듦. 
+                    // AI 결과를 위해 마지막 행을 업데이트하거나 새로 저장해야 함.
+                    // 간단히 구현하기 위해: AI 결과가 나오면 'AI 기록'으로 한 번 더 저장 (혹은 Backend에서 update 로직 구현 필요)
+                    // 여기서는 사용자가 'AI 결과'를 최종으로 보길 원하므로, 원본 대신 AI본을 저장하는게 맞지만, 
+                    // 비동기 처리를 위해 Raw 저장 -> (옵션) AI 저장 방식으로 둠.
+                    // *가장 좋은 방법*: AI 완료 후 '새로운 행'으로 저장. (기존 Raw 데이터는 백업 성격)
+                    let finalTxt = (job.prefix + aiRes.text).trim();
+                    // AI 완료된 텍스트로 '행동' 시트에 저장 (기존 raw 데이터와 중복될 수 있음 -> 감안)
+                    // *Backend save_record 수정 없이 사용*
+                    await sendRequest('save_record', {
+                        date: document.getElementById('rDate').value,
+                        name: job.name, type: job.type, text: finalTxt, check: job.check
+                    });
+                }
+            } catch(e) { console.error(e); }
+            processNextAiJob();
         }
 
         // [Student Manager]
@@ -570,10 +611,9 @@
         async function loadBookmarks() { bmList=await sendRequest('get_bookmarks')||[]; renderBmList(); }
         function renderBmList() { const l=document.getElementById('bmList'); l.innerHTML=''; let f=bmFilter?bmList.filter(b=>b.tags&&b.tags.includes(bmFilter)):bmList; f.sort((a,b)=>(b.starred===true)-(a.starred===true)); f.forEach(b=>{const d=document.createElement('div');d.className='bm-card';d.innerHTML=`<div class="bm-star ${b.starred?'active':''}" onclick="toggleBmStar(${b.row},${!b.starred},event)">★</div><div style="padding-right:20px"><a href="${b.url}" target="_blank" class="bm-link">${b.title}</a><div style="font-size:0.8rem;color:#666">${b.memo}</div></div><div style="margin-top:10px;text-align:right"><button class="btn-icon" onclick="editBookmark(${b.row})">수정</button> <button class="btn-icon" style="color:var(--danger)" onclick="deleteBookmark(${b.row})">삭제</button></div>`;l.appendChild(d);}); const fd=document.getElementById('bmFilterDisp'); if(bmFilter){fd.style.display='inline-block';fd.querySelector('span').innerText=bmFilter;}else fd.style.display='none'; }
         async function toggleBmStar(r,v,e) { e.stopPropagation(); const i=bmList.find(b=>b.row===r); if(i){i.starred=v;renderBmList();await sendRequest('save_bookmark',{row:r,tags:i.tags,title:i.title,url:i.url,memo:i.memo,starred:v});} }
-        function editBookmark(r) { const item=bmList.find(b=>b.row===r); if(!item)return; document.getElementById('bmUrl').value=item.url; document.getElementById('bmTitle').value=item.title; document.getElementById('bmMemo').value=item.memo; document.getElementById('bmEditRow').value=item.row; document.getElementById('bmStar').value=item.starred; selectedBmTags=item.tags?item.tags.split(',').map(s=>s.trim()):[]; renderBmTags(); }
+        function editBookmark(r) { const item=bmList.find(b=>b.row===r); if(!item)return; document.getElementById('bmUrl').value=item.url; document.getElementById('bmTitle').value=item.title; document.getElementById('bmMemo').value=item.memo; document.getElementById('bmEditRow').value=item.row; selectedBmTags=item.tags?item.tags.split(',').map(s=>s.trim()):[]; renderBmTags(); }
         async function saveBookmark() { 
             const r = document.getElementById('bmEditRow').value; 
-            // 목록에서만 제어하므로 신규 작성시 기본 false, 수정시 기존 값 유지
             let star = false; if(r) { const ex = bmList.find(b=>b.row==r); if(ex) star=ex.starred; }
             await sendRequest('save_bookmark',{row:r||null, tags:selectedBmTags.join(','), title:document.getElementById('bmTitle').value, url:document.getElementById('bmUrl').value, memo:document.getElementById('bmMemo').value, starred:star}); clearBmInput(); loadBookmarks(); 
         }
@@ -599,7 +639,7 @@
         function moveMemoMonth(d) { curMemoMonth+=d; if(curMemoMonth>11){curMemoMonth=0;curMemoYear++;}else if(curMemoMonth<0){curMemoMonth=11;curMemoYear--;} renderMemoCalendar(); }
         function renderMemoCalendar() { const g=document.getElementById('memoCalGrid'); g.innerHTML=''; document.getElementById('memoMonthTitle').innerText=`${curMemoYear}.${curMemoMonth+1}`; const f=new Date(curMemoYear,curMemoMonth,1); const l=new Date(curMemoYear,curMemoMonth+1,0); ['일','월','화','수','목','금','토'].forEach(d=>g.innerHTML+=`<div style="font-weight:bold">${d}</div>`); for(i=0;i<f.getDay();i++)g.appendChild(document.createElement('div')); for(i=1;i<=l.getDate();i++){const dStr=`${curMemoYear}-${String(curMemoMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; const d=document.createElement('div');d.className='cal-day';if(dStr===selectedMemoDate)d.classList.add('selected');if(memoList.some(m=>m.date===dStr))d.classList.add('has-memo');d.innerHTML=`<span>${i}</span><div class="cal-dot"></div>`;d.onclick=()=>{selectedMemoDate=dStr;renderMemoCalendar();renderMemoPreview();openMemoForm();};g.appendChild(d);} renderMemoPreview(); }
         function renderMemoPreview() { const a=document.getElementById('memoDatePreview'); const t=memoList.filter(m=>m.date===selectedMemoDate); if(t.length===0){a.style.display='none';return;} a.style.display='block'; a.innerHTML=''; t.forEach(m=>{const d=document.createElement('div');d.className='memo-mini-item'+(m.done?' done-memo':'');d.innerText=(m.pinned?'★ ':'')+m.content;d.onclick=()=>openMemoForm(m);a.appendChild(d);}); }
-        function renderMemoList() { const l=document.getElementById('memoListView'); l.innerHTML=''; memoList.sort((a,b)=>new Date(b.date)-new Date(a.date)); memoList.forEach(m=>{const d=document.createElement('div');d.className='memo-mini-item'+(m.done?' done-memo':'');d.style.padding='15px';d.innerHTML=`<span style="color:#999;font-size:0.8rem;margin-right:5px;">${m.date}</span> ${(m.pinned?'★ ':'')+m.content}`;d.onclick=()=>{selectedMemoDate=m.date;openMemoForm(m);};l.appendChild(d);}); }
+        function renderMemoList() { const l=document.getElementById('memoListView'); l.innerHTML=''; memoList.sort((a,b)=>new Date(b.date)-new Date(a.date)); memoList.forEach(m=>{const d=document.createElement('div');d.className='memo-list-item'+(m.done?' done-memo':'');d.innerHTML=`<div class="memo-list-date"><span>${m.date}</span><span>${m.pinned?'★':''}</span></div><div class="memo-list-content">${m.content}</div>`;d.onclick=()=>{selectedMemoDate=m.date;openMemoForm(m);};l.appendChild(d);}); }
         function openMemoForm(i) { document.getElementById('memoDateDisp').innerText=selectedMemoDate; if(i){document.getElementById('memoContent').value=i.content;document.getElementById('memoPinned').checked=i.pinned;document.getElementById('memoDone').checked=i.done;document.getElementById('memoEditRow').value=i.row;document.getElementById('btnDelMemo').style.display='inline-block';}else clearMemoInput(); }
         function clearMemoInput() { document.getElementById('memoContent').value='';document.getElementById('memoPinned').checked=false;document.getElementById('memoDone').checked=false;document.getElementById('memoEditRow').value='';document.getElementById('btnDelMemo').style.display='none'; }
         async function saveMemo() { const c=document.getElementById('memoContent').value; if(!c)return; await sendRequest('save_memo',{row:document.getElementById('memoEditRow').value||null,content:c,pinned:document.getElementById('memoPinned').checked,done:document.getElementById('memoDone').checked}); showToast("메모 저장"); loadMemos(); }
@@ -615,14 +655,66 @@
         async function deleteFile(r) { reqConfirm('삭제하시겠습니까?', async()=>{ await sendRequest('delete_file',{row:r}); loadFiles(); }); }
         
         function viewTab(m) { viewTabMode=m; document.getElementById('viewSubBtn').className=m==='subject'?'btn-sm active':'btn-sm inactive'; document.getElementById('viewBehBtn').className=m==='behavior'?'btn-sm active':'btn-sm inactive'; document.getElementById('viewSubjectFilter').style.display=m==='subject'?'block':'none'; loadHistory(); }
-        async function loadHistory() { if(!selectedStudentName)return; const c=document.getElementById('historyViewer'); c.innerHTML='로딩...'; const t=viewTabMode==='subject'?document.getElementById('viewSubjectFilter').value:'행동'; const h=await sendRequest('get_history',{name:selectedStudentName,type:t})||[]; c.innerHTML=''; if(h.length===0){c.innerHTML='기록 없음';return;} h.forEach(i=>{const d=document.createElement('div');d.className='history-card';d.innerHTML=`<div class="history-chk"><input type="checkbox" class="hist-chk" value="${i.rowNum}"></div><div class="history-content"><span style="font-size:0.8rem;color:#888">${i.date}</span> ${i.check!=='없음'?`<span style="color:var(--success);font-weight:bold">${i.check}</span>`:''} <div style="margin-top:5px">${i.txt}</div></div>`;c.appendChild(d);}); updateSubjectFilterOptions(); }
+        // [수정] History Load with Edit/Copy Buttons
+        async function loadHistory() { 
+            if(!selectedStudentName)return; 
+            const c=document.getElementById('historyViewer'); c.innerHTML='로딩...'; 
+            const t=viewTabMode==='subject'?document.getElementById('viewSubjectFilter').value:'행동'; 
+            const h=await sendRequest('get_history',{name:selectedStudentName,type:t})||[]; 
+            c.innerHTML=''; 
+            if(h.length===0){c.innerHTML='<div style="color:#999;padding:20px;text-align:center">기록 없음</div>';return;} 
+            h.forEach(i=>{
+                const d=document.createElement('div'); d.className='history-card';
+                d.innerHTML=`
+                    <div class="history-meta">
+                        <label style="display:flex;align-items:center;gap:5px;font-weight:normal"><input type="checkbox" class="hist-chk" value="${i.rowNum}"> ${i.date}</label>
+                        ${i.check!=='없음'?`<span style="color:var(--success);font-weight:bold">${i.check}</span>`:''}
+                    </div>
+                    <textarea class="history-txt-area" id="hist_txt_${i.rowNum}">${i.txt}</textarea>
+                    <div class="history-actions">
+                        <button class="btn-icon" onclick="copyText('hist_txt_${i.rowNum}')">복사</button>
+                        <button class="btn-icon" style="color:var(--primary);border-color:var(--primary)" onclick="updateRecord('${t}', ${i.rowNum})">저장</button>
+                    </div>`;
+                c.appendChild(d);
+            }); 
+            updateSubjectFilterOptions(); 
+        }
+        async function updateRecord(type, row) {
+            const txt = document.getElementById(`hist_txt_${row}`).value;
+            reqConfirm("수정하시겠습니까?", async() => {
+                await sendRequest('update_record_row', { type: type, rowNum: row, text: txt });
+                showToast("수정 완료");
+            });
+        }
+        function copyText(id) {
+            const el = document.getElementById(id);
+            if(el) { navigator.clipboard.writeText(el.value).then(()=>showToast("복사됨")); }
+        }
+
         function updateSubjectFilterOptions() { const s=document.getElementById('viewSubjectFilter'); s.innerHTML=''; subjectList.forEach(sub=>{const o=document.createElement('option');o.value=sub;o.innerText=sub;s.appendChild(o)}); }
         function updateNeisSubjectOptions() { const s=document.getElementById('neisSubjectSelect'); s.innerHTML=''; subjectList.forEach(sub=>{const o=document.createElement('option');o.value=sub;o.innerText=sub;s.appendChild(o)}); }
         async function deleteSelectedHistory() { const c=document.querySelectorAll('.hist-chk:checked'); if(c.length===0)return; reqConfirm(`${c.length}건 삭제하시겠습니까?`, async()=>{ const r=Array.from(c).map(e=>parseInt(e.value)); const t=viewTabMode==='subject'?document.getElementById('viewSubjectFilter').value:'행동'; await sendRequest('delete_record_bulk',{type:t,rows:r}); loadHistory(); }); }
         async function savePublicSettings() { await sendRequest('save_settings',{apiKey:document.getElementById('settingApiKey').value}); showToast("저장"); }
         async function savePersona() { aiPersona=document.getElementById('personaText').value; await sendRequest('save_settings',{persona:aiPersona}); showToast("저장"); }
         async function archiveData() { await sendRequest('archive_data'); location.reload(); }
-        async function generateNeisCards() { showToast("생성 중..."); const t=document.getElementById('neisType').value; const sub=t==='subject'?document.getElementById('neisSubjectSelect').value:'행동'; const k=document.getElementById('neisKeyword').value; const len=document.getElementById('neisLen').value; const resDiv=document.getElementById('neisResultList'); resDiv.innerHTML=''; for(const s of studentList){ const r=document.createElement('div'); r.className='card'; r.style.marginBottom='10px'; r.innerHTML=`<b>${s.name}</b><textarea style="height:100px">생성 중...</textarea>`; resDiv.appendChild(r); const d=await sendRequest('generate_neis_individual',{name:s.name,type:sub,keyword:k,length:len}); r.querySelector('textarea').value=d?d.text:'실패'; } showToast("완료"); }
+        // [수정] NEIS Copy Button
+        async function generateNeisCards() { 
+            showToast("생성 중..."); 
+            const t=document.getElementById('neisType').value; const sub=t==='subject'?document.getElementById('neisSubjectSelect').value:'행동'; const k=document.getElementById('neisKeyword').value; const len=document.getElementById('neisLen').value; 
+            const resDiv=document.getElementById('neisResultList'); resDiv.innerHTML=''; 
+            for(const s of studentList){ 
+                const r=document.createElement('div'); r.className='card'; r.style.marginBottom='10px'; 
+                const id = `neis_txt_${s.id}`;
+                r.innerHTML=`
+                    <div style="display:flex;justify-content:space-between;margin-bottom:5px"><b>${s.name}</b> <button class="btn-icon" onclick="copyText('${id}')">복사</button></div>
+                    <textarea id="${id}" style="height:100px;width:100%">생성 중...</textarea>
+                `; 
+                resDiv.appendChild(r); 
+                const d=await sendRequest('generate_neis_individual',{name:s.name,type:sub,keyword:k,length:len}); 
+                r.querySelector('textarea').value=d?d.text:'생성 실패'; 
+            } 
+            showToast("완료"); 
+        }
         function toggleNeisType() { const t=document.getElementById('neisType').value; document.getElementById('neisSubOption').style.display=t==='subject'?'block':'none'; document.getElementById('neisBehOption').style.display=t==='behavior'?'block':'none'; }
     </script>
 </body>
