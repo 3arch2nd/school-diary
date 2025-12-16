@@ -33,20 +33,20 @@
         }
         .global-overlay.show { display: block; }
 
-        /* [Modified] Music UI */
+        /* Music UI */
         .music-panel {
             position: fixed; top: 80px; left: -420px; width: 400px; height: 220px;
             background: white; border-radius: 12px; box-shadow: 2px 2px 15px rgba(0,0,0,0.2);
             z-index: 2200; transition: left 0.3s ease-in-out; display: flex; overflow: hidden;
         }
-        .music-panel.show { left: 20px; } /* 위치 조정 */
+        .music-panel.show { left: 20px; } 
         .mp-video { width: 180px; background: #000; }
         .mp-list { flex: 1; display: flex; flex-direction: column; padding: 10px; border-left: 1px solid #eee; }
         .mp-item { font-size: 0.85rem; padding: 5px; cursor: pointer; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; }
         .mp-item:hover { color: var(--primary); }
         .mp-add { margin-top: auto; display: flex; gap: 5px; }
 
-        /* [New] Music Capsule Button */
+        /* Music Capsule Button */
         .music-capsule {
             position: fixed; top: 20px; left: 20px; width: 220px; height: 50px;
             background: var(--primary-light); color: var(--primary-dark);
@@ -120,7 +120,7 @@
         .custom-item-row { padding: 10px; border: 1px solid #eee; border-radius: 6px; margin-bottom: 5px; cursor: pointer; display: flex; justify-content: space-between; }
         .custom-item-row.active { border-color: var(--primary); background: #f9fcff; }
         
-        /* [New] Advanced Chart */
+        /* Advanced Chart */
         .bar-chart-container { display: flex; flex-direction: column; height: 100%; overflow: hidden; padding-bottom: 10px; }
         .chart-bars-area { flex: 1; display: flex; align-items: flex-end; gap: 2px; padding-top: 20px; border-bottom: 1px solid #ccc; position: relative; }
         .stat-bar { flex: 1; background: #e0e0e0; border-radius: 3px 3px 0 0; transition: all 0.2s; position: relative; min-height: 20%; cursor: pointer; }
@@ -184,7 +184,7 @@
         .cal-day.today { background: #fffbe6; border: 1px solid #ffd591; }
         .cal-day.selected { border: 2px solid var(--primary-dark); }
         
-        /* [Modified] Calendar Dots */
+        /* Calendar Dots */
         .cal-dots-container { display: flex; gap: 2px; margin-top: 4px; justify-content: center; }
         .cal-dot { width: 6px; height: 6px; border-radius: 50%; }
         .cal-dot.event { background: var(--primary); }
@@ -242,7 +242,8 @@
             .quick-link-grid { grid-template-columns: repeat(3, 1fr); }
             .float-btn { top: auto; bottom: 30px; }
             .float-menu { top: auto; bottom: 90px; }
-            .music-capsule { top: auto; bottom: 30px; left: 20px; } /* Mobile */
+            /* [Modified] Hide Music on Mobile */
+            .music-capsule { display: none !important; }
         }
     </style>
 </head>
@@ -280,6 +281,17 @@
         </nav>
 
         <div id="home" class="section active">
+            <div class="mobile-only" style="margin-bottom: 20px;">
+                <div class="card">
+                     <div class="card-header">빠른 기록 (모바일)</div>
+                     <div style="background:#f9f9f9; padding:15px; border-radius:8px;">
+                        <div style="font-size:0.85rem; color:var(--text-sub); margin-bottom:10px;">[팁] 예: <b>김철수/수학/발표 잘함</b></div>
+                        <textarea id="homeQuickInputMobile" style="width:100%; height:80px; resize:none;" placeholder="입력..."></textarea>
+                        <button class="btn btn-primary" style="width:100%;" onclick="saveHomeQuickRecord('mobile')">✨ AI 자동 기록</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="split-container">
                 <div class="split-left">
                     <div class="card full-height scrollable">
@@ -296,11 +308,11 @@
                     <div class="card full-height scrollable">
                         <div class="card-header">자주 찾는 사이트</div>
                         <div class="quick-link-grid" id="quickLinkGrid"></div>
-                        <div class="card-header">빠른 기록</div>
-                         <div style="background:#f9f9f9; padding:15px; border-radius:8px;">
+                        <div class="card-header pc-only">빠른 기록</div>
+                         <div class="pc-only" style="background:#f9f9f9; padding:15px; border-radius:8px;">
                             <div style="font-size:0.85rem; color:var(--text-sub); margin-bottom:10px;">[팁] 예: <b>김철수/수학/발표 잘함</b></div>
                             <textarea id="homeQuickInput" style="width:100%; height:80px; resize:none;" placeholder="입력..."></textarea>
-                            <button class="btn btn-primary" style="width:100%;" onclick="saveHomeQuickRecord()">✨ AI 자동 기록</button>
+                            <button class="btn btn-primary" style="width:100%;" onclick="saveHomeQuickRecord('pc')">✨ AI 자동 기록</button>
                         </div>
                     </div>
                 </div>
@@ -374,7 +386,13 @@
         <div id="students" class="section">
             <div class="split-container">
                 <div class="split-left"><div class="card full-height scrollable"><div class="card-header">학생 명단</div><div style="margin-bottom: 15px;"><button class="btn btn-outline" style="width:100%;" onclick="openStudentManageModal()">+ 학생 명단 관리</button></div><div id="studentNavList"></div></div></div>
-                <div class="split-right"><div class="card full-height scrollable"><div class="card-header"><span id="viewerTitle">기록 상세</span><div style="display:flex; gap:5px;"><select id="viewSubjectFilter" style="margin-bottom:0; width:100px; padding:6px;" onchange="loadHistory()"></select><button class="btn-sm active" id="viewSubBtn" onclick="viewTab('subject')">과목</button><button class="btn-sm inactive" id="viewBehBtn" onclick="viewTab('behavior')">행동</button></div></div><div style="margin-bottom:10px; display:flex; gap:10px;"><button class="btn btn-sm btn-primary" style="flex:1" onclick="saveSelectedHistory()">일괄 저장 (수정된 항목)</button><button class="btn btn-sm btn-del" style="flex:1" onclick="deleteSelectedHistory()">선택 삭제</button></div><div id="historyViewer"></div></div></div>
+                <div class="split-right">
+                    <div class="card full-height" style="display:flex; flex-direction:column;">
+                        <div class="card-header" style="flex-shrink:0;"><span id="viewerTitle">기록 상세</span><div style="display:flex; gap:5px;"><select id="viewSubjectFilter" style="margin-bottom:0; width:100px; padding:6px;" onchange="loadHistory()"></select><button class="btn-sm active" id="viewSubBtn" onclick="viewTab('subject')">과목</button><button class="btn-sm inactive" id="viewBehBtn" onclick="viewTab('behavior')">행동</button></div></div>
+                        <div style="margin-bottom:10px; display:flex; gap:10px; flex-shrink:0;"><button class="btn btn-sm btn-primary" style="flex:1" onclick="saveSelectedHistory()">일괄 저장 (수정된 항목)</button><button class="btn btn-sm btn-del" style="flex:1" onclick="deleteSelectedHistory()">선택 삭제</button></div>
+                        <div id="historyViewer" style="flex:1; overflow-y:auto;"></div>
+                    </div>
+                </div>
             </div>
         </div>
         <div id="neis" class="section pc-only-tab">
@@ -431,7 +449,6 @@
         let curMemoYear = new Date().getFullYear(); let selectedMemoDate = formatDateYMD(new Date());
         let calendarEvents = []; let homeQuickLinks = [];
         let musicPlaylist = [];
-        // [New] Cache for attendance dots
         let attendanceCache = [];
 
         window.onload = () => { checkLock(); document.getElementById('rDate').valueAsDate = new Date(); initEnvironment(); };
@@ -441,7 +458,6 @@
         async function loadAllData() { 
             loadStudents();
             renderSubjectTags(); renderBmTags(); loadFiles(); loadHomeData(); loadMusicData(); loadCustomItems();
-            // [Modified] Fetch events AND attendance for dots
             await Promise.all([loadGoogleEvents(), loadAttendanceForDots()]);
             renderHomeToDo(); renderCalendar(); showDailyView(new Date().getDate());
         }
@@ -496,7 +512,6 @@
         }
         function playMusic(id, name) { 
             document.getElementById('musicIframe').src = `https://www.youtube.com/embed/${id}?autoplay=1`;
-            // [New] Update Capsule Text
             document.getElementById('musicCurrentTitle').innerText = "🎵 " + name;
         }
         async function addMusic() {
@@ -532,7 +547,23 @@
         async function saveHomeLinks() { renderQuickLinks(); await sendRequest('save_home_config', {key:"QuickLinks", value:JSON.stringify(homeQuickLinks)}); }
         async function uploadHomeImage(inp) { if(inp.files.length===0) return; const f=inp.files[0]; const r=new FileReader(); r.onload=async(e)=>{ const b=e.target.result.split(',')[1]; const res=await sendRequest('upload_file', {name:"home_"+Date.now(), mimeType:f.type, data:b}); if(res){ document.getElementById('homeMainImg').src=res.url; document.getElementById('homeMainImg').style.display='block'; document.querySelector('.home-image-msg').style.display='none'; await sendRequest('save_home_config',{key:"MainImage", value:res.url}); } }; r.readAsDataURL(f); }
         function renderHomeToDo() { const t=formatDateYMD(new Date()); const l=calendarEvents.filter(e=>e.date===t); document.getElementById('homeToDoList').innerHTML = l.length>0 ? l.map(e=>`• ${e.title}`).join('<br>') : "일정 없음"; }
-        async function saveHomeQuickRecord() { const t=document.getElementById('homeQuickInput').value.trim(); if(!t) return; showToast("AI 처리 중"); try{ const a=await sendRequest('call_ai',{prompt:`입력:"${t}". 규칙: 이름/과목/내용 분리. JSON출력:{"name":"이름","type":"과목","text":"내용"}`}); const j=JSON.parse(a.text.replace(/```json/g,"").replace(/```/g,"")); await sendRequest('save_record',{date:formatDateYMD(new Date()), name:j.name, type:j.type, text:j.text, check:"없음"}); document.getElementById('homeQuickInput').value=""; showToast("저장 완료"); }catch(e){showToast("실패");} }
+        
+        // [Modified] Separate Quick Record functions for Mobile/PC to handle different IDs
+        async function saveHomeQuickRecord(source) { 
+            let inputId = 'homeQuickInput';
+            if(source === 'mobile') inputId = 'homeQuickInputMobile';
+            
+            const t=document.getElementById(inputId).value.trim(); 
+            if(!t) return; showToast("AI 처리 중"); 
+            try{ 
+                const a=await sendRequest('call_ai',{prompt:`입력:"${t}". 규칙: 이름/과목/내용 분리. JSON출력:{"name":"이름","type":"과목","text":"내용"}`}); 
+                const j=JSON.parse(a.text.replace(/```json/g,"").replace(/```/g,"")); 
+                await sendRequest('save_record',{date:formatDateYMD(new Date()), name:j.name, type:j.type, text:j.text, check:"없음"}); 
+                document.getElementById(inputId).value=""; 
+                showToast("저장 완료"); 
+            } catch(e){showToast("실패");} 
+        }
+
         const da=document.getElementById('homeImgArea'); da.addEventListener('dragover',e=>{e.preventDefault();da.style.background='#eee';}); da.addEventListener('drop',e=>{e.preventDefault();da.style.background='#fafafa'; if(e.dataTransfer.files.length>0){document.getElementById('homeImgInput').files=e.dataTransfer.files; uploadHomeImage(document.getElementById('homeImgInput'));}});
         
         // [Record Logic - Normal & Custom]
@@ -546,12 +577,12 @@
                 document.getElementById('normalModeOptions').style.display = 'none';
                 document.getElementById('customModeOptions').style.display = 'block';
                 document.getElementById('normalRecordView').style.display = 'none';
-                document.getElementById('customRecordView').style.display = 'flex'; // Changed to flex for full height
+                document.getElementById('customRecordView').style.display = 'flex'; 
                 renderCustomItems();
             } else {
                 document.getElementById('normalModeOptions').style.display = 'block';
                 document.getElementById('customModeOptions').style.display = 'none';
-                document.getElementById('normalRecordView').style.display = 'flex'; // Changed to flex
+                document.getElementById('normalRecordView').style.display = 'flex'; 
                 document.getElementById('customRecordView').style.display = 'none';
                 
                 document.getElementById('subjectArea').style.display=m==='subject'?'block':'none'; 
@@ -617,11 +648,10 @@
             if(data.length > 0) {
                 await sendRequest('custom_record', {mode:'save', data: data});
                 showToast("저장 완료");
-                renderCustomStats(); // 통계 갱신
+                renderCustomStats(); 
             } else { showToast("선택된 내용 없음"); }
         }
 
-        // [Modified] Advanced Stats Rendering
         async function renderCustomStats() {
             if(currentCustomItem === null) return;
             const chartArea = document.getElementById('customStatsChart'); 
@@ -631,22 +661,20 @@
             const itemDef = customItems[currentCustomItem];
             const range = document.getElementById('statsRangeSelect').value;
             
-            // Filter by Date Range
             const today = new Date();
             let startDate = new Date(today);
             let endDate = new Date(today);
             
             if (range === 'today') {
-                // Today only
             } else if (range === 'month') {
                 startDate.setDate(1); 
                 endDate.setMonth(endDate.getMonth() + 1); endDate.setDate(0);
             } else if (range === 's1') {
-                startDate = new Date(today.getFullYear(), 2, 1); // 3월 1일
-                endDate = new Date(today.getFullYear(), 7, 31); // 8월 31일
+                startDate = new Date(today.getFullYear(), 2, 1); 
+                endDate = new Date(today.getFullYear(), 7, 31); 
             } else if (range === 's2') {
-                startDate = new Date(today.getFullYear(), 8, 1); // 9월 1일
-                endDate = new Date(today.getFullYear() + 1, 1, 28); // 다음해 2월
+                startDate = new Date(today.getFullYear(), 8, 1); 
+                endDate = new Date(today.getFullYear() + 1, 1, 28); 
             } else if (range === 'year') {
                 startDate = new Date(today.getFullYear(), 2, 1);
                 endDate = new Date(today.getFullYear() + 1, 1, 28);
@@ -661,26 +689,22 @@
                 return d.date >= startStr && d.date <= endStr;
             });
 
-            // Map Data to Students
             const studentStats = studentList.map(st => {
-                // Count occurrences for this student
                 const count = filteredData.filter(d => d.name === st.name).length;
                 return { id: st.id, name: st.name, count: count };
             });
             
-            // Render Chart
-            const maxVal = Math.max(...studentStats.map(s => s.count)) || 1; // avoid divide by zero
+            const maxVal = Math.max(...studentStats.map(s => s.count)) || 1; 
             chartArea.innerHTML = `<div class="chart-bars-area" id="barsContainer"></div>`;
             const barsContainer = document.getElementById('barsContainer');
             
             studentStats.forEach(st => {
                 const bar = document.createElement('div');
                 bar.className = 'stat-bar';
-                // Min 20%, Max 80% logic
                 let heightPct = 20;
                 if (st.count > 0) {
-                    const relative = (st.count / maxVal) * 60; // 0 to 60
-                    heightPct = 20 + relative; // 20 to 80
+                    const relative = (st.count / maxVal) * 60; 
+                    heightPct = 20 + relative; 
                 }
                 
                 bar.style.height = `${heightPct}%`;
@@ -689,7 +713,6 @@
                 barsContainer.appendChild(bar);
             });
             
-            // Display empty message if no data at all
             if (studentStats.every(s => s.count === 0)) {
                 barsContainer.innerHTML = '<div style="position:absolute; width:100%; text-align:center; top:50%; color:#aaa;">데이터 없음</div>';
             }
@@ -817,7 +840,6 @@
 
         // [Calendar & Memo]
         async function loadGoogleEvents() { calendarEvents=await sendRequest('get_events')||[]; updateTodayScheduleInCal(); }
-        // [New] Load attendance dates for dots
         async function loadAttendanceForDots() {
             const data = await sendRequest('get_attendance');
             attendanceCache = data || [];
@@ -827,7 +849,6 @@
         function moveMonth(d) { curMonth+=d; if(curMonth>11){curMonth=0;curYear++;}else if(curMonth<0){curMonth=11;curYear--;} renderCalendar(); }
         function goToToday() { const t=new Date(); curYear=t.getFullYear(); curMonth=t.getMonth(); selectedDate=formatDateYMD(t); renderCalendar(); showDailyView(t.getDate()); }
         
-        // [Modified] Render Calendar with separate dots
         function renderCalendar() { 
             const g=document.getElementById('calGrid'); g.innerHTML=''; 
             document.getElementById('calMonth').innerText=`${curYear}.${curMonth+1}`; 
@@ -841,7 +862,6 @@
                 const d=document.createElement('div');d.className='cal-day';
                 if(dStr===selectedDate)d.classList.add('selected');
                 
-                // Dots logic
                 let dotsHtml = '';
                 if(calendarEvents.some(e=>e.date===dStr)) dotsHtml += '<div class="cal-dot event"></div>';
                 if(attendanceCache.some(a=>a.date===dStr)) dotsHtml += '<div class="cal-dot att"></div>';
@@ -853,11 +873,9 @@
         }
 
         async function showDailyView(day) { document.getElementById('calDetailTitle').innerText=`${selectedDate} 일정`; const div=document.getElementById('dailyEvents'); div.innerHTML=''; const evs=calendarEvents.filter(e=>e.date===selectedDate); if(evs.length===0)div.innerHTML='<div style="color:#999">일정 없음</div>'; else evs.forEach(e=>div.innerHTML+=`<div>• ${e.title}</div>`); loadAtt(); }
-        async function loadAtt() { const l=document.getElementById('attList'); l.innerHTML='로딩...'; const d=await sendRequest('get_attendance'); attendanceCache = d || []; /* Update Cache */ const t=d?d.filter(a=>a.date===selectedDate):[]; l.innerHTML=''; studentList.forEach(s=>{const e=t.find(a=>a.name===s.name); const row=document.createElement('div');row.className='att-row';row.innerHTML=`<span class="att-name">${s.name}</span><select class="att-status att-sel" data-name="${s.name}"><option ${e?.status==='출석'?'selected':''}>출석</option><option ${e?.status==='결석'?'selected':''}>결석</option><option ${e?.status==='지각'?'selected':''}>지각</option><option ${e?.status==='조퇴'?'selected':''}>조퇴</option><option ${e?.status==='결과'?'selected':''}>결과</option><option ${e?.status==='체험'?'selected':''}>체험</option></select><input type="text" class="att-memo" value="${e?.memo||''}" placeholder="비고">`;l.appendChild(row);}); }
+        async function loadAtt() { const l=document.getElementById('attList'); l.innerHTML='로딩...'; const d=await sendRequest('get_attendance'); attendanceCache = d || []; const t=d?d.filter(a=>a.date===selectedDate):[]; l.innerHTML=''; studentList.forEach(s=>{const e=t.find(a=>a.name===s.name); const row=document.createElement('div');row.className='att-row';row.innerHTML=`<span class="att-name">${s.name}</span><select class="att-status att-sel" data-name="${s.name}"><option ${e?.status==='출석'?'selected':''}>출석</option><option ${e?.status==='결석'?'selected':''}>결석</option><option ${e?.status==='지각'?'selected':''}>지각</option><option ${e?.status==='조퇴'?'selected':''}>조퇴</option><option ${e?.status==='결과'?'selected':''}>결과</option><option ${e?.status==='체험'?'selected':''}>체험</option></select><input type="text" class="att-memo" value="${e?.memo||''}" placeholder="비고">`;l.appendChild(row);}); }
         async function saveAttendance() { let l=[]; document.querySelectorAll('.att-row').forEach(r=>l.push({name:r.querySelector('.att-status').dataset.name, status:r.querySelector('.att-status').value, memo:r.querySelector('.att-memo').value})); await sendRequest('save_attendance',{date:selectedDate,data:l}); showToast("출석 저장"); loadAttendanceForDots().then(renderCalendar); }
         async function addEvent() { const t=document.getElementById('newEvent').value; if(t) { await sendRequest('save_event',{date:selectedDate,title:t}); document.getElementById('newEvent').value=''; loadGoogleEvents().then(()=>showDailyView()); } }
-        
-        // [Modified] Remove bold text in modal
         async function openMonthAttSummary() { 
             document.getElementById('monthAttModal').classList.add('open'); document.getElementById('monthAttBody').innerHTML='로딩...'; 
             const d=await sendRequest('get_attendance'); const m=`${curYear}-${String(curMonth+1).padStart(2,'0')}`; 
@@ -880,7 +898,35 @@
         }
         async function loadMemos() { memoList=await sendRequest('get_memos')||[]; setMemoMode(memoMode); }
         function moveMemoMonth(d) { curMemoMonth+=d; if(curMemoMonth>11){curMemoMonth=0;curMemoYear++;}else if(curMemoMonth<0){curMemoMonth=11;curMemoYear--;} renderMemoCalendar(); }
-        function renderMemoCalendar() { const g=document.getElementById('memoCalGrid'); g.innerHTML=''; document.getElementById('memoMonthTitle').innerText=`${curMemoYear}.${curMemoMonth+1}`; const f=new Date(curMemoYear,curMemoMonth,1); const l=new Date(curYear,curMemoMonth+1,0); ['일','월','화','수','목','금','토'].forEach(d=>g.innerHTML+=`<div style="font-weight:bold">${d}</div>`); for(i=0;i<f.getDay();i++)g.appendChild(document.createElement('div')); for(i=1;i<=l.getDate();i++){const dStr=`${curYear}-${String(curMemoMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; const d=document.createElement('div');d.className='cal-day';if(dStr===selectedMemoDate)d.classList.add('selected');if(memoList.some(m=>m.date===dStr))d.classList.add('has-memo');d.innerHTML=`<span>${i}</span><div class="cal-dot event"></div>`;d.onclick=()=>{selectedMemoDate=dStr;renderMemoCalendar();renderMemoPreview();openMemoForm();};g.appendChild(d);} renderMemoPreview(); }
+        
+        // [Modified] Fix Memo Calendar Dots (Check content validity)
+        function renderMemoCalendar() { 
+            const g=document.getElementById('memoCalGrid'); g.innerHTML=''; 
+            document.getElementById('memoMonthTitle').innerText=`${curMemoYear}.${curMemoMonth+1}`; 
+            const f=new Date(curMemoYear,curMemoMonth,1); const l=new Date(curYear,curMemoMonth+1,0); 
+            
+            ['일','월','화','수','목','금','토'].forEach(d=>g.innerHTML+=`<div style="font-weight:bold">${d}</div>`); 
+            for(i=0;i<f.getDay();i++)g.appendChild(document.createElement('div')); 
+            
+            for(i=1;i<=l.getDate();i++){
+                const dStr=`${curYear}-${String(curMemoMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; 
+                const d=document.createElement('div');d.className='cal-day';
+                if(dStr===selectedMemoDate)d.classList.add('selected');
+                
+                // Only show dot if there is actual content
+                if(memoList.some(m=>m.date===dStr && m.content && m.content.trim() !== '')) {
+                    d.classList.add('has-memo');
+                    d.innerHTML=`<span>${i}</span><div class="cal-dot event"></div>`;
+                } else {
+                    d.innerHTML=`<span>${i}</span><div class="cal-dots-container"></div>`;
+                }
+                
+                d.onclick=()=>{selectedMemoDate=dStr;renderMemoCalendar();renderMemoPreview();openMemoForm();};
+                g.appendChild(d);
+            } 
+            renderMemoPreview(); 
+        }
+
         function renderMemoPreview() { const a=document.getElementById('memoDatePreview'); const t=memoList.filter(m=>m.date===selectedMemoDate); if(t.length===0){a.style.display='none';return;} a.style.display='block'; a.innerHTML=''; t.forEach(m=>{const d=document.createElement('div');d.className='memo-mini-item'+(m.done?' done-memo':'');d.innerText=(m.pinned?'★ ':'')+m.content;d.onclick=()=>openMemoForm(m);a.appendChild(d);}); }
         function renderMemoList() { 
             const keyword = document.getElementById('memoSearchInput').value.toLowerCase();
