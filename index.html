@@ -81,8 +81,9 @@
 
         .card { background: var(--card-bg); border-radius: 8px; padding: 20px; border: 1px solid var(--border-color); box-shadow: 0 1px 2px rgba(0,0,0,0.03); display: flex; flex-direction: column; }
         .card.full-height { height: 100%; min-height: 0; flex: 1; }
-        /* 카드 헤더: 제목과 버튼들이 양끝 정렬되도록 수정 */
-        .card-header { font-size: 1.1rem; color: var(--primary-dark); font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; flex-shrink: 0; border-bottom: 2px solid var(--bg-main); display: flex; justify-content: space-between; align-items: center; }
+        
+        /* [수정] 카드 헤더: 제목과 버튼들이 양끝 정렬되도록 수정 */
+        .card-header { font-size: 1.1rem; color: var(--primary-dark); font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; flex-shrink: 0; border-bottom: 2px solid var(--bg-main); display: flex; justify-content: space-between; align-items: center; width: 100%; }
 
         .float-btn { position: fixed; top: 20px; right: 20px; width: 50px; height: 50px; background: var(--primary); color: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 2100; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; transition: 0.3s; }
         .float-menu { position: fixed; top: 80px; right: 20px; display: none; flex-direction: column; gap: 10px; z-index: 2100; }
@@ -96,23 +97,23 @@
         .tag .x-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; line-height: 16px; text-align: center; border-radius: 50%; font-size: 0.8rem; background: rgba(0,0,0,0.1); color: inherit; display: none; }
         .tag:hover .x-btn { display: block; }
         
-        /* [수정] 학생 목록 로우 정렬 수정 */
-        .student-row { display: flex; align-items: center; gap: 10px; padding: 12px 5px; border-bottom: 1px solid var(--bg-main); background: white; }
-        .st-name { width: 80px; font-weight: bold; color: var(--primary-dark); flex-shrink: 0; text-align: center; }
-        .st-input { flex-grow: 1; margin-bottom: 0 !important; height: 40px; min-width: 100px; } /* min-width 추가하여 너무 줄어들지 않게 */
+        /* [중요] 그리드 시스템 재정의: 헤더와 본문이 동일한 클래스 사용 */
+        .grid-row { display: flex; align-items: center; width: 100%; gap: 10px; }
+        .col-name { width: 90px; flex-shrink: 0; font-weight: bold; text-align: center; }
+        .col-content { flex: 1; min-width: 0; }
+        .col-check { width: 260px; flex-shrink: 0; display: flex; justify-content: space-between; padding: 0 5px; }
         
-        /* [수정] 체크박스 그룹 너비 고정 */
-        .st-check-group { display: flex; width: 240px; flex-shrink: 0; justify-content: space-between; padding: 0 5px; }
-        .check-circle { width: 28px; height: 28px; border: 2px solid var(--border-color); border-radius: 50%; cursor: pointer; position: relative; background: var(--bg-main); }
-        .check-circle.checked { border-color: var(--primary); background: var(--primary); }
-        .check-circle.checked::after { content: 'v'; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; font-weight:bold; }
+        /* 학생 목록 스타일 */
+        .student-row { padding: 10px 5px; border-bottom: 1px solid var(--bg-main); background: white; margin-bottom: 2px; }
+        .st-input { width: 100%; height: 42px; margin: 0 !important; } 
+        
+        /* 헤더 전용 스타일 */
+        .record-header-row { padding: 12px 5px; border-bottom: 2px solid #eee; background: #fafafa; border-radius: 6px 6px 0 0; color: var(--text-sub); font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; }
+        .col-check span { width: 30px; text-align: center; display: inline-block; letter-spacing: -1px; word-break: keep-all; line-height: 1.2; }
 
-        /* [수정] 기록하기 헤더 전용 스타일 */
-        .record-header-row { display: flex; align-items: center; gap: 10px; padding: 10px 5px; border-bottom: 1px solid #eee; font-weight: bold; color: var(--text-sub); font-size: 0.85rem; background: #fafafa; border-radius: 6px 6px 0 0; }
-        .rh-name { width: 80px; text-align: center; flex-shrink: 0; }
-        .rh-content { flex-grow: 1; text-align: center; }
-        .rh-check { width: 240px; display: flex; justify-content: space-between; flex-shrink: 0; padding: 0 5px; }
-        .rh-check span { width: 28px; text-align: center; display: inline-block; font-size: 0.8rem; letter-spacing: -1px; }
+        .check-circle { width: 30px; height: 30px; border: 2px solid var(--border-color); border-radius: 50%; cursor: pointer; position: relative; background: var(--bg-main); }
+        .check-circle.checked { border-color: var(--primary); background: var(--primary); }
+        .check-circle.checked::after { content: 'v'; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 16px; font-weight:bold; }
 
         .custom-item-row { padding: 10px; border: 1px solid #eee; border-radius: 6px; margin-bottom: 5px; cursor: pointer; display: flex; justify-content: space-between; }
         .custom-item-row.active { border-color: var(--primary); background: #f9fcff; }
@@ -392,11 +393,18 @@
                                             <button class="btn btn-primary" id="btnSaveAll" onclick="saveData()">저장하기</button>
                                         </div>
                                     </div>
-                                    <div class="record-header-row">
-                                        <div class="rh-name">이름</div>
-                                        <div class="rh-content">내용</div>
-                                        <div id="checkHeader" class="rh-check"><span>매우<br>잘함</span><span>잘함</span><span>보통</span><span>노력<br>요함</span></div>
+                                    
+                                    <div class="record-header-row grid-row">
+                                        <div class="col-name">이름</div>
+                                        <div class="col-content">내용</div>
+                                        <div id="checkHeader" class="col-check">
+                                            <span>매우<br>잘함</span>
+                                            <span>잘함</span>
+                                            <span>보통</span>
+                                            <span>노력<br>요함</span>
+                                        </div>
                                     </div>
+                                    
                                     <div id="recordList"></div>
                                 </div>
                                 
@@ -906,9 +914,10 @@
              const l=document.getElementById('recordList');
              l.innerHTML='';
              studentList.forEach(st=>{
-                 const r=document.createElement('div'); r.className='student-row';
-                 let chk=currentMode==='subject'?`<div class="st-check-group"><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div></div>`:'';
-                 r.innerHTML=`<div class="st-name">${st.name}</div><input type="text" class="st-input" id="input_${st.id}" placeholder="내용">${chk}`;
+                 // [중요] 그리드 클래스(grid-row)를 사용하여 학생 목록 행 생성
+                 const r=document.createElement('div'); r.className='student-row grid-row';
+                 let chk=currentMode==='subject'?`<div class="col-check st-check-group"><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div></div>`:'';
+                 r.innerHTML=`<div class="col-name st-name">${st.name}</div><div class="col-content"><input type="text" class="st-input" id="input_${st.id}" placeholder="내용"></div>${chk}`;
                  l.appendChild(r);
              });
         }
