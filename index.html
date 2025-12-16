@@ -18,23 +18,27 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Gowun Dodum', sans-serif;
             -webkit-tap-highlight-color: transparent; }
         
+        /* [핵심 수정 1] 전체 레이아웃 강제 위쪽 정렬 (설정 탭 내려감 방지) */
         body { background-color: var(--bg-main); color: var(--text-main); font-size: 16px; line-height: 1.5; height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
         
         .container { 
             width: 100%; max-width: 1400px; margin: 0 auto; padding: 20px; 
             height: 100%; flex: 1; display: flex; flex-direction: column; overflow: hidden;
+            justify-content: flex-start !important; /* 강제 위쪽 정렬 */
         }
         
         header { text-align: center; margin-bottom: 15px; flex-shrink: 0; }
         h1 { color: var(--primary-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: -0.5px; margin: 0; }
 
-        /* [핵심] 카드 스타일 (학생관리 탭과 동일한 스크롤 방식 적용) */
-        .card { background: var(--card-bg); border-radius: 8px; padding: 20px; border: 1px solid var(--border-color); box-shadow: 0 1px 2px rgba(0,0,0,0.03); display: flex; flex-direction: column; }
-        .card.full-height { height: 100%; min-height: 0; flex: 1; }
-        /* scrollable 클래스가 있으면 내용이 넘칠 때 무조건 스크롤 생성 */
-        .card.scrollable { overflow-y: auto; }
-        
-        .card-header { font-size: 1.1rem; color: var(--primary-dark); font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; flex-shrink: 0; border-bottom: 2px solid var(--bg-main); display: flex; justify-content: space-between; align-items: center; }
+        /* [핵심 수정 2] 섹션 레이아웃 (정렬 명시) */
+        .section { display: none; flex: 1; overflow: hidden; height: 100%; flex-direction: column; justify-content: flex-start; } 
+        .section.active { display: flex; animation: fadeIn 0.2s; } 
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* [핵심 수정 3] 만능 스크롤 래퍼 (홈 화면 등 내부 스크롤용) */
+        .scroll-wrapper {
+            flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding-right: 5px;
+        }
 
         /* Visibility Controls */
         .pc-only { display: block; }
@@ -68,21 +72,26 @@
         #lockInput { font-size: 1.2rem; text-align: center; margin-bottom: 5px; letter-spacing: 2px; }
         .lock-msg { font-size: 0.8rem; color: var(--danger); min-height: 20px; margin-bottom: 10px;}
 
-        /* Nav */
+        /* Tabs */
         .nav-tabs { display: flex; flex-shrink: 0; background: var(--card-bg); border-radius: 8px; margin-bottom: 15px; padding: 4px; border: 1px solid var(--border-color); }
         .nav-item { flex: 1; text-align: center; padding: 12px; cursor: pointer; color: var(--text-sub); border-radius: 6px; font-weight: bold; transition: 0.2s; }
         .nav-item.active { color: var(--primary-dark); background-color: #eaf6fc; }
         .nav-item-home { flex: 0.5; min-width: 60px; color: var(--primary-dark); }
 
-        /* Layout Sections */
-        .section { display: none; flex: 1; overflow: hidden; height: 100%; flex-direction: column; } 
-        .section.active { display: flex; animation: fadeIn 0.2s; } 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        
+        /* Layout Helpers */
         .split-container { display: flex; gap: 20px; height: 100%; overflow: hidden; flex: 1; min-height: 0; }
         .split-left { width: 360px; flex-shrink: 0; display: flex; flex-direction: column; gap: 15px; height: 100%; overflow: hidden; }
         .split-right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 15px; height: 100%; overflow: hidden; }
         .split-half { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+
+        /* Card System */
+        .card { background: var(--card-bg); border-radius: 8px; padding: 20px; border: 1px solid var(--border-color); box-shadow: 0 1px 2px rgba(0,0,0,0.03); display: flex; flex-direction: column; }
+        .card.full-height { height: 100%; min-height: 0; flex: 1; }
+        
+        /* [핵심 수정 4] 카드 자체 스크롤 (기록하기 탭 해결사) */
+        .card.scrollable { overflow-y: auto; }
+        
+        .card-header { font-size: 1.1rem; color: var(--primary-dark); font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; flex-shrink: 0; border-bottom: 2px solid var(--bg-main); display: flex; justify-content: space-between; align-items: center; }
 
         /* Float Menu */
         .float-btn { position: fixed; top: 20px; right: 20px; width: 50px; height: 50px; background: var(--primary); color: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 2100; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; transition: 0.3s; }
