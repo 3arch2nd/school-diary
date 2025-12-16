@@ -521,24 +521,71 @@
         </div>
    
         <div id="neis" class="section pc-only-tab">
-            <div class="mobile-block-overlay"><span>⚙️</span><p>해당 기능은 PC/태블릿에서<br>사용 가능해요!</p></div>
+            <div class="mobile-block-overlay">
+                <span>⚙️</span>
+                <p>해당 기능은 PC/태블릿에서<br>사용 가능해요!</p>
+            </div>
+
             <div class="split-container pc-only">
                 <div class="split-left">
                     <div class="card full-height">
-                         <div class="scroll-wrapper">
-<div class="card-header">NEIS 옵션</div>
-<div style="margin-bottom:15px; background:#fffbe6; padding:10px; border-radius:6px;">
-    <label style="display:flex; align-items:center; cursor:pointer; margin:0;">
-        <input type="checkbox" id="useRefFiles" style="width:20px; height:20px; margin-right:10px;"> 
-        <span>업로드 자료 반영</span>
-    </label>
-    <div style="font-size:0.8rem; color:#888; margin-top:5px; margin-left:30px;">(최근 업로드한 파일 3개를 참고합니다)</div>
-</div>
-<label>유형</label><select id="neisType" onchange="toggleNeisType()"><option value="subject">과목별 세특</option><option value="behavior">행동특성</option></select><div id="neisSubOption"><label>대상 과목</label><select id="neisSubjectSelect"></select></div><div id="neisBehOption" style="display:none;"><label>키워드</label><input type="text" id="neisKeyword" placeholder="예: 배려, 협력"></div><label style="margin-top:15px;">분량</label><div style="display:flex; gap:10px;"><input type="range" id="neisLen" min="100" max="1000" step="50" value="300" oninput="document.getElementById('lenVal').innerText=this.value"><span style="color:var(--primary); font-weight:bold;"><span id="lenVal">300</span>자</span></div><button class="btn btn-primary" id="btnGenNeis" style="margin-top:15px;" onclick="generateNeisCards()">자료 생성하기</button>
+                        <div class="scroll-wrapper">
+                            <div class="card-header">NEIS 옵션</div>
+                            
+                            <div style="margin-bottom:15px; background:#fffbe6; padding:10px; border-radius:6px;">
+                                <label style="display:flex; align-items:center; cursor:pointer; margin:0;">
+                                    <input type="checkbox" id="useRefFiles" style="width:20px; height:20px; margin-right:10px;"> 
+                                    <span>📚 업로드 자료 반영</span>
+                                </label>
+                                <div style="font-size:0.8rem; color:#888; margin-top:5px; margin-left:30px;">(최근 업로드한 파일 3개를 참고합니다)</div>
+                            </div>
+
+                            <label>유형</label>
+                            <select id="neisType" onchange="toggleNeisType()">
+                                <option value="subject">과목별 세특</option>
+                                <option value="behavior">행동특성</option>
+                            </select>
+                            
+                            <div id="neisSubOption">
+                                <label>대상 과목</label>
+                                <select id="neisSubjectSelect"></select>
+                            </div>
+                            
+                            <div id="neisBehOption" style="display:none;">
+                                <label>공통 키워드 (반 전체)</label>
+                                <input type="text" id="neisKeyword" placeholder="예: 배려, 협력, 봉사">
+                            </div>
+
+                            <label style="margin-top:15px;">분량 목표</label>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <input type="range" id="neisLen" min="100" max="1000" step="50" value="300" 
+                                    oninput="document.getElementById('lenVal').innerText=this.value" style="margin:0; flex:1;">
+                                <span style="color:var(--primary); font-weight:bold; width:50px; text-align:right;">
+                                    <span id="lenVal">300</span>자
+                                </span>
+                            </div>
+
+                            <hr style="margin: 20px 0;">
+                            <div style="display:flex; gap:10px;">
+                                <button class="btn btn-outline" style="flex:1;" onclick="prepareNeisUI()">1. 명단 세팅</button>
+                                <button class="btn btn-primary" id="btnGenNeis" style="flex:1;" onclick="startNeisGeneration()">2. AI 일괄 생성</button>
+                            </div>
+                            </div>
+                    </div>
+                </div>
+
+                <div class="split-right">
+                    <div class="card full-height">
+                        <div class="scroll-wrapper">
+                            <div class="card-header">생성 결과</div>
+                            <div id="neisResultList">
+                                <div style="text-align:center; padding:50px; color:#aaa;">
+                                    좌측에서 <b>[1. 명단 세팅]</b> 버튼을 눌러주세요.
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="split-right"><div class="card full-height"><div class="scroll-wrapper"><div class="card-header">생성 결과</div><div id="neisResultList"></div></div></div></div>
             </div>
         </div>
         
