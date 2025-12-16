@@ -18,17 +18,42 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Gowun Dodum', sans-serif;
             -webkit-tap-highlight-color: transparent; }
         
-        /* [Layout Core] - Scroll Fix Version Logic Restored */
-        body { background-color: var(--bg-main); color: var(--text-main); font-size: 16px; line-height: 1.5; height: 100vh; overflow: hidden; }
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; height: 100vh; display: flex; flex-direction: column; padding-bottom: 40px; }
+        /* Layout Core */
+        body { background-color: var(--bg-main); color: var(--text-main); font-size: 16px; line-height: 1.5; height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
+        .container { 
+            width: 100%; max-width: 1400px; margin: 0 auto; padding: 20px; 
+            height: 100%; flex: 1; display: flex; flex-direction: column; overflow: hidden;
+        }
         
         header { text-align: center; margin-bottom: 15px; flex-shrink: 0; }
-        h1 { color: var(--primary-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: -0.5px; }
+        h1 { color: var(--primary-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: -0.5px; margin: 0; }
+
+        /* [핵심 1] 공통 스크롤 래퍼 (기록하기 탭용 - 꽉 채우기) */
+        .scroll-wrapper {
+            flex: 1;            /* 남은 공간 모두 차지 */
+            min-height: 0;      /* 플렉스박스 스크롤 버그 방지 */
+            overflow-y: auto;   /* 넘치면 스크롤 */
+            width: 100%;
+            padding-right: 5px;
+        }
+
+        /* [핵심 2] 홈 화면 전용 정렬 (위쪽 정렬 강제) */
+        .home-content-stack {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* 위쪽부터 쌓기 */
+            gap: 15px; /* 아이템 간 간격 */
+            /* height: 100%를 주지 않아서 내용물만큼만 차지하게 함 */
+        }
+
+        /* Visibility Controls */
+        .pc-only { display: block; }
+        .mobile-only { display: none !important; }
 
         /* Overlay */
         .global-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 2000; display: none; }
         .global-overlay.show { display: block; }
-
+        
         /* Music UI */
         .music-panel { position: fixed; top: 80px; left: -420px; width: 400px; height: 220px; background: white; border-radius: 12px; box-shadow: 2px 2px 15px rgba(0,0,0,0.2); z-index: 2200; transition: left 0.3s ease-in-out; display: flex; overflow: hidden; }
         .music-panel.show { left: 20px; } 
@@ -37,7 +62,6 @@
         .mp-item { font-size: 0.85rem; padding: 5px; cursor: pointer; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; }
         .mp-item:hover { color: var(--primary); }
         .mp-add { margin-top: auto; display: flex; gap: 5px; }
-        
         .music-capsule { position: fixed; top: 20px; left: 20px; width: 220px; height: 50px; background: var(--primary-light); color: var(--primary-dark); border-radius: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 2300; display: flex; align-items: center; padding: 0 5px 0 15px; transition: 0.3s; overflow: hidden; border: 2px solid white; }
         .music-info { flex: 1; overflow: hidden; white-space: nowrap; font-size: 0.9rem; font-weight: bold; margin-right: 10px; }
         .music-play-btn { width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
@@ -60,13 +84,10 @@
         .nav-item.active { color: var(--primary-dark); background-color: #eaf6fc; }
         .nav-item-home { flex: 0.5; min-width: 60px; color: var(--primary-dark); }
 
-        /* Layout - Reverted to Flex Logic */
+        /* Layout Sections */
         .section { display: none; flex: 1; overflow: hidden; height: 100%; flex-direction: column; } 
         .section.active { display: flex; animation: fadeIn 0.2s; } 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .pc-only { display: block; height: 100%; }
-        .mobile-only { display: none !important; }
         
         .split-container { display: flex; gap: 20px; height: 100%; overflow: hidden; flex: 1; min-height: 0; }
         .split-left { width: 360px; flex-shrink: 0; display: flex; flex-direction: column; gap: 15px; height: 100%; overflow: hidden; }
@@ -75,7 +96,7 @@
 
         .card { background: var(--card-bg); border-radius: 8px; padding: 20px; border: 1px solid var(--border-color); box-shadow: 0 1px 2px rgba(0,0,0,0.03); display: flex; flex-direction: column; }
         .card.full-height { height: 100%; min-height: 0; flex: 1; }
-        .card.scrollable { overflow-y: auto; }
+        /* .card.scrollable was problematic, removing its explicit overflow here and letting scroll-wrapper handle it */
         .card-header { font-size: 1.1rem; color: var(--primary-dark); font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; flex-shrink: 0; border-bottom: 2px solid var(--bg-main); display: flex; justify-content: space-between; align-items: center; }
 
         /* Float Menu */
@@ -265,26 +286,33 @@
 
             <div class="split-container">
                 <div class="split-left">
-                    <div class="card full-height scrollable">
-                        <div class="home-image-area" id="homeImgArea" onclick="document.getElementById('homeImgInput').click()">
-                            <span class="home-image-msg">이미지 드래그 또는 클릭</span>
-                            <img id="homeMainImg" style="display:none;">
-                            <input type="file" id="homeImgInput" style="display:none" accept="image/*" onchange="uploadHomeImage(this)">
+                    <div class="card full-height">
+                        <div class="scroll-wrapper">
+                            <div class="home-image-area" id="homeImgArea" onclick="document.getElementById('homeImgInput').click()">
+                                <span class="home-image-msg">이미지 드래그 또는 클릭</span>
+                                <img id="homeMainImg" style="display:none;">
+                                <input type="file" id="homeImgInput" style="display:none" accept="image/*" onchange="uploadHomeImage(this)">
+                            </div>
+                            <div class="card-header" style="margin-top:20px; border-bottom:0;">오늘의 할 일</div>
+                            <div id="homeToDoList" style="flex-grow:1; font-size:1rem; color:#333; font-weight:bold; line-height:1.8;">일정 없음</div>
                         </div>
-                        <div class="card-header" style="margin-top:20px; border-bottom:0;">오늘의 할 일</div>
-                        <div id="homeToDoList" style="flex-grow:1; font-size:1rem; color:#333; font-weight:bold; line-height:1.8;">일정 없음</div>
                     </div>
                 </div>
                 <div class="split-right">
                     <div class="card full-height">
-                        <div style="flex:1; overflow-y:auto; display:flex; flex-direction:column; justify-content:flex-start;">
-                            <div class="card-header" style="flex-shrink:0;">자주 찾는 사이트</div>
-                            <div class="quick-link-grid" id="quickLinkGrid" style="flex-shrink:0;"></div>
-                            <div class="card-header pc-only" style="flex-shrink:0; margin-top:10px;">빠른 기록</div>
-                             <div class="pc-only" style="background:#f9f9f9; padding:15px; border-radius:8px; flex-shrink:0;">
-                                <div style="font-size:0.85rem; color:var(--text-sub); margin-bottom:10px;">[팁] 예: <b>김철수/수학/발표 잘함</b></div>
-                                <textarea id="homeQuickInput" style="width:100%; height:80px; resize:none;" placeholder="입력..."></textarea>
-                                <button class="btn btn-primary" style="width:100%;" onclick="saveHomeQuickRecord('pc')">✨ AI 자동 기록</button>
+                        <div class="scroll-wrapper">
+                            <div class="home-content-stack">
+                                <div> <div class="card-header">자주 찾는 사이트</div>
+                                    <div class="quick-link-grid" id="quickLinkGrid"></div>
+                                </div>
+                                <div class="pc-only">
+                                    <div class="card-header">빠른 기록</div>
+                                    <div style="background:#f9f9f9; padding:15px; border-radius:8px;">
+                                        <div style="font-size:0.85rem; color:var(--text-sub); margin-bottom:10px;">[팁] 예: <b>김철수/수학/발표 잘함</b></div>
+                                        <textarea id="homeQuickInput" style="width:100%; height:80px; resize:none;" placeholder="입력..."></textarea>
+                                        <button class="btn btn-primary" style="width:100%;" onclick="saveHomeQuickRecord('pc')">✨ AI 자동 기록</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -304,7 +332,7 @@
                         <input type="date" id="mobDate" style="margin-bottom:0;">
                     </div>
                     
-                    <div style="flex:1; overflow-y:auto; min-height:0;">
+                    <div class="scroll-wrapper">
                         <div id="mobViewQuick" style="display:flex; flex-direction:column; padding-top:15px; height: 100%;">
                             <div style="background:#f0f8ff; padding:15px; border-radius:8px; flex:1; display:flex; flex-direction:column; min-height: 200px;">
                                 <div style="font-size:0.9rem; color:var(--text-sub); margin-bottom:10px;">
@@ -320,7 +348,7 @@
                                 <label style="margin:0;">항목 선택</label>
                                 <select id="mobCustomSelect" style="width:60%; margin:0;" onchange="renderMobileCustomList()"></select>
                             </div>
-                            <div style="border:1px solid #eee; border-radius:8px; padding:10px; margin-bottom:10px; flex:1; overflow-y:auto;">
+                            <div class="scroll-wrapper" style="border:1px solid #eee; border-radius:8px; padding:10px; margin-bottom:10px; flex:1;">
                                 <div id="mobCustomList"></div>
                             </div>
                             <button class="btn btn-primary" style="width:100%; height:50px; flex-shrink:0;" onclick="saveMobileCustom()">저장하기</button>
@@ -332,44 +360,46 @@
             <div class="pc-only full-height">
                 <div class="split-container">
                     <div class="split-left">
-                        <div class="card full-height scrollable">
-                            <div class="card-header"><span>기본 정보</span><div style="display:flex; gap:5px;"><button class="btn-sm active" id="btnSubject" onclick="setMode('subject')">과목</button><button class="btn-sm inactive" id="btnBehavior" onclick="setMode('behavior')">행동</button><button class="btn-sm inactive" id="btnCustom" onclick="setMode('custom')">기타</button></div></div>
-                            <label>날짜</label><input type="date" id="rDate">
-                            <div id="normalModeOptions">
-                                <div id="periodArea"><label>교시</label><select id="rPeriod"><option value="">(선택안함)</option><option>1교시</option><option>2교시</option><option>3교시</option><option>4교시</option><option>5교시</option><option>6교시</option></select></div>
-                                <div id="subjectArea">
-                                    <label>과목 선택</label><div class="tag-container" id="subjectTags"></div>
-                                    <label>주제</label><input type="text" id="rTopic" placeholder="예: 시 낭송하기">
+                        <div class="card full-height">
+                            <div class="scroll-wrapper">
+                                <div class="card-header"><span>기본 정보</span><div style="display:flex; gap:5px;"><button class="btn-sm active" id="btnSubject" onclick="setMode('subject')">과목</button><button class="btn-sm inactive" id="btnBehavior" onclick="setMode('behavior')">행동</button><button class="btn-sm inactive" id="btnCustom" onclick="setMode('custom')">기타</button></div></div>
+                                <label>날짜</label><input type="date" id="rDate">
+                                <div id="normalModeOptions">
+                                    <div id="periodArea"><label>교시</label><select id="rPeriod"><option value="">(선택안함)</option><option>1교시</option><option>2교시</option><option>3교시</option><option>4교시</option><option>5교시</option><option>6교시</option></select></div>
+                                    <div id="subjectArea">
+                                        <label>과목 선택</label><div class="tag-container" id="subjectTags"></div>
+                                        <label>주제</label><input type="text" id="rTopic" placeholder="예: 시 낭송하기">
+                                    </div>
                                 </div>
-                            </div>
-                            <div id="customModeOptions" style="display:none;">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                                    <label style="margin:0;">나만의 항목</label>
-                                    <button class="btn-sm" onclick="openCustomItemModal()">+ 항목 생성</button>
+                                <div id="customModeOptions" style="display:none;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                                        <label style="margin:0;">나만의 항목</label>
+                                        <button class="btn-sm" onclick="openCustomItemModal()">+ 항목 생성</button>
+                                    </div>
+                                    <div id="customItemsList"></div>
                                 </div>
-                                <div id="customItemsList"></div>
                             </div>
                         </div>
                     </div>
                     <div class="split-right">
-                        <div class="card full-height" id="recordRightCard" style="display:flex; flex-direction:column;">
+                        <div class="card full-height" id="recordRightCard">
                             <div id="normalRecordView" style="display:flex; flex-direction:column; height:100%; overflow:hidden;">
                                 <div class="card-header" style="flex-shrink:0;">
                                     <div style="display:flex; align-items:center; gap:15px;"><span>학생별 기록</span><div class="switch-container"><label class="switch"><input type="checkbox" id="aiToggle" checked><span class="slider"></span></label><span>AI</span></div></div>
                                     <button class="btn btn-primary" id="btnSaveAll" onclick="saveData()">저장하기</button>
                                 </div>
                                 <div style="display:flex; padding-bottom:10px; border-bottom:1px solid #eee; font-weight:bold; color:var(--text-sub); font-size:0.9rem; flex-shrink:0;">
-                                    <div style="width:90px;">이름</div><div style="flex-grow:1; text-align:center;">내용</div>
-                                    <div id="checkHeader" style="width:220px; display:flex; justify-content:space-between; font-size:0.75rem;"><span>매우잘함</span><span>잘함</span><span>보통</span><span>노력요함</span></div>
+                                    <div style="width:80px;">이름</div><div style="flex-grow:1; text-align:center;">내용</div>
+                                    <div id="checkHeader" style="width:140px; display:flex; justify-content:space-between; font-size:0.75rem;"><span>매우</span><span>잘함</span><span>보통</span><span>노력</span></div>
                                 </div>
-                                <div id="recordList" style="flex:1; overflow-y:auto; min-height:0;"></div>
+                                <div id="recordList" class="scroll-wrapper"></div>
                             </div>
                             
                             <div id="customRecordView" style="display:none; height:100%; flex-direction:column; overflow:hidden;">
                                 <div class="split-container" style="flex:1; overflow:hidden; min-height:0;">
                                     <div class="split-half" style="display:flex; flex-direction:column; overflow:hidden;">
                                         <div class="card-header" style="flex-shrink:0;"><span>빠른 체크</span><button class="btn-sm active" onclick="saveCustomData()">저장</button></div>
-                                        <div id="customCheckList" style="flex:1; overflow-y:auto;"></div>
+                                        <div id="customCheckList" class="scroll-wrapper"></div>
                                     </div>
                                     <div class="split-half" style="border-left:1px solid #eee; padding-left:15px; display:flex; flex-direction:column; overflow:hidden;">
                                         <div class="card-header" style="flex-shrink:0;">
@@ -382,7 +412,7 @@
                                                 <option value="year">1년</option>
                                             </select>
                                         </div>
-                                        <div id="customStatsChart" class="bar-chart-container" style="flex:1; overflow-y:auto;"></div>
+                                        <div id="customStatsChart" class="bar-chart-container scroll-wrapper"></div>
                                     </div>
                                 </div>
                             </div>
@@ -394,12 +424,18 @@
 
         <div id="students" class="section">
             <div class="split-container">
-                <div class="split-left"><div class="card full-height scrollable"><div class="card-header">학생 명단</div><div style="margin-bottom: 15px;"><button class="btn btn-outline" style="width:100%;" onclick="openStudentManageModal()">+ 학생 명단 관리</button></div><div id="studentNavList"></div></div></div>
+                <div class="split-left">
+                    <div class="card full-height">
+                        <div class="scroll-wrapper">
+                            <div class="card-header">학생 명단</div><div style="margin-bottom: 15px;"><button class="btn btn-outline" style="width:100%;" onclick="openStudentManageModal()">+ 학생 명단 관리</button></div><div id="studentNavList"></div>
+                        </div>
+                    </div>
+                </div>
                 <div class="split-right">
                     <div class="card full-height" style="display:flex; flex-direction:column;">
                         <div class="card-header" style="flex-shrink:0;"><span id="viewerTitle">기록 상세</span><div style="display:flex; gap:5px;"><select id="viewSubjectFilter" style="margin-bottom:0; width:100px; padding:6px;" onchange="loadHistory()"></select><button class="btn-sm active" id="viewSubBtn" onclick="viewTab('subject')">과목</button><button class="btn-sm inactive" id="viewBehBtn" onclick="viewTab('behavior')">행동</button></div></div>
                         <div style="margin-bottom:10px; display:flex; gap:10px; flex-shrink:0;"><button class="btn btn-sm btn-primary" style="flex:1" onclick="saveSelectedHistory()">일괄 저장 (수정된 항목)</button><button class="btn btn-sm btn-del" style="flex:1" onclick="deleteSelectedHistory()">선택 삭제</button></div>
-                        <div id="historyViewer" style="flex:1; overflow-y:auto; min-height:0;"></div>
+                        <div id="historyViewer" class="scroll-wrapper"></div>
                     </div>
                 </div>
             </div>
@@ -407,25 +443,31 @@
         <div id="neis" class="section pc-only-tab">
             <div class="mobile-block-overlay"><span>⚙️</span><p>해당 기능은 PC/태블릿에서<br>사용 가능해요!</p></div>
             <div class="split-container pc-only">
-                <div class="split-left"><div class="card full-height scrollable"><div class="card-header">NEIS 옵션</div><label>유형</label><select id="neisType" onchange="toggleNeisType()"><option value="subject">과목별 세특</option><option value="behavior">행동특성</option></select><div id="neisSubOption"><label>대상 과목</label><select id="neisSubjectSelect"></select></div><div id="neisBehOption" style="display:none;"><label>키워드</label><input type="text" id="neisKeyword" placeholder="예: 배려, 협력"></div><label style="margin-top:15px;">분량</label><div style="display:flex; gap:10px;"><input type="range" id="neisLen" min="100" max="1000" step="50" value="300" oninput="document.getElementById('lenVal').innerText=this.value"><span style="color:var(--primary); font-weight:bold;"><span id="lenVal">300</span>자</span></div><button class="btn btn-primary" id="btnGenNeis" style="margin-top:15px;" onclick="generateNeisCards()">자료 생성하기</button></div></div>
-                <div class="split-right"><div class="card full-height scrollable"><div class="card-header">생성 결과</div><div id="neisResultList"></div></div></div>
+                <div class="split-left">
+                    <div class="card full-height">
+                        <div class="scroll-wrapper">
+                            <div class="card-header">NEIS 옵션</div><label>유형</label><select id="neisType" onchange="toggleNeisType()"><option value="subject">과목별 세특</option><option value="behavior">행동특성</option></select><div id="neisSubOption"><label>대상 과목</label><select id="neisSubjectSelect"></select></div><div id="neisBehOption" style="display:none;"><label>키워드</label><input type="text" id="neisKeyword" placeholder="예: 배려, 협력"></div><label style="margin-top:15px;">분량</label><div style="display:flex; gap:10px;"><input type="range" id="neisLen" min="100" max="1000" step="50" value="300" oninput="document.getElementById('lenVal').innerText=this.value"><span style="color:var(--primary); font-weight:bold;"><span id="lenVal">300</span>자</span></div><button class="btn btn-primary" id="btnGenNeis" style="margin-top:15px;" onclick="generateNeisCards()">자료 생성하기</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="split-right"><div class="card full-height"><div class="scroll-wrapper"><div class="card-header">생성 결과</div><div id="neisResultList"></div></div></div></div>
             </div>
         </div>
         <div id="bookmarks" class="section">
             <div class="split-container">
-                <div class="split-left"><div class="card full-height scrollable"><div class="card-header">북마크 추가</div><input type="hidden" id="bmEditRow" value=""><label>URL</label><input type="text" id="bmUrl" placeholder="https://..." style="margin-bottom:10px;"><label>제목</label><input type="text" id="bmTitle" placeholder="자동 완성 됨"><input type="hidden" id="bmStar"> <label>태그</label><div class="tag-container" id="bmTagArea"></div><div style="display:flex; gap:5px; margin-bottom:15px;"><input type="text" id="newBmTagInput" placeholder="새 태그" style="margin:0; flex:1;"><button class="btn-sm active" onclick="addNewBmTag()">+</button></div><label>메모</label><textarea id="bmMemo" style="height:120px;" placeholder="활용 팁..."></textarea><div style="display:flex; gap:10px; margin-top:10px;"><button class="btn btn-outline" style="flex:1" onclick="clearBmInput()">취소</button><button class="btn btn-primary" style="flex:1" onclick="saveBookmark()" id="btnSaveBm">저장</button></div></div></div>
-                <div class="split-right"><div class="card full-height scrollable"><div class="card-header"><span>북마크 목록</span><div id="bmFilterContainer" style="display:flex; gap:5px; flex-wrap:wrap; margin-left:10px;"></div></div><div id="bmList"></div></div></div>
+                <div class="split-left"><div class="card full-height"><div class="scroll-wrapper"><div class="card-header">북마크 추가</div><input type="hidden" id="bmEditRow" value=""><label>URL</label><input type="text" id="bmUrl" placeholder="https://..." style="margin-bottom:10px;"><label>제목</label><input type="text" id="bmTitle" placeholder="자동 완성 됨"><input type="hidden" id="bmStar"> <label>태그</label><div class="tag-container" id="bmTagArea"></div><div style="display:flex; gap:5px; margin-bottom:15px;"><input type="text" id="newBmTagInput" placeholder="새 태그" style="margin:0; flex:1;"><button class="btn-sm active" onclick="addNewBmTag()">+</button></div><label>메모</label><textarea id="bmMemo" style="height:120px;" placeholder="활용 팁..."></textarea><div style="display:flex; gap:10px; margin-top:10px;"><button class="btn btn-outline" style="flex:1" onclick="clearBmInput()">취소</button><button class="btn btn-primary" style="flex:1" onclick="saveBookmark()" id="btnSaveBm">저장</button></div></div></div></div>
+                <div class="split-right"><div class="card full-height"><div class="scroll-wrapper"><div class="card-header"><span>북마크 목록</span><div id="bmFilterContainer" style="display:flex; gap:5px; flex-wrap:wrap; margin-left:10px;"></div></div><div id="bmList"></div></div></div></div>
             </div>
         </div>
         <div id="calendar" class="section">
              <div class="split-container">
                 <div class="split-left"><div class="card scrollable"><div class="card-header" style="justify-content:center; gap:15px;"><button class="arrow-btn" onclick="moveMonth(-1)">◀</button><span id="calMonth"></span><button class="arrow-btn" onclick="moveMonth(1)">▶</button><button class="btn-sm" style="margin-left:5px;" onclick="goToToday()">오늘</button></div><div class="cal-grid" id="calGrid"></div></div><div class="card scrollable" style="flex:1; margin-top:10px;"><div class="card-header">오늘 일정</div><div id="todayTodoListCal" style="font-size:0.95rem; line-height:1.6;">일정 없음</div></div></div>
-                <div class="split-right"><div class="card full-height scrollable"><div class="card-header"><span id="calDetailTitle">선택 날짜 일정</span></div><div style="display:flex; gap:5px; margin-bottom:15px;"><input type="text" id="newEvent" placeholder="일정 등록 (구글 캘린더)" style="margin:0;"><button class="btn-primary" onclick="addEvent()" style="border-radius:6px; width:70px;">등록</button></div><div id="dailyEvents" style="margin-bottom:20px;"></div><hr style="margin:20px 0; border:0; border-top:1px dashed #eee;"><div class="card-header"><span>출석 체크</span><div style="display:flex; gap:5px;"><button class="btn-sm" onclick="openMonthAttSummary()">월별 통계</button><button class="btn-sm active" onclick="saveAttendance()">저장</button></div></div><div id="attList"></div></div></div>
+                <div class="split-right"><div class="card full-height"><div class="scroll-wrapper"><div class="card-header"><span id="calDetailTitle">선택 날짜 일정</span></div><div style="display:flex; gap:5px; margin-bottom:15px;"><input type="text" id="newEvent" placeholder="일정 등록 (구글 캘린더)" style="margin:0;"><button class="btn-primary" onclick="addEvent()" style="border-radius:6px; width:70px;">등록</button></div><div id="dailyEvents" style="margin-bottom:20px;"></div><hr style="margin:20px 0; border:0; border-top:1px dashed #eee;"><div class="card-header"><span>출석 체크</span><div style="display:flex; gap:5px;"><button class="btn-sm" onclick="openMonthAttSummary()">월별 통계</button><button class="btn-sm active" onclick="saveAttendance()">저장</button></div></div><div id="attList"></div></div></div></div>
              </div>
         </div>
         <div id="memo" class="section">
             <div class="split-container">
-                <div class="split-left"><div class="card full-height scrollable"><div class="card-header"><span>메모</span><div style="display:flex; gap:5px;"><button class="btn-sm active" id="btnMemoModeCal" onclick="setMemoMode('cal')">달력</button><button class="btn-sm inactive" id="btnMemoModeList" onclick="setMemoMode('list')">목록</button></div></div><div id="memoSearchArea" style="margin-bottom:10px; display:none;"><input type="text" id="memoSearchInput" placeholder="메모 검색..." oninput="renderMemoList()"></div>
+                <div class="split-left"><div class="card full-height"><div class="scroll-wrapper"><div class="card-header"><span>메모</span><div style="display:flex; gap:5px;"><button class="btn-sm active" id="btnMemoModeCal" onclick="setMemoMode('cal')">달력</button><button class="btn-sm inactive" id="btnMemoModeList" onclick="setMemoMode('list')">목록</button></div></div><div id="memoSearchArea" style="margin-bottom:10px; display:none;"><input type="text" id="memoSearchInput" placeholder="메모 검색..." oninput="renderMemoList()"></div>
                 <div id="memoCalView">
                     <div class="card-header" style="justify-content:center; gap:15px; border-bottom:none;">
                         <button class="arrow-btn" onclick="moveMemoMonth(-1)">◀</button>
@@ -436,8 +478,8 @@
                     <div class="cal-grid" id="memoCalGrid"></div>
                     <div id="memoDatePreview" style="margin-top:15px; border-top:1px solid #eee; padding-top:10px; display:none;"></div>
                 </div>
-                <div id="memoListView" style="display:none;"></div></div></div>
-                <div class="split-right"><div class="card full-height scrollable"><div class="card-header">작성 <span id="memoDateDisp" style="font-size:0.9rem; color:var(--text-sub); font-weight:normal;"></span></div><input type="hidden" id="memoEditRow"><textarea id="memoContent" style="height:300px; resize:none;" placeholder="내용을 입력하세요..."></textarea><div style="display:flex; gap:15px; margin-bottom:15px;"><label><input type="checkbox" id="memoPinned"> 중요</label><label><input type="checkbox" id="memoDone"> 완료</label></div><div style="text-align:right;"><button class="btn btn-danger" id="btnDelMemo" style="display:none; margin-right:10px;" onclick="deleteMemo()">삭제</button><button class="btn btn-primary" onclick="saveMemo()">저장</button><button class="btn btn-outline" style="margin-left:10px;" onclick="clearMemoInput()">새 메모</button></div></div></div>
+                <div id="memoListView" style="display:none;"></div></div></div></div>
+                <div class="split-right"><div class="card full-height"><div class="scroll-wrapper"><div class="card-header">작성 <span id="memoDateDisp" style="font-size:0.9rem; color:var(--text-sub); font-weight:normal;"></span></div><input type="hidden" id="memoEditRow"><textarea id="memoContent" style="height:300px; resize:none;" placeholder="내용을 입력하세요..."></textarea><div style="display:flex; gap:15px; margin-bottom:15px;"><label><input type="checkbox" id="memoPinned"> 중요</label><label><input type="checkbox" id="memoDone"> 완료</label></div><div style="text-align:right;"><button class="btn btn-danger" id="btnDelMemo" style="display:none; margin-right:10px;" onclick="deleteMemo()">삭제</button><button class="btn btn-primary" onclick="saveMemo()">저장</button><button class="btn btn-outline" style="margin-left:10px;" onclick="clearMemoInput()">새 메모</button></div></div></div></div>
             </div>
         </div>
         <div id="data" class="section pc-only-tab"><div class="mobile-block-overlay"><span>⚙️</span><p>해당 기능은 PC/태블릿에서<br>사용 가능해요!</p></div><div class="split-container pc-only"><div class="split-left"><div class="card full-height scrollable"><div class="card-header">참고 자료</div><input type="file" id="uploadInput" style="margin-bottom:10px;"><button class="btn btn-outline" id="btnUpload" style="width:100%; margin-bottom:15px;" onclick="uploadFile()">업로드</button><div id="fileList"></div></div></div><div class="split-right"><div class="card full-height scrollable"><div class="card-header">설정</div><div id="publicModeSettings" style="display:none; background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:20px;"><label>Gemini API Key</label><input type="password" id="settingApiKey"><button class="btn-sm active" style="width:100%;" onclick="savePublicSettings()">저장</button></div><label>AI 페르소나</label><textarea id="personaText" style="height:150px;" placeholder="예: 초등학교 교사 말투..."></textarea><div style="text-align:right;"><button class="btn btn-primary" id="btnPersona" onclick="savePersona()">저장</button></div><hr style="margin:20px 0;"><div class="card-header" style="color:var(--danger); border-bottom:none;">데이터 관리</div><button class="btn btn-danger" style="width:100%" onclick="reqConfirm('데이터를 초기화하시겠습니까?', archiveData)">[새 학년 준비] 데이터 백업 및 초기화</button></div></div></div></div>
