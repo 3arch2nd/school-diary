@@ -28,16 +28,26 @@
         header { text-align: center; margin-bottom: 15px; flex-shrink: 0; }
         h1 { color: var(--primary-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: -0.5px; margin: 0; }
 
-        /* [핵심] 만능 스크롤 래퍼: 남은 공간 꽉 채우고 스크롤 생성 */
+        /* [핵심] 만능 스크롤 래퍼 */
         .scroll-wrapper {
             flex: 1;            /* 부모의 남은 높이 100% 차지 */
-            min-height: 0;      /* Flexbox 자식의 최소 높이 0으로 설정 (스크롤 생성 필수 조건) */
+            min-height: 0;      /* Flexbox 자식 스크롤 필수 조건 */
             overflow-y: auto;   /* 내용 넘치면 스크롤 */
             width: 100%;
             padding-right: 5px;
         }
 
-        /* [핵심] 홈 화면 전용 정렬: 위쪽으로 오밀조밀하게 */
+        /* [핵심] 기록하기 섹션 스크롤 고침 (Flex 구조 강제) */
+        .pc-only.full-height, .mobile-only.full-height {
+            display: flex; 
+            flex-direction: column; 
+            flex: 1; 
+            min-height: 0; 
+            overflow: hidden; 
+            height: 100%;
+        }
+
+        /* [핵심] 홈 화면 전용 정렬 */
         .home-stack {
             display: flex; flex-direction: column; justify-content: flex-start; gap: 15px;
         }
@@ -231,7 +241,15 @@
             .music-capsule { display: none !important; }
             
             /* Mobile Record Full Height Fix */
-            .mobile-only.full-height { height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+            /* 여기서도 display: flex를 강제해서 스크롤 영역을 확보 */
+            .mobile-only.full-height { 
+                display: flex !important; 
+                flex-direction: column; 
+                flex: 1; 
+                min-height: 0; 
+                overflow: hidden; 
+                height: 100%;
+            }
         }
     </style>
 </head>
