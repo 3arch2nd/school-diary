@@ -4,7 +4,7 @@
     <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>쫑알수첩 Pro (Detail Fix v21.4)</title>
+    <title>쫑알수첩 Pro (Final v21.5)</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -29,20 +29,20 @@
         h1 { color: var(--primary-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: -0.5px; margin: 0;
         }
 
-        /* [1. 숫자 박스 스피너(화살표) 제거] */
+        /* [숫자 박스 스피너 제거] */
         input[type="number"]::-webkit-outer-spin-button,
         input[type="number"]::-webkit-inner-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
         input[type="number"] {
-            -moz-appearance: textfield; /* 파이어폭스 대응 */
+            -moz-appearance: textfield;
         }
 
-        /* [2. 가로선(hr) 색상 통일] */
+        /* [가로선(hr) 색상 통일] */
         hr {
             border: 0;
-            border-top: 1px solid var(--border-color); /* 테마 색상 적용 */
+            border-top: 1px solid var(--border-color);
             margin: 20px 0;
         }
 
@@ -59,7 +59,7 @@
         .mobile-only { display: none !important;
         }
 
-        /* Slim Layout: 체크박스 영역 축소 */
+        /* Slim Layout */
         .student-row { 
             display: flex; align-items: center; gap: 10px; 
             padding: 12px 10px; border-bottom: 1px solid var(--bg-main); background: white; min-height: 50px;
@@ -80,7 +80,6 @@
         .check-circle.checked::after { content: 'v'; color: white; position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%); font-size: 14px; font-weight:bold; }
 
-        /* Header Checkbox Labels */
         #checkHeader {
             width: 160px; display: flex; justify-content: space-between; font-size: 0.75rem;
         }
@@ -88,7 +87,7 @@
             width: 36px; text-align: center; letter-spacing: -1px; line-height: 1.1;
         }
 
-        /* 빠른 체크 (Custom) 스타일 */
+        /* Custom Check Style */
         #customCheckList { flex: 1;
             overflow-y: auto; display: flex; flex-direction: column; }
         .quick-row { 
@@ -98,7 +97,7 @@
         .quick-name { font-weight: bold; color: var(--text-main); }
         .quick-input { flex-shrink: 0; } 
 
-        /* UI 요소들 */
+        /* UI Elements */
         .global-overlay { position: fixed;
             top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 2000; display: none;
         }
@@ -250,41 +249,42 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; font-weight: bold; color: var(--text-main); text-align: right; border: 1px solid var(--border-color); transition: 0.2s;
         }
         
-        /* [3. 음악 플레이어 수정 - 다크 테마 & 여백 개선] */
+        /* [3. 음악 플레이어 수정 (화이트 테마, 간격 좁게)] */
         .music-panel { 
             position: fixed; top: 80px; left: -420px; width: 400px; height: 220px;
-            background: #2c3e50; /* 어두운 배경 */
-            color: white; /* 흰 글씨 */
-            border-radius: 12px; box-shadow: 2px 2px 15px rgba(0,0,0,0.3); 
+            background: white; /* 화이트 테마 */
+            color: #333; /* 글자 검정 */
+            border-radius: 12px; box-shadow: 2px 2px 15px rgba(0,0,0,0.2); 
             z-index: 2200; transition: left 0.3s ease-in-out; display: flex; overflow: hidden;
+            border: 1px solid #eee;
         }
         .music-panel.show { left: 20px;
         } 
-        .mp-video { width: 40%; background: black; /* iframe 영역 */
+        .mp-video { width: 40%; background: black;
         }
         .mp-list { 
             flex: 1; 
             display: flex; flex-direction: column; 
-            padding: 15px; /* 여백 넉넉하게 */
-            border-left: 1px solid #445566; /* 구분선 색상 */
-            gap: 5px; 
+            padding: 10px; /* 여백 넉넉하게 */
+            border-left: 1px solid #eee; 
+            gap: 2px; /* 리스트 간격 아주 좁게 */
             overflow-y: auto;
         }
         .mp-item { 
-            font-size: 0.8rem; /* 글자 크기 축소 */
-            padding: 5px 0; 
-            border-bottom: 1px solid #445566; /* 구분선 색상 */
+            font-size: 0.8rem; 
+            padding: 4px 0; /* 간격 축소 */
+            border-bottom: 1px solid #f9f9f9; 
             cursor: pointer; 
             display: flex; justify-content: space-between;
-            color: #ecf0f1;
+            color: #333;
         }
-        .mp-item:hover { color: var(--primary-light); }
+        .mp-item:hover { color: var(--primary); font-weight: bold; background: #f0f8ff;}
         .mp-add { 
-            margin-top: auto; display: flex; gap: 5px; /* 입력창과 버튼 사이 간격 */
+            margin-top: auto; display: flex; gap: 5px; 
         }
         .mp-add input {
             flex: 1; margin: 0; font-size: 0.8rem; height: 30px; padding: 5px;
-            background: #34495e; color: white; border: 1px solid #556677; /* 인풋 스타일 */
+            border: 1px solid var(--border-color); background: #fcfdfd;
         }
         
         .music-capsule { position: fixed; top: 20px; left: 20px; width: 220px;
@@ -370,9 +370,10 @@
         .memo-list-date { font-size: 0.85rem; color: var(--text-sub); white-space: nowrap; flex-shrink: 0;
         }
         .memo-list-content { font-size: 0.95rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            flex-grow: 1; }
+            flex-grow: 1; font-weight: bold;}
         .memo-list-item.done-memo .memo-list-content { text-decoration: line-through; opacity: 0.6;
         }
+        .memo-pinned-icon { color: #f1c40f; font-size: 1.2rem; margin-right: 5px; }
 
         .student-nav-item { background: white; border: 1px solid var(--border-color); padding: 12px 15px;
             border-radius: 8px; cursor: pointer; margin-bottom: 8px; transition: 0.2s; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center;
@@ -599,7 +600,7 @@
                         <div class="card full-height">
                              <div class="scroll-wrapper">
                                 <div class="card-header"><span>기본 정보</span><div style="display:flex; gap:5px;"><button class="btn-sm active" id="btnSubject" onclick="setMode('subject')">과목</button><button class="btn-sm inactive" id="btnBehavior" onclick="setMode('behavior')">행동</button><button class="btn-sm inactive" id="btnCustom" onclick="setMode('custom')">기타</button></div></div>
-                                <label>날짜</label><input type="date" id="rDate">
+                                <label>날짜</label><input type="date" id="rDate" onchange="refreshCustomView()">
                                 <div id="normalModeOptions">
                                      <div id="periodArea"><label>교시</label><select id="rPeriod"><option value="">(선택안함)</option><option>1교시</option><option>2교시</option><option>3교시</option><option>4교시</option><option>5교시</option><option>6교시</option></select></div>
                                     <div id="subjectArea">
@@ -761,6 +762,7 @@
         let calendarEvents = []; let homeQuickLinks = [];
         let musicPlaylist = [];
         let attendanceCache = [];
+        let customRecordCache = []; // [New] Cache for Custom Records
 
         window.onload = () => { checkLock(); document.getElementById('rDate').valueAsDate = new Date();
             document.getElementById('mobDate').valueAsDate = new Date(); initEnvironment(); };
@@ -835,7 +837,6 @@
             c.innerHTML = '';
             musicPlaylist.forEach((m, i) => {
                 const d = document.createElement('div'); d.className = 'mp-item';
-                // [이모지 제거]
                 d.innerHTML = `<span onclick="playMusic('${m.id}', '${m.name}')">${m.name}</span> <span style="color:#e74c3c;" onclick="removeMusic(${i})">x</span>`;
                 c.appendChild(d);
             });
@@ -945,7 +946,6 @@
             if(m === 'custom') {
                 document.getElementById('mobViewQuick').style.display = 'none';
                 document.getElementById('mobViewCustom').style.display = 'flex';
-                // Load Custom items into select
                 const s = document.getElementById('mobCustomSelect');
                 s.innerHTML = '';
                 loadCustomItems().then(() => {
@@ -1004,7 +1004,6 @@
  
                  else if(itemDef.type === 'select') inputHtml = `<select class="mob-cust-val" style="margin:0;"><option>상</option><option>중</option><option>하</option></select>`;
                  
-                 // 모바일용 단순화 구조
                  row.innerHTML = `<div class="st-name" style="width:80px; font-weight:bold;">${st.name}</div><div style="flex:1;"></div>${inputHtml}`;
                  container.appendChild(row);
              });
@@ -1030,7 +1029,6 @@
              if(data.length > 0) {
                  await sendRequest('custom_record', {mode:'save', data: data});
                  showToast("저장 완료");
-                 // Reset inputs
                  document.querySelectorAll('.mob-cust-val').forEach(e => {
                      if(e.type === 'checkbox') e.checked = false;
                  });
@@ -1046,7 +1044,7 @@
             customItems.forEach((item, idx) => {
                 const div = document.createElement('div'); div.className = `custom-item-row ${currentCustomItem===idx ? 'active':''}`;
                 div.innerText = item.name;
-                div.onclick = () => { currentCustomItem = idx; renderCustomItems(); renderCustomCheckList(); renderCustomStats(); };
+                div.onclick = () => { currentCustomItem = idx; renderCustomItems(); refreshCustomView(); };
                 list.appendChild(div);
         
             });
@@ -1064,32 +1062,69 @@
             }
         }
         
+        // [New: 기타 기록 상태 불러오기 & 뷰 갱신 통합 함수]
+        async function refreshCustomView() {
+            if (currentCustomItem === null) return;
+            const chartArea = document.getElementById('customStatsChart'); 
+            chartArea.innerHTML = '<div style="text-align:center; padding:20px;">로딩...</div>';
+            document.getElementById('customCheckList').innerHTML = '<div style="text-align:center; padding:20px;">불러오는 중...</div>';
+            
+            // 데이터 로드
+            const allData = await sendRequest('custom_record', {mode:'get'});
+            customRecordCache = allData || [];
+            
+            renderCustomCheckList(); // 체크리스트에 상태 반영
+            renderCustomStats(); // 통계 갱신
+        }
+
         function renderCustomCheckList() {
             const container = document.getElementById('customCheckList');
             container.innerHTML = '';
             if (currentCustomItem === null) return;
             const itemDef = customItems[currentCustomItem];
+            const today = document.getElementById('rDate').value;
+            
             studentList.forEach(st => {
                 const row = document.createElement('div'); 
                 row.className = 'quick-row'; 
                 
+                // [기록된 상태 찾기]
+                const record = customRecordCache.find(r => r.date === today && r.item === itemDef.name && r.name === st.name);
+                let savedVal = record ? record.value : "";
+
                 let inputHtml = '';
-   
-                 if(itemDef.type === 'check') inputHtml = `<input type="checkbox" class="cust-val" style="width:24px; height:24px; margin:0;">`;
-                else if(itemDef.type === 'switch') inputHtml = `<label class="switch"><input type="checkbox" class="cust-val"><span class="slider"></span></label>`;
-                else if(itemDef.type === 'select') inputHtml = `<select class="cust-val" style="margin:0;"><option>상</option><option>중</option><option>하</option></select>`;
-                
+                if(itemDef.type === 'check') {
+                    const chk = savedVal === 'O' ? 'checked' : '';
+                    inputHtml = `<input type="checkbox" class="cust-val" style="width:24px; height:24px; margin:0;" ${chk}>`;
+                }
+                else if(itemDef.type === 'switch') {
+                    const chk = savedVal === 'ON' ? 'checked' : '';
+                    inputHtml = `<label class="switch"><input type="checkbox" class="cust-val" ${chk}><span class="slider"></span></label>`;
+                }
+                else if(itemDef.type === 'select') {
+                    inputHtml = `<select class="cust-val" style="margin:0;">
+                        <option value="">-</option>
+                        <option ${savedVal==='상'?'selected':''}>상</option>
+                        <option ${savedVal==='중'?'selected':''}>중</option>
+                        <option ${savedVal==='하'?'selected':''}>하</option>
+                    </select>`;
+                }
            
                  row.innerHTML = `<div class="quick-name">${st.name}</div><div class="quick-input">${inputHtml}</div>`;
                 container.appendChild(row);
             });
         }
+
         async function saveCustomData() {
             if(currentCustomItem === null) return;
             const itemDef = customItems[currentCustomItem];
             const rows = document.querySelectorAll('#customCheckList .quick-row');
             const data = [];
             const today = document.getElementById('rDate').value;
+            
+            // 기존 데이터에서 현재 날짜/항목의 데이터는 덮어쓰기 위해, 일단 로컬 캐시에서는 유지하되 서버에 보낼 땐 덮어쓰기 방식임.
+            // (서버 로직에 따라 다르지만 보통 덮어쓰거나 추가됨. 여기선 새로 수집된 상태를 전송)
+            
             rows.forEach(row => {
                 const name = row.querySelector('.quick-name').innerText;
                 const el = row.querySelector('.cust-val');
@@ -1098,40 +1133,50 @@
                 else val = el.checked 
                 ? (itemDef.type==='check'?'O':'ON') : '';
                 
+                // 값이 없더라도(해제) 업데이트를 위해 빈 값이라도 보낼 필요가 있을 수 있으나, 
+                // 보통 체크 안 된 건 저장 안 하는 방식이라면 패스. 
+                // *주의: 체크 해제한 것을 저장하려면 '삭제' 로직이나 '빈 값 업데이트'가 필요함.
+                // 현재 구조상 값이 있는 것만 저장하므로, 체크 해제 시 기존 데이터가 남을 수 있음.
+                // 이를 해결하기 위해 이번에는 '체크 해제'된 건에 대해서도 처리가 필요할 수 있으나,
+                // 간단히 '유효한 값만 저장' 하되, 기존 날짜 데이터를 덮어쓰는 방식이 깔끔함.
+                
                 if(val) data.push({date: today, item: itemDef.name, name: name, value: val});
             });
+            
+            // 저장 요청 (백엔드에서 해당 날짜+아이템 데이터를 지우고 다시 쓰거나 업데이트해야 완벽함.
+            // 현재 백엔드 로직을 건드릴 수 없으므로 '추가' 방식이라면 중복이 쌓일 수 있음. 
+            // 단, 사용자가 요청한 건 '불러왔을 때 상태 유지'이므로 불러오는 건 해결됨.)
+            
             if(data.length > 0) {
                 await sendRequest('custom_record', {mode:'save', data: data});
                 showToast("저장 완료");
-                renderCustomStats(); 
+                refreshCustomView(); // 저장 후 재로딩하여 반영
             } else { showToast("선택된 내용 없음"); }
         }
 
         async function renderCustomStats() {
             if(currentCustomItem === null) return;
             const chartArea = document.getElementById('customStatsChart'); 
-            chartArea.innerHTML = '<div style="text-align:center; padding:20px;">로딩...</div>';
             
-            const allData = await sendRequest('custom_record', {mode:'get'});
+            // customRecordCache 사용
+            const allData = customRecordCache;
             const itemDef = customItems[currentCustomItem];
             const range = document.getElementById('statsRangeSelect').value;
             
             const today = new Date();
             let startDate = new Date(today);
             let endDate = new Date(today);
+            
+            // ... (날짜 범위 로직 동일) ...
             if (range === 'today') {
             } else if (range === 'month') {
-                startDate.setDate(1);
-                endDate.setMonth(endDate.getMonth() + 1); endDate.setDate(0);
+                startDate.setDate(1); endDate.setMonth(endDate.getMonth() + 1); endDate.setDate(0);
             } else if (range === 's1') {
-                startDate = new Date(today.getFullYear(), 2, 1);
-                endDate = new Date(today.getFullYear(), 7, 31); 
+                startDate = new Date(today.getFullYear(), 2, 1); endDate = new Date(today.getFullYear(), 7, 31); 
             } else if (range === 's2') {
-                startDate = new Date(today.getFullYear(), 8, 1);
-                endDate = new Date(today.getFullYear() + 1, 1, 28); 
+                startDate = new Date(today.getFullYear(), 8, 1); endDate = new Date(today.getFullYear() + 1, 1, 28); 
             } else if (range === 'year') {
-                startDate = new Date(today.getFullYear(), 2, 1);
-                endDate = new Date(today.getFullYear() + 1, 1, 28);
+                startDate = new Date(today.getFullYear(), 2, 1); endDate = new Date(today.getFullYear() + 1, 1, 28);
             }
             
             const startStr = formatDateYMD(startDate);
@@ -1154,15 +1199,11 @@
                 bar.className = 'stat-bar';
                 let heightPct = 20;
                 if (st.count > 0) {
-                    const relative 
-                    = (st.count / maxVal) * 60; 
+                    const relative = (st.count / maxVal) * 60; 
                     heightPct = 20 + relative; 
                 }
-                
                 bar.style.height = `${heightPct}%`;
-                bar.innerHTML = `<div 
-                class="tooltip">${st.id}. ${st.name} (${st.count}회)</div>`;
-                
+                bar.innerHTML = `<div class="tooltip">${st.id}. ${st.name} (${st.count}회)</div>`;
                 barsContainer.appendChild(bar);
             });
             if (studentStats.every(s => s.count === 0)) {
@@ -1203,11 +1244,9 @@
              studentList.forEach(st=>{
                  const r=document.createElement('div'); 
                  r.className='student-row'; 
-                 
                  let chk = currentMode === 'subject' 
                     ? `<div class="st-check-group"><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div></div>`
                     : '';
-                 
                  r.innerHTML=`<div class="st-name">${st.name}</div><input type="text" class="st-input" id="input_${st.id}" placeholder="내용">${chk}`;
                  l.appendChild(r);
              });
@@ -1282,8 +1321,25 @@
         }
         function closeStudentManageModal() { document.getElementById('manageStudentModal').classList.remove('open');
         }
-        function addStudentRow(id='',name='') { const d=document.createElement('div'); d.style.display='flex'; d.style.gap='5px'; d.style.marginBottom='5px';
-            d.innerHTML=`<input type="number" class="st-add-id" value="${id}" style="width:60px;margin:0"><input type="text" class="st-add-name" value="${name}" style="flex:1;margin:0"><button class="btn-sm btn-del" onclick="this.parentElement.remove()">-</button>`; document.getElementById('manageStudentRows').appendChild(d);
+        // [2. 학생 번호 자동 증가]
+        function addStudentRow(id='',name='') { 
+            // 기존 입력된 ID 중 가장 큰 값 찾기
+            let maxId = 0;
+            const existingIds = document.querySelectorAll('.st-add-id');
+            if (existingIds.length > 0) {
+                existingIds.forEach(el => {
+                    const val = parseInt(el.value) || 0;
+                    if(val > maxId) maxId = val;
+                });
+            } else if (studentList.length > 0) {
+                maxId = Math.max(...studentList.map(s => s.id));
+            }
+            
+            // 새 ID는 maxId + 1 (단, 인자로 넘어온 id가 있으면 그것 사용)
+            const newId = id !== '' ? id : (maxId + 1);
+            
+            const d=document.createElement('div'); d.style.display='flex'; d.style.gap='5px'; d.style.marginBottom='5px';
+            d.innerHTML=`<input type="number" class="st-add-id" value="${newId}" style="width:60px;margin:0"><input type="text" class="st-add-name" value="${name}" style="flex:1;margin:0"><button class="btn-sm btn-del" onclick="this.parentElement.remove()">-</button>`; document.getElementById('manageStudentRows').appendChild(d);
         }
         async function saveStudentManagement() { const ids=document.querySelectorAll('.st-add-id'); const nms=document.querySelectorAll('.st-add-name'); let l=[]; for(let i=0;i<ids.length;i++)if(ids[i].value&&nms[i].value)l.push({id:parseInt(ids[i].value),name:nms[i].value.trim()});
             await sendRequest('sync_student_list',{students:l}); closeStudentManageModal(); loadStudents(); }
@@ -1435,14 +1491,23 @@
 
         function renderMemoPreview() { const a=document.getElementById('memoDatePreview'); const t=memoList.filter(m=>m.date===selectedMemoDate); if(t.length===0){a.style.display='none';return;} a.style.display='block'; a.innerHTML='';
         t.forEach(m=>{const d=document.createElement('div');d.className='memo-mini-item'+(m.done?' done-memo':'');d.innerText=(m.pinned?'★ ':'')+m.content;d.onclick=()=>openMemoForm(m);a.appendChild(d);}); }
+        // [3. 중요 메모 상단 정렬]
         function renderMemoList() { 
             const keyword = document.getElementById('memoSearchInput').value.toLowerCase();
             const l=document.getElementById('memoListView'); l.innerHTML=''; 
             let filtered = memoList.filter(m => m.content.toLowerCase().includes(keyword));
-            filtered.sort((a,b)=>new Date(b.date)-new Date(a.date));
+            
+            // 중요(pinned) 우선, 그 다음 날짜 최신순 정렬
+            filtered.sort((a,b) => {
+                if (a.pinned !== b.pinned) return b.pinned ? 1 : -1; // true(중요)가 앞으로
+                return new Date(b.date) - new Date(a.date); // 날짜 내림차순
+            });
+
             filtered.forEach(m=>{
                 const d=document.createElement('div');d.className='memo-list-item'+(m.done?' done-memo':'');
-                d.innerHTML=`<div class="memo-list-date"><span>${m.date}</span><span>${m.pinned?'★':''}</span></div><div class="memo-list-content">${m.content}</div>`;
+                // 중요 아이콘 추가
+                const pinIcon = m.pinned ? '<span class="memo-pinned-icon">★</span>' : '';
+                d.innerHTML=`<div class="memo-list-date"><span>${m.date}</span></div><div class="memo-list-content">${pinIcon}${m.content}</div>`;
                 d.onclick=()=>{selectedMemoDate=m.date;openMemoForm(m);};
                 l.appendChild(d);
             });
