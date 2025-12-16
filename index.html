@@ -4,7 +4,7 @@
     <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>쫑알수첩 Pro (Final v21.5)</title>
+    <title>쫑알수첩 Pro (Motion v21.6)</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -29,449 +29,256 @@
         h1 { color: var(--primary-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: -0.5px; margin: 0;
         }
 
-        /* [숫자 박스 스피너 제거] */
+        /* 숫자 박스 스피너 제거 */
         input[type="number"]::-webkit-outer-spin-button,
-        input[type="number"]::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        input[type="number"] {
-            -moz-appearance: textfield;
-        }
+        input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="number"] { -moz-appearance: textfield; }
 
-        /* [가로선(hr) 색상 통일] */
-        hr {
-            border: 0;
-            border-top: 1px solid var(--border-color);
-            margin: 20px 0;
+        /* 가로선 통일 */
+        hr { border: 0; border-top: 1px solid var(--border-color); margin: 20px 0; }
+
+        /* [3. 호버링 이펙트 (PC 전용)] */
+        @media (min-width: 769px) {
+            .btn, .nav-item, .float-btn, .music-play-btn, .custom-item-row, .student-nav-item, .quick-link-item {
+                transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+            }
+            .btn:hover, .btn-sm:hover:not(.inactive), .float-btn:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            }
+            .nav-item:hover {
+                background-color: #eaf6fc;
+                transform: translateY(-2px);
+            }
+            .quick-link-item:hover {
+                transform: translateY(-5px) !important;
+                border-color: var(--primary);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
+            }
         }
 
         /* 레이아웃 공통 */
-        .scroll-wrapper { flex: 1;
-            min-height: 0; overflow-y: auto; width: 100%; padding-right: 5px; }
-        .pc-only.full-height, .mobile-only.full-height { display: flex;
-            flex-direction: column; flex: 1; min-height: 0; overflow: hidden; height: 100%;
-        }
-        .home-stack { display: flex; flex-direction: column; justify-content: flex-start; gap: 15px;
-        }
-        .pc-only { display: block;
-        }
-        .mobile-only { display: none !important;
-        }
+        .scroll-wrapper { flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding-right: 5px; }
+        .pc-only.full-height, .mobile-only.full-height { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; height: 100%; }
+        .home-stack { display: flex; flex-direction: column; justify-content: flex-start; gap: 15px; }
+        .pc-only { display: block; }
+        .mobile-only { display: none !important; }
 
         /* Slim Layout */
-        .student-row { 
-            display: flex; align-items: center; gap: 10px; 
-            padding: 12px 10px; border-bottom: 1px solid var(--bg-main); background: white; min-height: 50px;
-        }
-        .st-name { 
-            width: 80px; font-weight: bold; color: var(--primary-dark); flex-shrink: 0; text-align: center; 
-        }
-        .st-input { 
-            flex-grow: 1; margin-bottom: 0 !important; height: 40px; 
-        }
-        .st-check-group { 
-            display: flex; gap: 2px; width: 160px; flex-shrink: 0; justify-content: space-between; 
-        }
-        .check-circle { width: 24px; height: 24px; border: 2px solid var(--border-color); border-radius: 50%;
-            cursor: pointer; position: relative; background: var(--bg-main); }
-        .check-circle.checked { border-color: var(--primary); background: var(--primary);
-        }
-        .check-circle.checked::after { content: 'v'; color: white; position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); font-size: 14px; font-weight:bold; }
-
-        #checkHeader {
-            width: 160px; display: flex; justify-content: space-between; font-size: 0.75rem;
-        }
-        #checkHeader span {
-            width: 36px; text-align: center; letter-spacing: -1px; line-height: 1.1;
-        }
+        .student-row { display: flex; align-items: center; gap: 10px; padding: 12px 10px; border-bottom: 1px solid var(--bg-main); background: white; min-height: 50px; }
+        .st-name { width: 80px; font-weight: bold; color: var(--primary-dark); flex-shrink: 0; text-align: center; }
+        .st-input { flex-grow: 1; margin-bottom: 0 !important; height: 40px; }
+        .st-check-group { display: flex; gap: 2px; width: 160px; flex-shrink: 0; justify-content: space-between; }
+        .check-circle { width: 24px; height: 24px; border: 2px solid var(--border-color); border-radius: 50%; cursor: pointer; position: relative; background: var(--bg-main); }
+        .check-circle.checked { border-color: var(--primary); background: var(--primary); }
+        .check-circle.checked::after { content: 'v'; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; font-weight:bold; }
+        
+        #checkHeader { width: 160px; display: flex; justify-content: space-between; font-size: 0.75rem; }
+        #checkHeader span { width: 36px; text-align: center; letter-spacing: -1px; line-height: 1.1; }
 
         /* Custom Check Style */
-        #customCheckList { flex: 1;
-            overflow-y: auto; display: flex; flex-direction: column; }
-        .quick-row { 
-            display: flex; align-items: center; justify-content: space-between; 
-            width: 100%; padding: 12px 10px; border-bottom: 1px solid #f0f0f0; background: white; min-height: 50px;
-        }
+        #customCheckList { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+        .quick-row { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 12px 10px; border-bottom: 1px solid #f0f0f0; background: white; min-height: 50px; }
         .quick-name { font-weight: bold; color: var(--text-main); }
         .quick-input { flex-shrink: 0; } 
 
         /* UI Elements */
-        .global-overlay { position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 2000; display: none;
-        }
-        .global-overlay.show { display: block;
-        }
+        .global-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 2000; display: none; }
+        .global-overlay.show { display: block; }
         
-        #aiStatusBar { position: fixed;
-            bottom: 0; left: 0; width: 100%; height: 30px; background: #333; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.85rem;
-            z-index: 2500; transform: translateY(100%); transition: transform 0.3s ease-in-out; }
-        #aiStatusBar.show { transform: translateY(0);
-        }
-        .ai-loading-icon { display: inline-block; width: 10px; height: 10px; border: 2px solid #fff;
-            border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 10px;
-        }
-        @keyframes spin { to { transform: rotate(360deg);
-        } }
+        #aiStatusBar { position: fixed; bottom: 0; left: 0; width: 100%; height: 30px; background: #333; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; z-index: 2500; transform: translateY(100%); transition: transform 0.3s ease-in-out; }
+        #aiStatusBar.show { transform: translateY(0); }
+        .ai-loading-icon { display: inline-block; width: 10px; height: 10px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 10px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        #lockScreen { position: fixed; top: 0; left: 0; width: 100%;
-            height: 100%; background: var(--bg-main); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto;
-        }
-        #lockCard { background: white; padding: 40px; border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; width: 320px; position: relative; z-index: 100000;
-        }
-        #lockInput { font-size: 1.2rem; text-align: center; margin-bottom: 5px; letter-spacing: 2px; position: relative;
-            z-index: 100001; background: white; }
-        .lock-msg { font-size: 0.8rem; color: var(--danger); min-height: 20px;
-            margin-bottom: 10px;}
+        #lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-main); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; }
+        #lockCard { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; width: 320px; position: relative; z-index: 100000; }
+        #lockInput { font-size: 1.2rem; text-align: center; margin-bottom: 5px; letter-spacing: 2px; position: relative; z-index: 100001; background: white; }
+        .lock-msg { font-size: 0.8rem; color: var(--danger); min-height: 20px; margin-bottom: 10px;}
 
-        .nav-tabs { display: flex; flex-shrink: 0; background: var(--card-bg); border-radius: 8px;
-            margin-bottom: 15px; padding: 4px; border: 1px solid var(--border-color); }
-        .nav-item { flex: 1;
-            text-align: center; padding: 12px; cursor: pointer; color: var(--text-sub); border-radius: 6px; font-weight: bold; transition: 0.2s;
-        }
-        .nav-item.active { color: var(--primary-dark); background-color: #eaf6fc;
-        }
-        .nav-item-home { flex: 0.5; min-width: 60px; color: var(--primary-dark);
-        }
+        .nav-tabs { display: flex; flex-shrink: 0; background: var(--card-bg); border-radius: 8px; margin-bottom: 15px; padding: 4px; border: 1px solid var(--border-color); }
+        .nav-item { flex: 1; text-align: center; padding: 12px; cursor: pointer; color: var(--text-sub); border-radius: 6px; font-weight: bold; transition: 0.2s; }
+        .nav-item.active { color: var(--primary-dark); background-color: #eaf6fc; }
+        .nav-item-home { flex: 0.5; min-width: 60px; color: var(--primary-dark); }
 
-        .section { display: none; flex: 1; overflow: hidden; height: 100%; flex-direction: column;
-        } 
-        .section.active { display: flex; animation: fadeIn 0.2s;
-        } 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px);
-        } to { opacity: 1; transform: translateY(0); } }
+        .section { display: none; flex: 1; overflow: hidden; height: 100%; flex-direction: column; } 
+        .section.active { display: flex; animation: fadeIn 0.2s; } 
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
-        .split-container { display: flex;
-            gap: 20px; height: 100%; overflow: hidden; flex: 1; min-height: 0;
-        }
-        .split-left { width: 360px; flex-shrink: 0; display: flex; flex-direction: column; gap: 15px;
-            height: 100%; overflow: hidden; }
-        .split-right { flex: 1; min-width: 0; display: flex;
-            flex-direction: column; gap: 15px; height: 100%; overflow: hidden; }
-        .split-half { flex: 1;
-            display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+        .split-container { display: flex; gap: 20px; height: 100%; overflow: hidden; flex: 1; min-height: 0; }
+        .split-left { width: 360px; flex-shrink: 0; display: flex; flex-direction: column; gap: 15px; height: 100%; overflow: hidden; }
+        .split-right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 15px; height: 100%; overflow: hidden; }
+        .split-half { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
 
-        .card { background: var(--card-bg);
-            border-radius: 8px; padding: 20px; border: 1px solid var(--border-color); box-shadow: 0 1px 2px rgba(0,0,0,0.03); display: flex; flex-direction: column;
-        }
-        .card.full-height { height: 100%; min-height: 0; flex: 1;
-        }
-        .card-header { font-size: 1.1rem; color: var(--primary-dark); font-weight: bold; margin-bottom: 15px; padding-bottom: 10px;
-            flex-shrink: 0; border-bottom: 2px solid var(--bg-main); display: flex; justify-content: space-between; align-items: center; width: 100%;
-        }
+        .card { background: var(--card-bg); border-radius: 8px; padding: 20px; border: 1px solid var(--border-color); box-shadow: 0 1px 2px rgba(0,0,0,0.03); display: flex; flex-direction: column; }
+        .card.full-height { height: 100%; min-height: 0; flex: 1; }
+        .card-header { font-size: 1.1rem; color: var(--primary-dark); font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; flex-shrink: 0; border-bottom: 2px solid var(--bg-main); display: flex; justify-content: space-between; align-items: center; width: 100%; }
 
-        .tag-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;
-        }
-        .tag { position: relative; padding: 8px 30px 8px 16px; background: var(--bg-main);
-            border-radius: 20px; font-size: 0.95rem; cursor: pointer; border: 1px solid var(--border-color); transition: 0.2s; user-select: none;
-        }
-        .tag.selected { background: var(--primary); color: white; border-color: var(--primary);
-        }
-        .tag-add { padding: 8px 16px; border: 1px dashed var(--primary); background: white;
-            color: var(--primary); text-align:center;}
-        .tag .x-btn { position: absolute; right: 8px; top: 50%;
-            transform: translateY(-50%); width: 18px; height: 18px; line-height: 16px; text-align: center; border-radius: 50%; font-size: 0.8rem; background: rgba(0,0,0,0.1); color: inherit; display: none;
-        }
-        .tag:hover .x-btn { display: block;
-        }
+        .tag-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+        .tag { position: relative; padding: 8px 30px 8px 16px; background: var(--bg-main); border-radius: 20px; font-size: 0.95rem; cursor: pointer; border: 1px solid var(--border-color); transition: 0.2s; user-select: none; }
+        .tag.selected { background: var(--primary); color: white; border-color: var(--primary); }
+        .tag-add { padding: 8px 16px; border: 1px dashed var(--primary); background: white; color: var(--primary); text-align:center;}
+        .tag .x-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; line-height: 16px; text-align: center; border-radius: 50%; font-size: 0.8rem; background: rgba(0,0,0,0.1); color: inherit; display: none; }
+        .tag:hover .x-btn { display: block; }
 
-        .custom-item-row { padding: 10px;
-            border: 1px solid #eee; border-radius: 6px; margin-bottom: 5px; cursor: pointer; display: flex; justify-content: space-between;
-        }
-        .custom-item-row.active { border-color: var(--primary); background: #f9fcff;
-        }
+        .custom-item-row { padding: 10px; border: 1px solid #eee; border-radius: 6px; margin-bottom: 5px; cursor: pointer; display: flex; justify-content: space-between; }
+        .custom-item-row.active { border-color: var(--primary); background: #f9fcff; }
         
-        .bar-chart-container { display: flex;
-            flex-direction: column; height: 100%; overflow: hidden; padding-bottom: 10px; }
-        .chart-bars-area { flex: 1;
-            display: flex; align-items: flex-end; gap: 2px; padding-top: 20px; border-bottom: 1px solid #ccc; position: relative;
-        }
-        .stat-bar { flex: 1; background: #e0e0e0; border-radius: 3px 3px 0 0;
-            transition: all 0.2s; position: relative; min-height: 20%; cursor: pointer; }
-        .stat-bar:hover { background: var(--primary);
-            transform: scaleY(1.05); transform-origin: bottom; }
-        .stat-bar .tooltip { position: absolute; bottom: 100%;
-            left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; white-space: nowrap; pointer-events: none;
-            opacity: 0; transition: 0.2s; z-index: 10; }
-        .stat-bar:hover .tooltip { opacity: 1;
-            bottom: 105%; }
+        .bar-chart-container { display: flex; flex-direction: column; height: 100%; overflow: hidden; padding-bottom: 10px; }
+        .chart-bars-area { flex: 1; display: flex; align-items: flex-end; gap: 2px; padding-top: 20px; border-bottom: 1px solid #ccc; position: relative; }
+        .stat-bar { flex: 1; background: #e0e0e0; border-radius: 3px 3px 0 0; transition: all 0.2s; position: relative; min-height: 20%; cursor: pointer; }
+        .stat-bar:hover { background: var(--primary); transform: scaleY(1.05); transform-origin: bottom; }
+        .stat-bar .tooltip { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; white-space: nowrap; pointer-events: none; opacity: 0; transition: 0.2s; z-index: 10; }
+        .stat-bar:hover .tooltip { opacity: 1; bottom: 105%; }
 
-        .switch-container { display: flex; align-items: center; gap: 8px; font-size: 0.9rem;
-            color: var(--text-sub); margin-right: 10px;}
-        .switch { position: relative; display: inline-block; width: 36px;
-            height: 20px; margin-bottom: 0; }
-        .switch input { opacity: 0; width: 0;
-            height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0;
-            right: 0; bottom: 0; background-color: var(--border-color); transition: .3s; border-radius: 34px;
-        }
-        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px;
-            bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--primary);
-        }
-        input:checked + .slider:before { transform: translateX(16px);
-        }
+        .switch-container { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text-sub); margin-right: 10px;}
+        .switch { position: relative; display: inline-block; width: 36px; height: 20px; margin-bottom: 0; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); transition: .3s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(16px); }
 
-        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 15px;
-            border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; background: #fcfdfd;
-        }
-        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); background: white;
-        }
-        .btn { display: inline-flex; justify-content: center; align-items: center; height: 42px; min-width: 80px;
-            padding: 0 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 1rem; font-weight: bold; transition: 0.2s; white-space: nowrap;
-        }
-        .btn-primary { background: var(--primary); color: white;
-        }
-        .btn-outline { background: white; border: 1px solid var(--border-color); color: var(--text-main);
-        }
-        .btn-danger { background: var(--danger); color: white;
-        }
-        .btn-sm { height: 34px; min-width: 60px; padding: 0 12px; font-size: 0.9rem;
-            border-radius: 6px; border: 1px solid; cursor: pointer; transition: 0.2s; }
-        .btn-sm.active { background: var(--primary);
-            color: white; border-color: var(--primary); }
-        .btn-sm.inactive { background: white; color: var(--text-sub); border-color: var(--border-color);
-        }
-        .btn-icon { font-size: 0.8rem; background: none; border: 1px solid var(--border-color);
-            padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-left: 5px; }
+        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; background: #fcfdfd; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); background: white; }
+        .btn { display: inline-flex; justify-content: center; align-items: center; height: 42px; min-width: 80px; padding: 0 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 1rem; font-weight: bold; transition: 0.2s; white-space: nowrap; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-outline { background: white; border: 1px solid var(--border-color); color: var(--text-main); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-sm { height: 34px; min-width: 60px; padding: 0 12px; font-size: 0.9rem; border-radius: 6px; border: 1px solid; cursor: pointer; transition: 0.2s; }
+        .btn-sm.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .btn-sm.inactive { background: white; color: var(--text-sub); border-color: var(--border-color); }
+        .btn-icon { font-size: 0.8rem; background: none; border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-left: 5px; }
 
-        .float-btn { position: fixed;
-            top: 20px; right: 20px; width: 50px; height: 50px; background: var(--primary); color: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            z-index: 2100; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; transition: 0.3s;
-        }
-        .float-menu { position: fixed; top: 80px; right: 20px; display: none; flex-direction: column;
-            gap: 10px; z-index: 2100; }
-        .float-menu.show { display: flex; animation: fadeIn 0.2s;
-        }
-        .float-menu-item { background: white; padding: 10px 20px; border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; font-weight: bold; color: var(--text-main); text-align: right; border: 1px solid var(--border-color); transition: 0.2s;
-        }
+        /* [2. 애니메이션 강화: 플로팅 메뉴 & 자물쇠] */
+        .float-btn { position: fixed; top: 20px; right: 20px; width: 50px; height: 50px; background: var(--primary); color: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 2100; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; transition: 0.3s; }
         
-        /* [3. 음악 플레이어 수정 (화이트 테마, 간격 좁게)] */
+        .float-menu { 
+            position: fixed; top: 80px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 2100;
+            /* 들어갈 때 */
+            opacity: 0; transform: translateY(-20px) scale(0.9); pointer-events: none; 
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); /* 톡 튀어나오는 효과 */
+        }
+        .float-menu.show { 
+            /* 나올 때 */
+            opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; 
+        }
+        .float-menu-item { background: white; padding: 10px 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; font-weight: bold; color: var(--text-main); text-align: right; border: 1px solid var(--border-color); transition: 0.2s; }
+        
+        /* [4. 자물쇠 버튼: + 왼쪽에서 나옴] */
+        .lock-float-btn {
+            position: fixed; top: 25px; right: 25px; /* 초기 위치: + 버튼 뒤 */
+            width: 40px; height: 40px; border-radius: 50%; background: #e74c3c; color: white;
+            display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 2090;
+            opacity: 0; pointer-events: none; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .lock-float-btn.show {
+            right: 80px; opacity: 1; pointer-events: auto; /* 왼쪽으로 튀어나옴 */
+        }
+
+        /* [2. 애니메이션 강화: 음악 패널] */
         .music-panel { 
             position: fixed; top: 80px; left: -420px; width: 400px; height: 220px;
-            background: white; /* 화이트 테마 */
-            color: #333; /* 글자 검정 */
-            border-radius: 12px; box-shadow: 2px 2px 15px rgba(0,0,0,0.2); 
-            z-index: 2200; transition: left 0.3s ease-in-out; display: flex; overflow: hidden;
-            border: 1px solid #eee;
+            background: white; color: #333; border-radius: 12px; box-shadow: 2px 2px 15px rgba(0,0,0,0.2); 
+            z-index: 2200; display: flex; overflow: hidden; border: 1px solid #eee;
+            transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease; /* 부드러운 슬라이딩 */
+            opacity: 0;
         }
-        .music-panel.show { left: 20px;
-        } 
-        .mp-video { width: 40%; background: black;
-        }
-        .mp-list { 
-            flex: 1; 
-            display: flex; flex-direction: column; 
-            padding: 10px; /* 여백 넉넉하게 */
-            border-left: 1px solid #eee; 
-            gap: 2px; /* 리스트 간격 아주 좁게 */
-            overflow-y: auto;
-        }
-        .mp-item { 
-            font-size: 0.8rem; 
-            padding: 4px 0; /* 간격 축소 */
-            border-bottom: 1px solid #f9f9f9; 
-            cursor: pointer; 
-            display: flex; justify-content: space-between;
-            color: #333;
-        }
+        .music-panel.show { left: 20px; opacity: 1; } 
+        
+        .mp-video { width: 40%; background: black; }
+        .mp-list { flex: 1; display: flex; flex-direction: column; padding: 10px; border-left: 1px solid #eee; gap: 2px; overflow-y: auto; }
+        .mp-item { font-size: 0.8rem; padding: 4px 0; border-bottom: 1px solid #f9f9f9; cursor: pointer; display: flex; justify-content: space-between; color: #333; }
         .mp-item:hover { color: var(--primary); font-weight: bold; background: #f0f8ff;}
-        .mp-add { 
-            margin-top: auto; display: flex; gap: 5px; 
-        }
-        .mp-add input {
-            flex: 1; margin: 0; font-size: 0.8rem; height: 30px; padding: 5px;
-            border: 1px solid var(--border-color); background: #fcfdfd;
-        }
+        .mp-add { margin-top: auto; display: flex; gap: 5px; }
+        .mp-add input { flex: 1; margin: 0; font-size: 0.8rem; height: 30px; padding: 5px; border: 1px solid var(--border-color); background: #fcfdfd; }
         
-        .music-capsule { position: fixed; top: 20px; left: 20px; width: 220px;
-            height: 50px; background: var(--primary-light); color: var(--primary-dark); border-radius: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 2300; display: flex; align-items: center;
-            padding: 0 5px 0 15px; transition: 0.3s; overflow: hidden; border: 2px solid white;
-        }
-        .music-info { flex: 1; overflow: hidden; white-space: nowrap; font-size: 0.9rem; font-weight: bold;
-            margin-right: 10px; }
-        .music-play-btn { width: 40px; height: 40px; background: white; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
+        .music-capsule { position: fixed; top: 20px; left: 20px; width: 220px; height: 50px; background: var(--primary-light); color: var(--primary-dark); border-radius: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 2300; display: flex; align-items: center; padding: 0 5px 0 15px; transition: 0.3s; overflow: hidden; border: 2px solid white; cursor: pointer;}
+        .music-info { flex: 1; overflow: hidden; white-space: nowrap; font-size: 0.9rem; font-weight: bold; margin-right: 10px; }
+        .music-play-btn { width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
-        .home-image-area { width: 100%; aspect-ratio: 4 / 3; background: #fafafa;
-            border: 2px dashed #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; position: relative;
-        }
-        .home-image-area img { width: 100%; height: 100%; object-fit: cover;
-        }
-        .home-image-msg { color: #aaa; font-weight: bold; pointer-events: none;
-        }
-        .quick-link-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px;
-        }
-        .quick-link-item { background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px;
-            text-align: center; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100px;
-        }
-        .ql-emoji { font-size: 2rem; margin-bottom: 5px;
-        }
-        .ql-name { font-size: 0.85rem; color: var(--text-main); font-weight: bold; overflow: hidden; text-overflow: ellipsis;
-            white-space: nowrap; width: 100%; }
+        .home-image-area { width: 100%; aspect-ratio: 4 / 3; background: #fafafa; border: 2px dashed #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; position: relative; }
+        .home-image-area img { width: 100%; height: 100%; object-fit: cover; }
+        .home-image-msg { color: #aaa; font-weight: bold; pointer-events: none; }
+        .quick-link-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }
+        .quick-link-item { background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100px; }
+        .ql-emoji { font-size: 2rem; margin-bottom: 5px; }
+        .ql-name { font-size: 0.85rem; color: var(--text-main); font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
 
-        #bmList { display: grid; gap: 15px; padding-right: 5px;
-        }
-        @media (min-width: 1200px) { #bmList { grid-template-columns: repeat(3, 1fr);
-        } }
-        @media (min-width: 800px) and (max-width: 1199px) { #bmList { grid-template-columns: repeat(2, 1fr);
-        } }
-        @media (max-width: 799px) { #bmList { grid-template-columns: 1fr;
-        } }
-        .bm-card { background: white; padding: 15px; border-radius: 8px;
-            border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between; position: relative;
-        }
-        .bm-star { position: absolute; top: 10px; right: 10px; font-size: 1.2rem; cursor: pointer;
-            color: #ddd; transition: 0.2s; }
-        .bm-star.active { color: #f1c40f;
-        }
-        .bm-link { font-weight: bold; color: var(--primary-dark); text-decoration: none; font-size: 1.05rem; display: block;
-            margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .bm-filter-tag { padding: 5px 12px;
-            background: #fff; border: 1px solid #ddd; border-radius: 15px; font-size: 0.85rem; cursor: pointer; color: #666; transition: 0.2s;
-        }
-        .bm-filter-tag.active { background: var(--primary); color: white; border-color: var(--primary);
-        }
+        #bmList { display: grid; gap: 15px; padding-right: 5px; }
+        @media (min-width: 1200px) { #bmList { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 800px) and (max-width: 1199px) { #bmList { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 799px) { #bmList { grid-template-columns: 1fr; } }
+        .bm-card { background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between; position: relative; }
+        .bm-star { position: absolute; top: 10px; right: 10px; font-size: 1.2rem; cursor: pointer; color: #ddd; transition: 0.2s; }
+        .bm-star.active { color: #f1c40f; }
+        .bm-link { font-weight: bold; color: var(--primary-dark); text-decoration: none; font-size: 1.05rem; display: block; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .bm-filter-tag { padding: 5px 12px; background: #fff; border: 1px solid #ddd; border-radius: 15px; font-size: 0.85rem; cursor: pointer; color: #666; transition: 0.2s; }
+        .bm-filter-tag.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center;
-            margin-bottom: 10px; }
-        .cal-day { padding: 4px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;
-            height: 50px; display: flex; flex-direction: column; align-items: center; position: relative;
-        }
-        .cal-day:hover { background: #eaf6fc;
-        }
-        .cal-day.today { background: #fffbe6; border: 1px solid #ffd591;
-        }
-        .cal-day.selected { border: 2px solid var(--primary-dark);
-        }
-        .cal-dots-container { display: flex; gap: 2px; margin-top: 4px; justify-content: center;
-        }
-        .cal-dot { width: 6px; height: 6px; border-radius: 50%;
-        }
-        .cal-dot.event { background: var(--primary);
-        }
-        .cal-dot.att { background: var(--att-dot);
-        }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-bottom: 10px; }
+        .cal-day { padding: 4px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; height: 50px; display: flex; flex-direction: column; align-items: center; position: relative; }
+        .cal-day:hover { background: #eaf6fc; }
+        .cal-day.today { background: #fffbe6; border: 1px solid #ffd591; }
+        .cal-day.selected { border: 2px solid var(--primary-dark); }
+        .cal-dots-container { display: flex; gap: 2px; margin-top: 4px; justify-content: center; }
+        .cal-dot { width: 6px; height: 6px; border-radius: 50%; }
+        .cal-dot.event { background: var(--primary); }
+        .cal-dot.att { background: var(--att-dot); }
         
-        .memo-mini-item { padding: 10px 8px;
-            border-bottom: 1px solid #eee; cursor: pointer; font-size: 0.9rem; color: var(--text-main); display: block; width: 100%; white-space: nowrap !important; overflow: hidden !important;
-            text-overflow: ellipsis !important; height: 40px; line-height: 20px; }
-        .memo-mini-item:hover { color: var(--primary);
-        }
-        .memo-mini-item.done-memo { text-decoration: line-through; opacity: 0.6; color: #aaa;
-        }
-        .memo-list-item { background: white; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 10px;
-            cursor: pointer; transition: 0.2s; padding: 12px; display: flex; align-items: center; gap: 10px;
-        }
-        .memo-list-date { font-size: 0.85rem; color: var(--text-sub); white-space: nowrap; flex-shrink: 0;
-        }
-        .memo-list-content { font-size: 0.95rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            flex-grow: 1; font-weight: bold;}
-        .memo-list-item.done-memo .memo-list-content { text-decoration: line-through; opacity: 0.6;
-        }
+        .memo-mini-item { padding: 10px 8px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 0.9rem; color: var(--text-main); display: block; width: 100%; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; height: 40px; line-height: 20px; }
+        .memo-mini-item:hover { color: var(--primary); }
+        .memo-mini-item.done-memo { text-decoration: line-through; opacity: 0.6; color: #aaa; }
+        .memo-list-item { background: white; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; padding: 12px; display: flex; align-items: center; gap: 10px; }
+        .memo-list-date { font-size: 0.85rem; color: var(--text-sub); white-space: nowrap; flex-shrink: 0; }
+        .memo-list-content { font-size: 0.95rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-grow: 1; font-weight: bold;}
+        .memo-list-item.done-memo .memo-list-content { text-decoration: line-through; opacity: 0.6; }
         .memo-pinned-icon { color: #f1c40f; font-size: 1.2rem; margin-right: 5px; }
 
-        .student-nav-item { background: white; border: 1px solid var(--border-color); padding: 12px 15px;
-            border-radius: 8px; cursor: pointer; margin-bottom: 8px; transition: 0.2s; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center;
-        }
-        .student-nav-item:hover { background: #eaf6fc; color: var(--primary-dark); border-color: var(--primary-light);
-        }
-        .student-nav-item.active { background: #eaf6fc; border-color: var(--primary); font-weight: bold; color: var(--primary-dark); border-width: 2px;
-        }
+        .student-nav-item { background: white; border: 1px solid var(--border-color); padding: 12px 15px; border-radius: 8px; cursor: pointer; margin-bottom: 8px; transition: 0.2s; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center; }
+        .student-nav-item:hover { background: #eaf6fc; color: var(--primary-dark); border-color: var(--primary-light); }
+        .student-nav-item.active { background: #eaf6fc; border-color: var(--primary); font-weight: bold; color: var(--primary-dark); border-width: 2px; }
 
-        .history-card { border-bottom: 1px solid #eee; padding: 15px 10px; display: flex;
-            gap: 10px; align-items: flex-start; }
-        .history-chk { padding-top: 2px;
-        }
-        .history-content { flex: 1;
-        }
+        .history-card { border-bottom: 1px solid #eee; padding: 15px 10px; display: flex; gap: 10px; align-items: flex-start; }
+        .history-chk { padding-top: 2px; }
+        .history-content { flex: 1; }
 
-        .att-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px;
-            padding-bottom: 8px; border-bottom: 1px solid #eee; }
-        .att-name { width: 50px; font-weight: bold;
-            font-size: 0.9rem; flex-shrink: 0; }
-        .att-sel { font-size: 0.9rem; padding: 4px; width: 70px;
-            margin-bottom: 0 !important; flex-shrink: 0; }
-        .att-memo { font-size: 0.9rem; padding: 4px;
-            flex-grow: 1; margin-bottom: 0 !important; }
+        .att-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #eee; }
+        .att-name { width: 50px; font-weight: bold; font-size: 0.9rem; flex-shrink: 0; }
+        .att-sel { font-size: 0.9rem; padding: 4px; width: 70px; margin-bottom: 0 !important; flex-shrink: 0; }
+        .att-memo { font-size: 0.9rem; padding: 4px; flex-grow: 1; margin-bottom: 0 !important; }
 
-        .mobile-block-overlay { display: none; flex-direction: column;
-            align-items: center; justify-content: center; height: 100%; text-align: center; color: var(--text-sub);
-        }
-        .mobile-block-overlay span { font-size: 3rem; margin-bottom: 20px;
-        }
+        .mobile-block-overlay { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; color: var(--text-sub); }
+        .mobile-block-overlay span { font-size: 3rem; margin-bottom: 20px; }
 
-        .loading-dots::after { content: ''; animation: dots 1.5s steps(4, end) infinite;
-        }
-        @keyframes dots { 0%, 20% { content: '';
-        } 40% { content: '.'; } 60% { content: '..'; } 80%, 100% { content: '...';
-        } }
+        .loading-dots::after { content: ''; animation: dots 1.5s steps(4, end) infinite; }
+        @keyframes dots { 0%, 20% { content: ''; } 40% { content: '.'; } 60% { content: '..'; } 80%, 100% { content: '...'; } }
         
-        #toast { visibility: hidden;
-            min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 30px; padding: 12px 20px; position: fixed; z-index: 3000; left: 50%;
-            bottom: 30px; transform: translateX(-50%); font-size: 0.95rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s;
-        }
-        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px;
-            opacity: 1;} }
-        @keyframes fadeout { from {bottom: 30px;
-            opacity: 1;} to {bottom: 0; opacity: 0;} }
+        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 30px; padding: 12px 20px; position: fixed; z-index: 3000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 0.95rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
         
-        .modal-overlay { position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 2000; display: none; align-items: center; justify-content: center;
-        }
-        .modal-overlay.open { display: flex;
-        }
-        .modal-card { background: white; padding: 25px; border-radius: 12px; width: 400px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--border-color); }
-        .modal-msg { margin-bottom: 20px;
-            text-align: center; color: var(--text-main); font-weight: bold; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 2000; display: none; align-items: center; justify-content: center; }
+        .modal-overlay.open { display: flex; }
+        .modal-card { background: white; padding: 25px; border-radius: 12px; width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--border-color); }
+        .modal-msg { margin-bottom: 20px; text-align: center; color: var(--text-main); font-weight: bold; }
 
         @media (max-width: 768px) {
-            .container { padding: 10px;
-        }
-            .nav-item { font-size: 0.9rem; padding: 10px 5px;
-        }
-            .pc-only { display: none !important;
-        }
-            .mobile-only { display: block !important;
-        }
-            
-            .home-image-area { display: none !important;
-        } 
-            
-            .split-container { flex-direction: column;
-            overflow-y: auto; }
-            .split-left, .split-right { width: 100%;
-            height: auto; overflow: visible; flex: 1; min-height: 0; }
-            .card { min-height: 0;
-        }
-            .pc-only-tab .split-container { display: none;
-        }
-            .pc-only-tab .mobile-block-overlay { display: flex;
-        }
-            .quick-link-grid { grid-template-columns: repeat(3, 1fr);
-        }
-            .float-btn { top: auto; bottom: 30px;
-        }
-            .float-menu { top: auto; bottom: 90px;
-        }
-            .music-capsule { display: none !important;
-        }
-            
-            .mobile-only.full-height { 
-                display: flex !important;
-                flex-direction: column; 
-                flex: 1; 
-                min-height: 0; 
-                overflow: hidden; 
-                height: 100%;
-        }
+            .container { padding: 10px; }
+            .nav-item { font-size: 0.9rem; padding: 10px 5px; }
+            .pc-only { display: none !important; }
+            .mobile-only { display: block !important; }
+            .split-container { flex-direction: column; overflow-y: auto; }
+            .split-left, .split-right { width: 100%; height: auto; overflow: visible; flex: 1; min-height: 0; }
+            .card { min-height: 0; }
+            .pc-only-tab .split-container { display: none; }
+            .pc-only-tab .mobile-block-overlay { display: flex; }
+            .quick-link-grid { grid-template-columns: repeat(3, 1fr); }
+            .float-btn { top: auto; bottom: 30px; }
+            .float-menu { top: auto; bottom: 90px; }
+            .music-capsule { display: none !important; }
+            .mobile-only.full-height { display: flex !important; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; height: 100%; }
         }
     </style>
 </head>
@@ -484,13 +291,14 @@
         <div class="mp-list" id="musicList"></div>
     </div>
 
-    <div class="music-capsule" id="musicBtn">
+    <div class="music-capsule" id="musicBtn" onclick="toggleMusicPanel()">
         <div class="music-info" id="musicCurrentTitle">🎵 음악을 선택하세요</div>
-        <div class="music-play-btn" onclick="toggleMusicPanel()">▶</div>
+        <div class="music-play-btn">▶</div>
     </div>
 
     <div id="lockScreen"><div id="lockCard"><h2 style="color:var(--primary-dark); margin-bottom:20px;">쫑알수첩 Pro</h2><p style="margin-bottom:10px; color:var(--text-sub);">관리자 인증이 필요합니다.</p><input type="password" id="lockInput" placeholder="Password" onkeyup="checkCaps(event)"><div id="lockMsg" class="lock-msg"></div><button class="btn btn-primary" onclick="unlockApp()" style="width:100%;">접속</button></div></div>
 
+    <div class="lock-float-btn" id="lockFloatBtn" onclick="relockApp()">🔒</div>
     <div class="float-btn" onclick="toggleFloatMenu()">+</div>
     <div class="float-menu" id="floatMenu">
         <div class="float-menu-item" onclick="changeSection('bookmarks')">북마크</div>
@@ -709,7 +517,23 @@
         
         <div id="calendar" class="section">
              <div class="split-container">
-                <div class="split-left"><div class="card scrollable"><div class="card-header" style="justify-content:center; gap:15px;"><button class="arrow-btn" onclick="moveMonth(-1)">◀</button><span id="calMonth"></span><button class="arrow-btn" onclick="moveMonth(1)">▶</button><button class="btn-sm" style="margin-left:5px;" onclick="goToToday()">오늘</button></div><div class="cal-grid" id="calGrid"></div></div><div class="card scrollable" style="flex:1; margin-top:10px;"><div class="card-header">오늘 일정</div><div id="todayTodoListCal" style="font-size:0.95rem; line-height:1.6;">일정 없음</div></div></div>
+                <div class="split-left">
+                    <div class="card full-height">
+                        <div class="scroll-wrapper">
+                            <div class="card-header" style="justify-content:center; gap:15px; border-bottom:none;">
+                                <button class="arrow-btn" onclick="moveMonth(-1)">◀</button>
+                                <span id="calMonth"></span>
+                                <button class="arrow-btn" onclick="moveMonth(1)">▶</button>
+                                <button class="btn-sm" style="margin-left:5px;" onclick="goToToday()">오늘</button>
+                            </div>
+                            <div class="cal-grid" id="calGrid"></div>
+                            <div style="border-top:1px dashed #eee; margin-top:10px; padding-top:15px;">
+                                <div class="card-header">오늘 일정</div>
+                                <div id="todayTodoListCal" style="font-size:0.95rem; line-height:1.6;">일정 없음</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="split-right"><div class="card full-height"><div class="scroll-wrapper"><div class="card-header"><span id="calDetailTitle">선택 날짜 일정</span></div><div style="display:flex; gap:5px; margin-bottom:15px;"><input type="text" id="newEvent" placeholder="일정 등록 (구글 캘린더)" style="margin:0;"><button class="btn-primary" onclick="addEvent()" style="border-radius:6px; width:70px;">등록</button></div><div id="dailyEvents" style="margin-bottom:20px;"></div><hr style="margin:20px 0; border:0; border-top:1px dashed #eee;"><div class="card-header"><span>출석 체크</span><div style="display:flex; gap:5px;"><button class="btn-sm" onclick="openMonthAttSummary()">월별 통계</button><button class="btn-sm active" onclick="saveAttendance()">저장</button></div></div><div id="attList"></div></div></div></div>
              </div>
         </div>
@@ -762,7 +586,7 @@
         let calendarEvents = []; let homeQuickLinks = [];
         let musicPlaylist = [];
         let attendanceCache = [];
-        let customRecordCache = []; // [New] Cache for Custom Records
+        let customRecordCache = []; 
 
         window.onload = () => { checkLock(); document.getElementById('rDate').valueAsDate = new Date();
             document.getElementById('mobDate').valueAsDate = new Date(); initEnvironment(); };
@@ -787,6 +611,10 @@
                 document.getElementById('lockInput').value=''; 
             } 
         }
+        function relockApp() {
+            try { sessionStorage.setItem('isUnlocked', 'false'); } catch(e) {}
+            location.reload();
+        }
         async function loadAllData() { 
             loadStudents();
             renderSubjectTags(); renderBmTags(); loadFiles(); loadHomeData(); loadMusicData(); loadCustomItems();
@@ -796,13 +624,22 @@
 
         // Global Overlay Logic
         function closeAllOverlays() {
-            document.getElementById('floatMenu').classList.remove('show');
-            document.getElementById('musicPanel').classList.remove('show');
+            const m = document.getElementById('floatMenu');
+            const l = document.getElementById('lockFloatBtn');
+            const p = document.getElementById('musicPanel');
+            
+            m.classList.remove('show');
+            l.classList.remove('show');
+            p.classList.remove('show');
+            
             document.getElementById('globalOverlay').classList.remove('show');
         }
         function toggleFloatMenu() { 
             const m = document.getElementById('floatMenu');
+            const l = document.getElementById('lockFloatBtn');
             m.classList.toggle('show'); 
+            l.classList.toggle('show');
+            
             if(m.classList.contains('show')) document.getElementById('globalOverlay').classList.add('show');
             else document.getElementById('globalOverlay').classList.remove('show');
         }
@@ -1062,19 +899,17 @@
             }
         }
         
-        // [New: 기타 기록 상태 불러오기 & 뷰 갱신 통합 함수]
         async function refreshCustomView() {
             if (currentCustomItem === null) return;
             const chartArea = document.getElementById('customStatsChart'); 
             chartArea.innerHTML = '<div style="text-align:center; padding:20px;">로딩...</div>';
             document.getElementById('customCheckList').innerHTML = '<div style="text-align:center; padding:20px;">불러오는 중...</div>';
             
-            // 데이터 로드
             const allData = await sendRequest('custom_record', {mode:'get'});
             customRecordCache = allData || [];
             
-            renderCustomCheckList(); // 체크리스트에 상태 반영
-            renderCustomStats(); // 통계 갱신
+            renderCustomCheckList(); 
+            renderCustomStats(); 
         }
 
         function renderCustomCheckList() {
@@ -1088,7 +923,6 @@
                 const row = document.createElement('div'); 
                 row.className = 'quick-row'; 
                 
-                // [기록된 상태 찾기]
                 const record = customRecordCache.find(r => r.date === today && r.item === itemDef.name && r.name === st.name);
                 let savedVal = record ? record.value : "";
 
@@ -1122,9 +956,6 @@
             const data = [];
             const today = document.getElementById('rDate').value;
             
-            // 기존 데이터에서 현재 날짜/항목의 데이터는 덮어쓰기 위해, 일단 로컬 캐시에서는 유지하되 서버에 보낼 땐 덮어쓰기 방식임.
-            // (서버 로직에 따라 다르지만 보통 덮어쓰거나 추가됨. 여기선 새로 수집된 상태를 전송)
-            
             rows.forEach(row => {
                 const name = row.querySelector('.quick-name').innerText;
                 const el = row.querySelector('.cust-val');
@@ -1133,24 +964,13 @@
                 else val = el.checked 
                 ? (itemDef.type==='check'?'O':'ON') : '';
                 
-                // 값이 없더라도(해제) 업데이트를 위해 빈 값이라도 보낼 필요가 있을 수 있으나, 
-                // 보통 체크 안 된 건 저장 안 하는 방식이라면 패스. 
-                // *주의: 체크 해제한 것을 저장하려면 '삭제' 로직이나 '빈 값 업데이트'가 필요함.
-                // 현재 구조상 값이 있는 것만 저장하므로, 체크 해제 시 기존 데이터가 남을 수 있음.
-                // 이를 해결하기 위해 이번에는 '체크 해제'된 건에 대해서도 처리가 필요할 수 있으나,
-                // 간단히 '유효한 값만 저장' 하되, 기존 날짜 데이터를 덮어쓰는 방식이 깔끔함.
-                
                 if(val) data.push({date: today, item: itemDef.name, name: name, value: val});
             });
-            
-            // 저장 요청 (백엔드에서 해당 날짜+아이템 데이터를 지우고 다시 쓰거나 업데이트해야 완벽함.
-            // 현재 백엔드 로직을 건드릴 수 없으므로 '추가' 방식이라면 중복이 쌓일 수 있음. 
-            // 단, 사용자가 요청한 건 '불러왔을 때 상태 유지'이므로 불러오는 건 해결됨.)
             
             if(data.length > 0) {
                 await sendRequest('custom_record', {mode:'save', data: data});
                 showToast("저장 완료");
-                refreshCustomView(); // 저장 후 재로딩하여 반영
+                refreshCustomView(); 
             } else { showToast("선택된 내용 없음"); }
         }
 
@@ -1158,7 +978,6 @@
             if(currentCustomItem === null) return;
             const chartArea = document.getElementById('customStatsChart'); 
             
-            // customRecordCache 사용
             const allData = customRecordCache;
             const itemDef = customItems[currentCustomItem];
             const range = document.getElementById('statsRangeSelect').value;
@@ -1167,7 +986,6 @@
             let startDate = new Date(today);
             let endDate = new Date(today);
             
-            // ... (날짜 범위 로직 동일) ...
             if (range === 'today') {
             } else if (range === 'month') {
                 startDate.setDate(1); endDate.setMonth(endDate.getMonth() + 1); endDate.setDate(0);
@@ -1321,9 +1139,7 @@
         }
         function closeStudentManageModal() { document.getElementById('manageStudentModal').classList.remove('open');
         }
-        // [2. 학생 번호 자동 증가]
         function addStudentRow(id='',name='') { 
-            // 기존 입력된 ID 중 가장 큰 값 찾기
             let maxId = 0;
             const existingIds = document.querySelectorAll('.st-add-id');
             if (existingIds.length > 0) {
@@ -1334,8 +1150,6 @@
             } else if (studentList.length > 0) {
                 maxId = Math.max(...studentList.map(s => s.id));
             }
-            
-            // 새 ID는 maxId + 1 (단, 인자로 넘어온 id가 있으면 그것 사용)
             const newId = id !== '' ? id : (maxId + 1);
             
             const d=document.createElement('div'); d.style.display='flex'; d.style.gap='5px'; d.style.marginBottom='5px';
@@ -1491,7 +1305,6 @@
 
         function renderMemoPreview() { const a=document.getElementById('memoDatePreview'); const t=memoList.filter(m=>m.date===selectedMemoDate); if(t.length===0){a.style.display='none';return;} a.style.display='block'; a.innerHTML='';
         t.forEach(m=>{const d=document.createElement('div');d.className='memo-mini-item'+(m.done?' done-memo':'');d.innerText=(m.pinned?'★ ':'')+m.content;d.onclick=()=>openMemoForm(m);a.appendChild(d);}); }
-        // [3. 중요 메모 상단 정렬]
         function renderMemoList() { 
             const keyword = document.getElementById('memoSearchInput').value.toLowerCase();
             const l=document.getElementById('memoListView'); l.innerHTML=''; 
@@ -1499,13 +1312,12 @@
             
             // 중요(pinned) 우선, 그 다음 날짜 최신순 정렬
             filtered.sort((a,b) => {
-                if (a.pinned !== b.pinned) return b.pinned ? 1 : -1; // true(중요)가 앞으로
-                return new Date(b.date) - new Date(a.date); // 날짜 내림차순
+                if (a.pinned !== b.pinned) return b.pinned ? 1 : -1; 
+                return new Date(b.date) - new Date(a.date);
             });
 
             filtered.forEach(m=>{
                 const d=document.createElement('div');d.className='memo-list-item'+(m.done?' done-memo':'');
-                // 중요 아이콘 추가
                 const pinIcon = m.pinned ? '<span class="memo-pinned-icon">★</span>' : '';
                 d.innerHTML=`<div class="memo-list-date"><span>${m.date}</span></div><div class="memo-list-content">${pinIcon}${m.content}</div>`;
                 d.onclick=()=>{selectedMemoDate=m.date;openMemoForm(m);};
