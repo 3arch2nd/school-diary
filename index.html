@@ -7,12 +7,11 @@
     <title>쫑알수첩 Pro (Personal)</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
     <style>
-        /* [기본 테마] */
         :root {
             --bg-main: #f2f8fc;
             --card-bg: #FFFFFF;
             --primary-light: #9fcde8; --primary: #6ab0cf; --primary-dark: #35667a;
-            --pink-point: #ff8fab;
+            --pink-point: #ff8fab; --sky-point: #81ecec; /* 메모 포인트 색 */
             --text-main: #2c3e50; --text-sub: #7f8c8d; --border-color: #e3eff5;
             --success: #27ae60; --danger: #e74c3c;
         }
@@ -23,11 +22,17 @@
         header { text-align: center; margin-bottom: 15px; flex-shrink: 0; }
         h1 { color: var(--primary-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: -0.5px; }
 
+        /* AI Status Bar */
+        #aiStatusBar { position: fixed; bottom: 0; left: 0; width: 100%; height: 30px; background: #333; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; z-index: 2500; transform: translateY(100%); transition: transform 0.3s ease-in-out; }
+        #aiStatusBar.show { transform: translateY(0); }
+        .ai-loading-icon { display: inline-block; width: 10px; height: 10px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 10px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
         /* Global Overlay */
         .global-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 2000; display: none; }
         .global-overlay.show { display: block; }
 
-        /* Music Player Button (Bar Type) - 모바일에서 숨김 처리 */
+        /* Music Player Button (PC Only) */
         .music-btn-bar { 
             position: fixed; top: 20px; left: 20px; width: 180px; height: 50px; 
             background: var(--primary-light); color: white; border-radius: 25px; 
@@ -47,17 +52,12 @@
         .mp-item:hover { color: var(--primary); }
         .mp-add { margin-top: auto; display: flex; gap: 5px; }
 
-        /* AI Status Bar */
-        #aiStatusBar { position: fixed; bottom: 0; left: 0; width: 100%; height: 30px; background: #333; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; z-index: 2500; transform: translateY(100%); transition: transform 0.3s ease-in-out; }
-        #aiStatusBar.show { transform: translateY(0); }
-        .ai-loading-icon { display: inline-block; width: 10px; height: 10px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 10px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
         /* Lock Screen */
         #lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-main); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         #lockCard { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; width: 320px; }
         #lockInput { font-size: 1.2rem; text-align: center; margin-bottom: 5px; letter-spacing: 2px; }
-        
+        .lock-msg { font-size: 0.8rem; color: var(--danger); min-height: 20px; margin-bottom: 10px;}
+
         /* Tabs */
         .nav-tabs { display: flex; flex-shrink: 0; background: var(--card-bg); border-radius: 8px; margin-bottom: 15px; padding: 4px; border: 1px solid var(--border-color); }
         .nav-item { flex: 1; text-align: center; padding: 12px; cursor: pointer; color: var(--text-sub); border-radius: 6px; font-weight: bold; transition: 0.2s; }
@@ -81,49 +81,40 @@
         .split-right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 15px; height: 100%; overflow: hidden; }
         .split-half { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* PC/Mobile Visibility Defaults (PC First) */
         .pc-only { display: block; }
         .mobile-only { display: none; }
-        .mobile-block-overlay { display: none; } /* Default hidden on PC */
+        .mobile-block-overlay { display: none; }
 
         .card { background: var(--card-bg); border-radius: 8px; padding: 20px; border: 1px solid var(--border-color); box-shadow: 0 1px 2px rgba(0,0,0,0.03); display: flex; flex-direction: column; }
         .card.full-height { height: 100%; } .card.scrollable { overflow-y: auto; }
         .card-header { font-size: 1.1rem; color: var(--primary-dark); font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; flex-shrink: 0; border-bottom: 2px solid var(--bg-main); display: flex; justify-content: space-between; align-items: center; }
 
-        /* [수정] Quick Link UI */
+        /* [수정] Quick Link UI (반응형) */
         .quick-link-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }
-        .quick-link-item { 
-            background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; transition: 0.2s; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100px; 
-        }
+        .quick-link-item { background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100px; }
         .quick-link-item:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-color: var(--primary); }
         .ql-emoji { font-size: 2.2rem; margin-bottom: 2px; line-height: 1; }
         .ql-name { font-size: 0.8rem; color: var(--text-sub); font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
 
         /* [수정] 나만의 항목 (박스형) */
-        .custom-item-row { 
-            padding: 12px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 8px; cursor: pointer; 
-            display: flex; justify-content: space-between; align-items: center; background: white; transition: 0.2s;
-            font-weight: bold; color: var(--text-main);
-        }
+        .custom-item-row { padding: 12px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: white; transition: 0.2s; font-weight: bold; color: var(--text-main); }
         .custom-item-row:hover { border-color: var(--primary); background: #f9fcff; }
         .custom-item-row.active { border-color: var(--primary); background: #eaf6fc; color: var(--primary-dark); }
 
-        /* 통계 그래프 */
-        .chart-controls { display: flex; gap: 5px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
-        .chart-btn { padding: 4px 10px; border: 1px solid #ddd; background: white; border-radius: 12px; font-size: 0.8rem; cursor: pointer; white-space: nowrap; }
-        .chart-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-        .bar-chart-area { display: flex; align-items: flex-end; height: 100%; gap: 3px; padding-bottom: 5px; overflow-x: auto; }
-        .bar-col { flex: 1; min-width: 15px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; position: relative; }
+        /* [수정] 통계 그래프 (스크롤 제거) */
+        .chart-controls { margin-bottom: 15px; } /* 드롭다운 여백 */
+        .bar-chart-area { display: flex; align-items: flex-end; height: 100%; gap: 3px; padding-bottom: 5px; overflow: hidden; }
+        .bar-col { flex: 1; min-width: 10px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; position: relative; }
         .bar-stick { width: 100%; background: var(--primary); border-radius: 3px 3px 0 0; transition: height 0.5s ease; min-height: 20%; opacity: 0.7; }
         .bar-col:hover .bar-stick { opacity: 1; background: var(--primary-dark); }
         .bar-col:hover::after { content: attr(data-tooltip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; white-space: nowrap; pointer-events: none; z-index: 10; margin-bottom: 5px; }
 
-        /* [수정] 달력 점 */
+        /* [수정] 달력 점 3개 (일정/출석/메모) */
         .cal-dot-container { display: flex; justify-content: center; gap: 3px; margin-top: 4px; }
         .cal-dot { width: 6px; height: 6px; border-radius: 50%; }
         .cal-dot.schedule { background: var(--primary); }
         .cal-dot.attendance { background: var(--pink-point); }
+        .cal-dot.memo-dot { background: var(--sky-point); }
 
         /* 기타 스타일 */
         .tag-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
@@ -176,12 +167,6 @@
         .bm-star.active { color: #f1c40f; }
         .bm-link { font-weight: bold; color: var(--primary-dark); text-decoration: none; font-size: 1.05rem; display: block; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-bottom: 10px; }
-        .cal-day { padding: 4px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; height: 50px; display: flex; flex-direction: column; align-items: center; }
-        .cal-day:hover { background: #eaf6fc; }
-        .cal-day.today { background: #fffbe6; border: 1px solid #ffd591; }
-        .cal-day.selected { border: 2px solid var(--primary-dark); }
-        
         .memo-mini-item { padding: 10px 8px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 0.9rem; color: var(--text-main); display: block; width: 100%; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; height: 40px; line-height: 20px; }
         .memo-list-item { background: white; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; padding: 12px; display: flex; align-items: center; gap: 10px; }
         .memo-list-date { font-size: 0.85rem; color: var(--text-sub); white-space: nowrap; flex-shrink: 0; }
@@ -191,11 +176,10 @@
         .student-nav-item { background: white; border: 1px solid var(--border-color); padding: 12px 15px; border-radius: 8px; cursor: pointer; margin-bottom: 8px; transition: 0.2s; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center; }
         .student-nav-item.active { background: #eaf6fc; border-color: var(--primary); font-weight: bold; color: var(--primary-dark); border-width: 2px; }
 
-        /* [수정] 학생 관리 내역 (왼쪽 정렬, 줄바꿈) */
         .history-card { border-bottom: 1px solid #eee; padding: 15px 10px; display: flex; gap: 10px; align-items: flex-start; }
         .h-left { width: 90px; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; font-size: 0.85rem; color: #666; text-align: left; }
         .h-date { font-weight: bold; color: var(--text-main); }
-        .h-badge { color: var(--success); font-weight: bold; font-size: 0.8rem; display: block; } /* 줄바꿈 효과 */
+        .h-badge { color: var(--success); font-weight: bold; font-size: 0.8rem; display: block; margin-top: 2px; }
         .h-text { flex: 1; border: 1px solid #e3eff5; border-radius: 4px; padding: 8px; font-size: 0.95rem; line-height: 1.5; resize: vertical; min-height: 50px; font-family: inherit; background: #fff; }
 
         .att-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #eee; }
@@ -203,19 +187,25 @@
         .att-sel { font-size: 0.9rem; padding: 4px; width: 70px; margin-bottom: 0 !important; flex-shrink: 0; }
         .att-memo { font-size: 0.9rem; padding: 4px; flex-grow: 1; margin-bottom: 0 !important; }
 
+        .mobile-block-overlay { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; color: var(--text-sub); }
+        .mobile-block-overlay span { font-size: 3rem; margin-bottom: 20px; }
+
         .loading-dots::after { content: ''; animation: dots 1.5s steps(4, end) infinite; }
         @keyframes dots { 0%, 20% { content: ''; } 40% { content: '.'; } 60% { content: '..'; } 80%, 100% { content: '...'; } }
+        #status-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #2c3e50; color: white; font-size: 0.85rem; padding: 8px 15px; display: none; justify-content: space-between; align-items: center; z-index: 2500; }
+        #status-bar.show { display: flex; }
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 30px; padding: 12px 20px; position: fixed; z-index: 3000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 0.95rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 2000; display: none; align-items: center; justify-content: center; }
         .modal-overlay.open { display: flex; }
         .modal-card { background: white; padding: 25px; border-radius: 12px; width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--border-color); }
+        .modal-msg { margin-bottom: 20px; text-align: center; color: var(--text-main); font-weight: bold; }
 
         /* [수정] 모바일 레이아웃 강제 전환 (1000px 기준) */
         @media (max-width: 1000px) {
             .container { padding: 10px; }
-            /* 1. 레이아웃 변환 */
+            /* 1. 레이아웃 변환 (세로 배치) */
             .split-container { flex-direction: column; overflow-y: auto; }
             .split-left, .split-right { width: 100%; height: auto; overflow: visible; }
             .card { min-height: auto; }
@@ -262,7 +252,7 @@
     </div>
 
     <div class="container">
-        <header><h1>쫑알수첩 v22.0</h1></header>
+        <header><h1>쫑알수첩 v23.1</h1></header>
         <nav class="nav-tabs">
             <div class="nav-item nav-item-home active" onclick="changeSection('home')">HOME</div>
             <div class="nav-item" onclick="changeSection('record')">기록하기</div>
@@ -281,12 +271,13 @@
         <div id="record" class="section">
             <div class="mobile-only">
                  <div class="card scrollable">
+                    <div class="card-header">모바일 빠른 기록</div>
                     <label>날짜</label><input type="date" id="mDate" style="margin-bottom:15px;">
                     <div style="display:flex; gap:10px; margin-bottom:15px;">
                         <button class="btn active" id="mBtnSub" onclick="setMobileMode('subject')">과목</button>
                         <button class="btn" id="mBtnBeh" onclick="setMobileMode('behavior')">행동</button>
                     </div>
-                    <textarea id="mInput" style="width:100%; height:150px; resize:none;" placeholder="입력..."></textarea>
+                    <textarea id="mInput" style="width:100%; height:150px; resize:none;" placeholder="내용을 입력하세요..."></textarea>
                     <button class="btn btn-primary" style="width:100%;" onclick="saveMobileRecord()">✨ 저장</button>
                 </div>
             </div>
@@ -332,12 +323,14 @@
                                     </div>
                                     <div class="split-half" style="border-left:1px solid #eee; padding-left:15px;">
                                         <div class="card-header">통계</div>
-                                        <div class="chart-controls">
-                                            <button class="chart-btn active" onclick="changeStatsScope('today', this)">오늘</button>
-                                            <button class="chart-btn" onclick="changeStatsScope('month', this)">이번 달</button>
-                                            <button class="chart-btn" onclick="changeStatsScope('sem1', this)">1학기</button>
-                                            <button class="chart-btn" onclick="changeStatsScope('sem2', this)">2학기</button>
-                                            <button class="chart-btn" onclick="changeStatsScope('year', this)">1년</button>
+                                        <div style="margin-bottom:15px;">
+                                            <select id="statsScopeSelect" onchange="changeStatsScope(this.value)" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ddd;">
+                                                <option value="today">오늘</option>
+                                                <option value="month">이번 달</option>
+                                                <option value="sem1">1학기</option>
+                                                <option value="sem2">2학기</option>
+                                                <option value="year">1년</option>
+                                            </select>
                                         </div>
                                         <div id="customStatsChart" class="bar-chart-area"></div>
                                     </div>
@@ -356,17 +349,51 @@
             </div>
         </div>
         
-        <div id="neis" class="section pc-only-tab">
-            <div class="mobile-block-overlay"><span>⚙️</span><p>해당 기능은 PC/태블릿에서<br>사용 가능해요!</p></div>
-            <div class="split-container pc-only">
-                <div class="split-left"><div class="card full-height scrollable"><div class="card-header">NEIS 옵션</div><label>유형</label><select id="neisType" onchange="toggleNeisType()"><option value="subject">과목별 세특</option><option value="behavior">행동특성</option></select><div id="neisSubOption"><label>대상 과목</label><select id="neisSubjectSelect"></select></div><div id="neisBehOption" style="display:none;"><label>키워드</label><input type="text" id="neisKeyword" placeholder="예: 배려, 협력"></div><label style="margin-top:15px;">분량</label><div style="display:flex; gap:10px;"><input type="range" id="neisLen" min="100" max="1000" step="50" value="300" oninput="document.getElementById('lenVal').innerText=this.value"><span style="color:var(--primary); font-weight:bold;"><span id="lenVal">300</span>자</span></div><button class="btn btn-primary" id="btnGenNeis" style="margin-top:15px;" onclick="generateNeisCards()">자료 생성하기</button></div></div><div class="split-right"><div class="card full-height scrollable"><div class="card-header">생성 결과</div><div id="neisResultList"></div></div></div>
-            </div>
-        </div>
+        <div id="neis" class="section pc-only-tab"><div class="mobile-block-overlay"><span>⚙️</span><p>해당 기능은 PC/태블릿에서<br>사용 가능해요!</p></div><div class="split-container pc-only"><div class="split-left"><div class="card full-height scrollable"><div class="card-header">NEIS 옵션</div><label>유형</label><select id="neisType" onchange="toggleNeisType()"><option value="subject">과목별 세특</option><option value="behavior">행동특성</option></select><div id="neisSubOption"><label>대상 과목</label><select id="neisSubjectSelect"></select></div><div id="neisBehOption" style="display:none;"><label>키워드</label><input type="text" id="neisKeyword" placeholder="예: 배려, 협력"></div><label style="margin-top:15px;">분량</label><div style="display:flex; gap:10px;"><input type="range" id="neisLen" min="100" max="1000" step="50" value="300" oninput="document.getElementById('lenVal').innerText=this.value"><span style="color:var(--primary); font-weight:bold;"><span id="lenVal">300</span>자</span></div><button class="btn btn-primary" id="btnGenNeis" style="margin-top:15px;" onclick="generateNeisCards()">자료 생성하기</button></div></div><div class="split-right"><div class="card full-height scrollable"><div class="card-header">생성 결과</div><div id="neisResultList"></div></div></div></div></div>
         
         <div id="bookmarks" class="section"><div class="split-container"><div class="split-left"><div class="card full-height scrollable"><div class="card-header">북마크 추가</div><input type="hidden" id="bmEditRow" value=""><label>URL</label><input type="text" id="bmUrl" placeholder="https://..." style="margin-bottom:10px;"><label>제목</label><input type="text" id="bmTitle" placeholder="자동 완성 됨"><input type="hidden" id="bmStar"> <label>태그</label><div class="tag-container" id="bmTagArea"></div><div style="display:flex; gap:5px; margin-bottom:15px;"><input type="text" id="newBmTagInput" placeholder="새 태그" style="margin:0; flex:1;"><button class="btn-sm active" onclick="addNewBmTag()">+</button></div><label>메모</label><textarea id="bmMemo" style="height:120px;" placeholder="활용 팁..."></textarea><div style="display:flex; gap:10px; margin-top:10px;"><button class="btn btn-outline" style="flex:1" onclick="clearBmInput()">취소</button><button class="btn btn-primary" style="flex:1" onclick="saveBookmark()" id="btnSaveBm">저장</button></div></div></div><div class="split-right"><div class="card full-height scrollable"><div class="card-header"><span>북마크 목록</span><div id="bmFilterContainer" style="display:flex; gap:5px; flex-wrap:wrap; margin-left:10px;"></div></div><div id="bmList"></div></div></div></div></div>
-        <div id="calendar" class="section"><div class="split-container"><div class="split-left"><div class="card scrollable"><div class="card-header" style="justify-content:center; gap:15px;"><button class="arrow-btn" onclick="moveMonth(-1)">◀</button><span id="calMonth"></span><button class="arrow-btn" onclick="moveMonth(1)">▶</button><button class="btn-sm" style="margin-left:5px;" onclick="goToToday()">오늘</button></div><div class="cal-grid" id="calGrid"></div></div><div class="card scrollable" style="flex:1; margin-top:10px;"><div class="card-header">오늘 일정</div><div id="todayTodoListCal" style="font-size:0.95rem; line-height:1.6;">일정 없음</div></div></div><div class="split-right"><div class="card full-height scrollable"><div class="card-header"><span id="calDetailTitle">선택 날짜 일정</span></div><div style="display:flex; gap:5px; margin-bottom:15px;"><input type="text" id="newEvent" placeholder="일정 등록 (구글 캘린더)" style="margin:0;"><button class="btn-primary" onclick="addEvent()" style="border-radius:6px; width:70px;">등록</button></div><div id="dailyEvents" style="margin-bottom:20px;"></div><hr style="margin:20px 0; border:0; border-top:1px dashed #eee;"><div class="card-header"><span>출석 체크</span><div style="display:flex; gap:5px;"><button class="btn-sm" onclick="openMonthAttSummary()">월별 통계</button><button class="btn-sm active" onclick="saveAttendance()">저장</button></div></div><div id="attList"></div></div></div></div></div>
+        
+        <div id="calendar" class="section">
+             <div class="split-container">
+                <div class="split-left"><div class="card scrollable"><div class="card-header" style="justify-content:center; gap:15px;"><button class="arrow-btn" onclick="moveMonth(-1)">◀</button><span id="calMonth"></span><button class="arrow-btn" onclick="moveMonth(1)">▶</button><button class="btn-sm" style="margin-left:5px;" onclick="goToToday()">오늘</button></div><div class="cal-grid" id="calGrid"></div></div><div class="card scrollable" style="flex:1; margin-top:10px;"><div class="card-header">오늘 일정</div><div id="todayTodoListCal" style="font-size:0.95rem; line-height:1.6;">일정 없음</div></div></div>
+                <div class="split-right"><div class="card full-height scrollable"><div class="card-header"><span id="calDetailTitle">선택 날짜 일정</span></div><div style="display:flex; gap:5px; margin-bottom:15px;"><input type="text" id="newEvent" placeholder="일정 등록 (구글 캘린더)" style="margin:0;"><button class="btn-primary" onclick="addEvent()" style="border-radius:6px; width:70px;">등록</button></div><div id="dailyEvents" style="margin-bottom:20px;"></div><hr style="margin:20px 0; border:0; border-top:1px dashed #eee;"><div class="card-header"><span>출석 체크</span><div style="display:flex; gap:5px;"><button class="btn-sm" onclick="openMonthAttSummary()">월별 통계</button><button class="btn-sm active" onclick="saveAttendance()">저장</button></div></div><div id="attList"></div></div></div>
+             </div>
+        </div>
         <div id="memo" class="section"><div class="split-container"><div class="split-left"><div class="card full-height scrollable"><div class="card-header"><span>메모</span><div style="display:flex; gap:5px;"><button class="btn-sm active" id="btnMemoModeCal" onclick="setMemoMode('cal')">달력</button><button class="btn-sm inactive" id="btnMemoModeList" onclick="setMemoMode('list')">목록</button></div></div><div id="memoSearchArea" style="margin-bottom:10px; display:none;"><input type="text" id="memoSearchInput" placeholder="메모 검색..." oninput="renderMemoList()"></div><div id="memoCalView"><div class="card-header" style="justify-content:center; gap:15px; border-bottom:none;"><button class="arrow-btn" onclick="moveMemoMonth(-1)">◀</button><span id="memoMonthTitle"></span><button class="arrow-btn" onclick="moveMemoMonth(1)">▶</button></div><div class="cal-grid" id="memoCalGrid"></div><div id="memoDatePreview" style="margin-top:15px; border-top:1px solid #eee; padding-top:10px; display:none;"></div></div><div id="memoListView" style="display:none;"></div></div></div><div class="split-right"><div class="card full-height scrollable"><div class="card-header">작성 <span id="memoDateDisp" style="font-size:0.9rem; color:var(--text-sub); font-weight:normal;"></span></div><input type="hidden" id="memoEditRow"><textarea id="memoContent" style="height:300px; resize:none;" placeholder="내용을 입력하세요..."></textarea><div style="display:flex; gap:15px; margin-bottom:15px;"><label><input type="checkbox" id="memoPinned"> 중요</label><label><input type="checkbox" id="memoDone"> 완료</label></div><div style="text-align:right;"><button class="btn btn-danger" id="btnDelMemo" style="display:none; margin-right:10px;" onclick="deleteMemo()">삭제</button><button class="btn btn-primary" onclick="saveMemo()">저장</button><button class="btn btn-outline" style="margin-left:10px;" onclick="clearMemoInput()">새 메모</button></div></div></div></div></div>
-        <div id="data" class="section pc-only-tab"><div class="mobile-block-overlay"><span>⚙️</span><p>해당 기능은 PC/태블릿에서<br>사용 가능해요!</p></div><div class="split-container pc-only"><div class="split-left"><div class="card full-height scrollable"><div class="card-header">참고 자료</div><input type="file" id="uploadInput" style="margin-bottom:10px;"><button class="btn btn-outline" id="btnUpload" style="width:100%; margin-bottom:15px;" onclick="uploadFile()">업로드</button><div id="fileList"></div></div></div><div class="split-right"><div class="card full-height scrollable"><div class="card-header">설정</div><div id="publicModeSettings" style="display:none; background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:20px;"><label>Gemini API Key</label><input type="password" id="settingApiKey"><button class="btn-sm active" style="width:100%;" onclick="savePublicSettings()">저장</button></div><label>AI 페르소나</label><textarea id="personaText" style="height:150px;" placeholder="예: 초등학교 교사 말투..."></textarea><div style="text-align:right;"><button class="btn btn-primary" id="btnPersona" onclick="savePersona()">저장</button></div><hr style="margin:20px 0;"><div class="card-header" style="color:var(--danger); border-bottom:none;">데이터 관리</div><button class="btn btn-danger" style="width:100%" onclick="reqConfirm('데이터를 초기화하시겠습니까?', archiveData)">[새 학년 준비] 데이터 백업 및 초기화</button></div></div></div></div>
+        
+        <div id="data" class="section pc-only-tab">
+             <div class="mobile-block-overlay"><span>⚙️</span><p>해당 기능은 PC/태블릿에서<br>사용 가능해요!</p></div>
+             <div class="split-container pc-only">
+                 <div class="split-left">
+                     <div class="card full-height scrollable">
+                         <div class="card-header">참고 자료</div>
+                         <input type="file" id="uploadInput" style="margin-bottom:10px;"><button class="btn btn-outline" id="btnUpload" style="width:100%; margin-bottom:15px;" onclick="uploadFile()">업로드</button>
+                         <div id="fileList"></div>
+                     </div>
+                 </div>
+                 <div class="split-right">
+                     <div class="card full-height scrollable">
+                         <div class="card-header">설정</div>
+                         <div id="publicModeSettings" style="display:none; background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:20px;"><label>Gemini API Key</label><input type="password" id="settingApiKey"><button class="btn-sm active" style="width:100%;" onclick="savePublicSettings()">저장</button></div>
+                         
+                         <div style="margin-bottom:20px;">
+                            <label>AI 페르소나 설정</label>
+                            <textarea id="personaText" style="height:120px; resize:none;" placeholder="예: 따뜻하고 칭찬을 아끼지 않는 초등학교 선생님 말투..."></textarea>
+                            <div style="text-align:right; margin-top:5px;"><button class="btn btn-primary" id="btnPersona" onclick="savePersona()">저장</button></div>
+                         </div>
+                         
+                         <hr style="margin:20px 0; border:0; border-top:1px dashed #eee;">
+                         
+                         <div class="card-header" style="color:var(--danger); border-bottom:none; margin-bottom:10px;">데이터 관리</div>
+                         <div style="background:#fff0f0; padding:15px; border-radius:8px; border:1px solid #ffcccc;">
+                             <p style="font-size:0.9rem; color:#c0392b; margin-bottom:10px;"><b>주의:</b> 모든 기록을 백업하고 현재 데이터를 초기화합니다.</p>
+                             <button class="btn btn-danger" style="width:100%" onclick="reqConfirm('데이터를 초기화하시겠습니까? (되돌릴 수 없음)', archiveData)">[새 학년 준비] 데이터 백업 및 초기화</button>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+        </div>
+
     </div>
 
     <div id="toast"></div>
@@ -398,11 +425,11 @@
         function checkLock() { if(sessionStorage.getItem('isUnlocked')==='true') { document.getElementById('lockScreen').style.display='none'; loadAllData(); } }
         function unlockApp() { if(document.getElementById('lockInput').value === 'ekdms320') { sessionStorage.setItem('isUnlocked', 'true'); document.getElementById('lockScreen').style.display='none'; loadAllData(); } else { alert('비밀번호 오류'); document.getElementById('lockInput').value=''; } }
         async function loadAllData() { 
-            loadStudents(); renderSubjectTags(); renderBmTags(); loadFiles(); loadHomeData(); loadMusicData(); loadCustomItems();
+            loadStudents(); renderSubjectTags(); renderBmTags(); loadFiles(); loadHomeData(); loadMusicData(); loadCustomItems(); loadMemos();
             Promise.all([loadGoogleEvents(), loadAttendance()]).then(()=>{ renderHomeToDo(); renderCalendar(); showDailyView(new Date().getDate()); }); 
         }
 
-        // Global Overlay Logic
+        // ... (Overlay, Music, AI Status, HOME Logic 동일) ...
         function closeAllOverlays() {
             document.getElementById('floatMenu').classList.remove('show');
             document.getElementById('musicPanel').classList.remove('show');
@@ -511,6 +538,36 @@
                 renderRecordList(); 
             }
         }
+        
+        // [수정] 모바일 모드 설정 함수 수정
+        function setMobileMode(m) {
+            mobileMode = m;
+            document.getElementById('mBtnSub').className = m==='subject'?'btn active':'btn';
+            document.getElementById('mBtnBeh').className = m==='behavior'?'btn active':'btn';
+        }
+        
+        async function saveMobileRecord() {
+            const date = document.getElementById('mDate').value;
+            const text = document.getElementById('mInput').value;
+            if(!text) return;
+            
+            showToast("AI 분석 중...");
+            const prompt = `입력: "${text}". 규칙: 이름과 내용을 분리해. 출력JSON: {"name":"이름","text":"내용"}`;
+            try {
+                const aiRes = await sendRequest('call_ai', { prompt });
+                const json = JSON.parse(aiRes.text.replace(/```json/g,"").replace(/```/g,""));
+                
+                await sendRequest('save_record', {
+                    date: date,
+                    name: json.name, 
+                    type: mobileMode === 'subject' ? '과목' : '행동', 
+                    text: json.text, 
+                    check: '없음'
+                });
+                document.getElementById('mInput').value = '';
+                showToast("저장 완료");
+            } catch(e) { showToast("저장 실패"); }
+        }
 
         // [CUSTOM MODE]
         async function loadCustomItems() { customItems = await sendRequest('manage_custom_items', {mode:'get'}) || []; }
@@ -574,10 +631,8 @@
             } else { showToast("선택된 내용 없음"); }
         }
         
-        function changeStatsScope(scope, btn) {
+        function changeStatsScope(scope) {
             customStatsScope = scope;
-            document.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
             renderCustomStats();
         }
 
@@ -662,7 +717,6 @@
              });
         }
         function toggleCheck(el) { const p=el.parentElement; const w=el.classList.contains('checked'); p.querySelectorAll('.check-circle').forEach(c=>c.classList.remove('checked')); if(!w) el.classList.add('checked'); }
-        
         async function saveData() {
             const inputs=document.querySelectorAll('.st-input'); const ai=document.getElementById('aiToggle').checked;
             let type="행동"; if(currentMode==='subject'){ const t=document.querySelector('#subjectTags .tag.selected'); if(!t){showToast("과목 선택 필요");return;} type=t.innerText.split(' ')[0]; }
@@ -720,7 +774,7 @@
             }, 8000); 
         }
 
-        // [Student/Bookmarks/Utils - Same as before]
+        // [Student Manager]
         async function loadStudents() { studentList=await sendRequest('get_students')||[]; renderRecordList(); renderStudentNav(); }
         function renderStudentNav() { const l=document.getElementById('studentNavList'); l.innerHTML=''; studentList.forEach(s=>{const d=document.createElement('div');d.className='student-nav-item';d.innerHTML=`<span>${s.id}. <b>${s.name}</b></span><span>></span>`;d.onclick=()=>{selectedStudentName=s.name;loadHistory();};l.appendChild(d);}); }
         function openStudentManageModal() { const c=document.getElementById('manageStudentRows'); c.innerHTML=''; if(studentList.length>0)studentList.forEach(s=>addStudentRow(s.id,s.name)); else for(i=0;i<3;i++)addStudentRow(); document.getElementById('manageStudentModal').classList.add('open'); }
@@ -728,6 +782,7 @@
         function addStudentRow(id='',name='') { const d=document.createElement('div'); d.style.display='flex'; d.style.gap='5px'; d.style.marginBottom='5px'; d.innerHTML=`<input type="number" class="st-add-id" value="${id}" style="width:60px;margin:0"><input type="text" class="st-add-name" value="${name}" style="flex:1;margin:0"><button class="btn-sm btn-del" onclick="this.parentElement.remove()">-</button>`; document.getElementById('manageStudentRows').appendChild(d); }
         async function saveStudentManagement() { const ids=document.querySelectorAll('.st-add-id'); const nms=document.querySelectorAll('.st-add-name'); let l=[]; for(let i=0;i<ids.length;i++)if(ids[i].value&&nms[i].value)l.push({id:parseInt(ids[i].value),name:nms[i].value.trim()}); await sendRequest('sync_student_list',{students:l}); closeStudentManageModal(); loadStudents(); }
 
+        // [Bookmarks]
         function renderBmTags() { 
             const c=document.getElementById('bmTagArea'); c.innerHTML=''; 
             bmTags.forEach(t=>{const b=document.createElement('div');b.className='tag';b.innerHTML=`${t} <span class="x-btn" onclick="removeBmTag('${t}', event)">x</span>`;if(selectedBmTags.includes(t))b.classList.add('selected');b.onclick=(e)=>{if(e.target.classList.contains('x-btn'))return;if(selectedBmTags.includes(t))selectedBmTags=selectedBmTags.filter(x=>x!==t);else selectedBmTags.push(t);renderBmTags();};c.appendChild(b);});
@@ -770,12 +825,15 @@
                 const d=document.createElement('div');d.className='cal-day';
                 if(dStr===selectedDate)d.classList.add('selected');
                 
+                // [수정] 점 3개 표시 (일정/출석/메모)
                 const hasEvent = calendarEvents.some(e=>e.date===dStr);
                 const hasAtt = attendanceData.some(a=>a.date===dStr && a.status!=='출석'); 
+                const hasMemo = memoList.some(m=>m.date===dStr);
                 
                 let dots = '';
                 if(hasEvent) dots += `<div class="cal-dot schedule"></div>`;
                 if(hasAtt) dots += `<div class="cal-dot attendance"></div>`;
+                if(hasMemo) dots += `<div class="cal-dot memo-dot"></div>`;
 
                 d.innerHTML=`<span>${i}</span><div class="cal-dot-container">${dots}</div>`;
                 d.onclick=()=>{selectedDate=dStr;renderCalendar();showDailyView(i);};
@@ -787,25 +845,13 @@
         async function loadAtt() { const l=document.getElementById('attList'); l.innerHTML='로딩...'; const d=await sendRequest('get_attendance'); attendanceData=d; const t=d?d.filter(a=>a.date===selectedDate):[]; l.innerHTML=''; studentList.forEach(s=>{const e=t.find(a=>a.name===s.name); const row=document.createElement('div');row.className='att-row';row.innerHTML=`<span class="att-name">${s.name}</span><select class="att-status att-sel" data-name="${s.name}"><option ${e?.status==='출석'?'selected':''}>출석</option><option ${e?.status==='결석'?'selected':''}>결석</option><option ${e?.status==='지각'?'selected':''}>지각</option><option ${e?.status==='조퇴'?'selected':''}>조퇴</option><option ${e?.status==='결과'?'selected':''}>결과</option><option ${e?.status==='체험'?'selected':''}>체험</option></select><input type="text" class="att-memo" value="${e?.memo||''}" placeholder="비고">`;l.appendChild(row);}); }
         async function saveAttendance() { let l=[]; document.querySelectorAll('.att-row').forEach(r=>l.push({name:r.querySelector('.att-status').dataset.name, status:r.querySelector('.att-status').value, memo:r.querySelector('.att-memo').value})); await sendRequest('save_attendance',{date:selectedDate,data:l}); showToast("출석 저장"); loadAttendance().then(renderCalendar); }
         async function addEvent() { const t=document.getElementById('newEvent').value; if(t) { await sendRequest('save_event',{date:selectedDate,title:t}); document.getElementById('newEvent').value=''; loadGoogleEvents().then(()=>showDailyView()); } }
-        
-        async function openMonthAttSummary() { 
-            document.getElementById('monthAttModal').classList.add('open'); 
-            document.getElementById('monthAttBody').innerHTML='로딩...'; 
-            const d=await sendRequest('get_attendance'); 
-            const m=`${curYear}-${String(curMonth+1).padStart(2,'0')}`; 
-            const t=d.filter(a=>a.date.startsWith(m)&&a.status!=='출석'); 
-            let h='<table style="width:100%;border-collapse:collapse;font-size:0.9rem"><thead><tr style="background:#eee"><th style="border:1px solid #ddd;padding:5px">날짜</th><th>이름</th><th>상태</th><th>비고</th></tr></thead><tbody>'; 
-            if(t.length===0)h='<div style="padding:20px;text-align:center">특이사항 없음</div>'; 
-            else t.forEach(r=>{h+=`<tr><td style="border:1px solid #ddd;padding:4px">${r.date.substr(5)}</td><td style="border:1px solid #ddd;text-align:center">${r.name}</td><td style="border:1px solid #ddd;text-align:center;color:#e74c3c;">${r.status}</td><td style="border:1px solid #ddd;padding:4px">${r.memo}</td></tr>`;}); 
-            if(t.length>0)h+='</tbody></table>'; 
-            document.getElementById('monthAttBody').innerHTML=h; 
-        }
+        async function openMonthAttSummary() { document.getElementById('monthAttModal').classList.add('open'); document.getElementById('monthAttBody').innerHTML='로딩...'; const d=await sendRequest('get_attendance'); const m=`${curYear}-${String(curMonth+1).padStart(2,'0')}`; const t=d.filter(a=>a.date.startsWith(m)&&a.status!=='출석'); let h='<table style="width:100%;border-collapse:collapse;font-size:0.9rem"><thead><tr style="background:#eee"><th style="border:1px solid #ddd;padding:5px">날짜</th><th>이름</th><th>상태</th><th>비고</th></tr></thead><tbody>'; if(t.length===0)h='<div style="padding:20px;text-align:center">특이사항 없음</div>'; else t.forEach(r=>{h+=`<tr><td style="border:1px solid #ddd;padding:4px">${r.date.substr(5)}</td><td style="border:1px solid #ddd;text-align:center">${r.name}</td><td style="border:1px solid #ddd;text-align:center;color:#e74c3c;">${r.status}</td><td style="border:1px solid #ddd;padding:4px">${r.memo}</td></tr>`;}); if(t.length>0)h+='</tbody></table>'; document.getElementById('monthAttBody').innerHTML=h; }
 
         // Memo
         function setMemoMode(m) { memoMode=m; document.getElementById('btnMemoModeCal').className=m==='cal'?'btn-sm active':'btn-sm inactive'; document.getElementById('btnMemoModeList').className=m==='list'?'btn-sm active':'btn-sm inactive'; document.getElementById('memoCalView').style.display=m==='cal'?'block':'none'; document.getElementById('memoListView').style.display=m==='list'?'block':'none'; document.getElementById('memoSearchArea').style.display = m==='list'?'block':'none'; if(m==='cal') renderMemoCalendar(); else renderMemoList(); }
         async function loadMemos() { memoList=await sendRequest('get_memos')||[]; setMemoMode(memoMode); }
         function moveMemoMonth(d) { curMemoMonth+=d; if(curMemoMonth>11){curMemoMonth=0;curMemoYear++;}else if(curMemoMonth<0){curMemoMonth=11;curMemoYear--;} renderMemoCalendar(); }
-        function renderMemoCalendar() { const g=document.getElementById('memoCalGrid'); g.innerHTML=''; document.getElementById('memoMonthTitle').innerText=`${curMemoYear}.${curMemoMonth+1}`; const f=new Date(curMemoYear,curMemoMonth,1); const l=new Date(curYear,curMemoMonth+1,0); ['일','월','화','수','목','금','토'].forEach(d=>g.innerHTML+=`<div style="font-weight:bold">${d}</div>`); for(i=0;i<f.getDay();i++)g.appendChild(document.createElement('div')); for(i=1;i<=l.getDate();i++){const dStr=`${curYear}-${String(curMemoMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; const d=document.createElement('div');d.className='cal-day';if(dStr===selectedMemoDate)d.classList.add('selected');if(memoList.some(m=>m.date===dStr))d.classList.add('has-memo');d.innerHTML=`<span>${i}</span><div class="cal-dot"></div>`;d.onclick=()=>{selectedMemoDate=dStr;renderMemoCalendar();renderMemoPreview();openMemoForm();};g.appendChild(d);} renderMemoPreview(); }
+        function renderMemoCalendar() { const g=document.getElementById('memoCalGrid'); g.innerHTML=''; document.getElementById('memoMonthTitle').innerText=`${curMemoYear}.${curMemoMonth+1}`; const f=new Date(curMemoYear,curMemoMonth,1); const l=new Date(curYear,curMemoMonth+1,0); ['일','월','화','수','목','금','토'].forEach(d=>g.innerHTML+=`<div style="font-weight:bold">${d}</div>`); for(i=0;i<f.getDay();i++)g.appendChild(document.createElement('div')); for(i=1;i<=l.getDate();i++){const dStr=`${curYear}-${String(curMemoMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; const d=document.createElement('div');d.className='cal-day';if(dStr===selectedMemoDate)d.classList.add('selected');if(memoList.some(m=>m.date===dStr))d.classList.add('has-memo');d.innerHTML=`<span>${i}</span><div class="cal-dot"></div>`;d.onclick=()=>{selectedMemoDate=dStr;renderMemoCalendar();renderMemoPreview();openMemoForm();};g.appendChild(d);} renderMemoCalendar(); } // 달력 업데이트 시 점 찍기 위해 한번 더 호출
         function renderMemoPreview() { const a=document.getElementById('memoDatePreview'); const t=memoList.filter(m=>m.date===selectedMemoDate); if(t.length===0){a.style.display='none';return;} a.style.display='block'; a.innerHTML=''; t.forEach(m=>{const d=document.createElement('div');d.className='memo-mini-item'+(m.done?' done-memo':'');d.innerText=(m.pinned?'★ ':'')+m.content;d.onclick=()=>openMemoForm(m);a.appendChild(d);}); }
         function renderMemoList() { const keyword = document.getElementById('memoSearchInput').value.toLowerCase(); const l=document.getElementById('memoListView'); l.innerHTML=''; let filtered = memoList.filter(m => m.content.toLowerCase().includes(keyword)); filtered.sort((a,b)=>new Date(b.date)-new Date(a.date)); filtered.forEach(m=>{const d=document.createElement('div');d.className='memo-list-item'+(m.done?' done-memo':'');d.innerHTML=`<div class="memo-list-date"><span>${m.date}</span><span>${m.pinned?'★':''}</span></div><div class="memo-list-content">${m.content}</div>`;d.onclick=()=>{selectedMemoDate=m.date;openMemoForm(m);};l.appendChild(d);}); }
         function openMemoForm(i) { document.getElementById('memoDateDisp').innerText=selectedMemoDate; if(i){document.getElementById('memoContent').value=i.content;document.getElementById('memoPinned').checked=i.pinned;document.getElementById('memoDone').checked=i.done;document.getElementById('memoEditRow').value=i.row;document.getElementById('btnDelMemo').style.display='inline-block';}else clearMemoInput(); }
