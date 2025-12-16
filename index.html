@@ -4,7 +4,7 @@
     <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>쫑알수첩 Pro (Final Stable)</title>
+    <title>쫑알수첩 Pro (Final Fix)</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -95,32 +95,28 @@
         .tag .x-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; line-height: 16px; text-align: center; border-radius: 50%; font-size: 0.8rem; background: rgba(0,0,0,0.1); color: inherit; display: none; }
         .tag:hover .x-btn { display: block; }
         
-        /* [핵심 수정] 만능 그리드 시스템 - 과목, 행동, 빠른체크 모두 통일 */
-        .student-row { display: flex; align-items: center; width: 100%; gap: 10px; padding: 10px 5px; border-bottom: 1px solid var(--bg-main); background: white; margin-bottom: 2px; }
+        /* [핵심 솔루션] 통합 격자 시스템 (과목/행동/빠른체크 공통) */
+        .grid-row { display: flex; align-items: center; width: 100%; gap: 10px; padding: 10px 5px; border-bottom: 1px solid var(--bg-main); background: white; margin-bottom: 2px; }
         
-        /* 이름: 고정 너비 */
-        .st-name { width: 90px; flex-shrink: 0; font-weight: bold; text-align: center; color: var(--primary-dark); }
+        /* 1. 이름 (고정) */
+        .col-name { width: 80px; flex-shrink: 0; font-weight: bold; text-align: center; color: var(--primary-dark); }
         
-        /* 내용/공백: 남은 공간 모두 차지 */
-        .st-content { flex: 1; min-width: 0; display: flex; align-items: center; }
+        /* 2. 내용 (가변 - 여기가 핵심) */
+        .col-content { flex: 1; min-width: 0; display: flex; align-items: center; }
         .st-input { width: 100%; height: 42px; margin: 0 !important; } 
         
-        /* 체크박스 그룹: 고정 너비 (작게 수정됨 180px) */
-        .st-check-group { width: 180px; flex-shrink: 0; display: flex; justify-content: space-between; padding: 0 2px; }
+        /* 3. 체크박스 (고정) */
+        .col-check { width: 170px; flex-shrink: 0; display: flex; justify-content: space-between; padding: 0 2px; }
         
-        /* 빠른 체크 전용 오른쪽 정렬 */
-        .st-right-end { justify-content: flex-end; }
-
-        /* 헤더 전용 스타일 */
+        /* 헤더 스타일 */
         .record-header-row { display: flex; align-items: center; width: 100%; gap: 10px; padding: 12px 5px; border-bottom: 2px solid #eee; background: #fafafa; border-radius: 6px 6px 0 0; color: var(--text-sub); font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; }
-        .col-check-header { width: 180px; flex-shrink: 0; display: flex; justify-content: space-between; padding: 0 2px; }
-        .col-check-header span { width: 40px; text-align: center; display: inline-block; letter-spacing: -1px; word-break: keep-all; line-height: 1.2; font-size: 0.75rem; }
+        .col-check span { width: 38px; text-align: center; display: inline-block; letter-spacing: -1px; word-break: keep-all; line-height: 1.2; font-size: 0.75rem; }
 
         .check-circle { width: 24px; height: 24px; border: 2px solid var(--border-color); border-radius: 50%; cursor: pointer; position: relative; background: var(--bg-main); }
         .check-circle.checked { border-color: var(--primary); background: var(--primary); }
         .check-circle.checked::after { content: 'v'; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; font-weight:bold; }
 
-        /* [핵심 수정] 빠른 체크 스크롤 복구 */
+        /* [수정] 빠른 체크 스크롤 복구 */
         #customCheckList { flex: 1; min-height: 0; overflow-y: auto; padding-right: 5px; }
 
         .custom-item-row { padding: 10px; border: 1px solid #eee; border-radius: 6px; margin-bottom: 5px; cursor: pointer; display: flex; justify-content: space-between; }
@@ -403,10 +399,10 @@
                                         </div>
                                     </div>
                                     
-                                    <div class="record-header-row" id="recordHeaderRow">
-                                        <div class="st-name">이름</div>
-                                        <div class="st-content" style="justify-content:center;">내용</div>
-                                        <div class="col-check-header" id="checkHeader">
+                                    <div class="record-header-row grid-row" id="recordHeaderRow">
+                                        <div class="col-name">이름</div>
+                                        <div class="col-content" style="justify-content:center;">내용</div>
+                                        <div class="col-check" id="checkHeader">
                                             <span>매우<br>잘함</span>
                                             <span>잘함</span>
                                             <span>보통</span>
@@ -757,7 +753,7 @@
                  else if(itemDef.type === 'switch') inputHtml = `<label class="switch"><input type="checkbox" class="mob-cust-val"><span class="slider"></span></label>`;
                  else if(itemDef.type === 'select') inputHtml = `<select class="mob-cust-val" style="margin:0;"><option>상</option><option>중</option><option>하</option></select>`;
                  
-                 row.innerHTML = `<div class="st-name">${st.name}</div><div class="st-content"></div>${inputHtml}`;
+                 row.innerHTML = `<div class="col-name st-name">${st.name}</div><div class="col-content st-content"></div>${inputHtml}`;
                  container.appendChild(row);
              });
         }
@@ -821,8 +817,8 @@
             const itemDef = customItems[currentCustomItem];
             studentList.forEach(st => {
                 const row = document.createElement('div'); 
-                // 빠른 체크는 오른쪽 정렬이 필요하므로 st-right-end 추가
-                row.className = 'student-row st-right-end'; 
+                // 빠른 체크는 오른쪽 정렬이 필요하므로 grid-row와 함께 사용
+                row.className = 'grid-row student-row'; 
                 
                 let inputHtml = '';
                 if(itemDef.type === 'check') inputHtml = `<input type="checkbox" class="cust-val" style="width:24px; height:24px; margin:0;">`;
@@ -830,7 +826,7 @@
                 else if(itemDef.type === 'select') inputHtml = `<select class="cust-val" style="margin:0;"><option>상</option><option>중</option><option>하</option></select>`;
                 
                 // st-content를 비워두되 flex로 공간을 차지하게 하여 양옆으로 찢음
-                row.innerHTML = `<div class="st-name" style="text-align:left;">${st.name}</div><div class="st-content"></div>${inputHtml}`;
+                row.innerHTML = `<div class="col-name st-name" style="text-align:left;">${st.name}</div><div class="col-content st-content"></div>${inputHtml}`;
                 container.appendChild(row);
             });
         }
@@ -946,16 +942,16 @@
              const l=document.getElementById('recordList');
              l.innerHTML='';
              studentList.forEach(st=>{
-                 const r=document.createElement('div'); r.className='student-row';
+                 // [핵심] Grid-row 클래스 적용하여 레이아웃 고정
+                 const r=document.createElement('div'); r.className='grid-row student-row';
                  
-                 // [핵심 로직] 행동 탭이면 체크박스 그룹을 아예 빈 문자열로 처리
-                 // 이렇게 하면 st-content가 flex: 1 덕분에 끝까지 늘어나게 됨
                  let chk = '';
                  if(currentMode === 'subject') {
-                     chk = `<div class="st-check-group"><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div></div>`;
+                     chk = `<div class="col-check st-check-group"><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div></div>`;
                  }
                  
-                 r.innerHTML=`<div class="st-name">${st.name}</div><div class="st-content"><input type="text" class="st-input" id="input_${st.id}" placeholder="내용"></div>${chk}`;
+                 // [핵심] 내용 칸이 늘어나도록 col-content st-content 클래스 적용
+                 r.innerHTML=`<div class="col-name st-name">${st.name}</div><div class="col-content st-content"><input type="text" class="st-input" id="input_${st.id}" placeholder="내용"></div>${chk}`;
                  l.appendChild(r);
              });
         }
