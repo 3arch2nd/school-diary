@@ -751,11 +751,25 @@
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             closeAllOverlays();
+            
+            // 탭 스타일 활성화
             document.querySelectorAll('.nav-tabs .nav-item').forEach(e => e.classList.remove('active'));
             const nav = document.querySelector(`.nav-tabs .nav-item[onclick="changeSection('${id}')"]`);
             if(nav) nav.classList.add('active');
-            if(id==='bookmarks') loadBookmarks(); else if(id==='calendar') { renderCalendar();
-            showDailyView(new Date().getDate()); } else if(id==='memo') loadMemos();
+
+            // [추가된 부분] NEIS 탭 진입 시 '과목별 세특'으로 초기화
+            if(id === 'neis') {
+                const typeSelect = document.getElementById('neisType');
+                if(typeSelect) {
+                    typeSelect.value = 'subject'; // 드롭다운을 '과목'으로 변경
+                    toggleNeisType();             // 화면(버튼) 갱신 함수 호출
+                }
+            }
+
+            // 기존 로직들
+            if(id === 'bookmarks') loadBookmarks(); 
+            else if(id === 'calendar') { renderCalendar(); showDailyView(new Date().getDate()); } 
+            else if(id === 'memo') loadMemos();
         }
         function reqConfirm(msg, callback) { document.getElementById('confirmMsg').innerText = msg;
             document.getElementById('confirmModal').classList.add('open'); document.getElementById('btnConfirmYes').onclick = () => { document.getElementById('confirmModal').classList.remove('open'); callback(); }; }
