@@ -1674,20 +1674,24 @@
             showToast("페르소나 저장 완료!"); 
             clearLoading(btn); 
         }
-// [UI] 유형 선택에 따라 버튼과 옵션 표시 변경
+// [수정됨] 유형 선택 시 화면 전환 함수 (버튼 그룹 제어 추가)
         function toggleNeisType() {
             const type = document.getElementById('neisType').value;
             
-            // 과목 선택 옵션 보이기/숨기기
-            document.getElementById('neisSubOption').style.display = (type === 'subject') ? 'block' : 'none';
+            // 1. 과목 선택 옵션 제어 (과목일 때만 보임)
+            const subOpt = document.getElementById('neisSubOption');
+            if(subOpt) subOpt.style.display = (type === 'subject') ? 'block' : 'none';
             
-            // 버튼 그룹 교체
+            // 2. 버튼 그룹 교체 (핵심: 이 부분이 빠져서 버튼이 안 바뀌었던 것!)
+            const btnSub = document.getElementById('btnGroupSubject');
+            const btnBeh = document.getElementById('btnGroupBehavior');
+
             if (type === 'subject') {
-                document.getElementById('btnGroupSubject').style.display = 'block';
-                document.getElementById('btnGroupBehavior').style.display = 'none';
+                if(btnSub) btnSub.style.display = 'block';
+                if(btnBeh) btnBeh.style.display = 'none';
             } else {
-                document.getElementById('btnGroupSubject').style.display = 'none';
-                document.getElementById('btnGroupBehavior').style.display = 'block';
+                if(btnSub) btnSub.style.display = 'none';
+                if(btnBeh) btnBeh.style.display = 'block';
             }
         }
 
