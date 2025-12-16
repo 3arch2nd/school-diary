@@ -7,7 +7,6 @@
     <title>쫑알수첩 Pro (Personal)</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
     <style>
-        /* [기본 테마] */
         :root {
             --bg-main: #f2f8fc;
             --card-bg: #FFFFFF;
@@ -18,22 +17,53 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Gowun Dodum', sans-serif; -webkit-tap-highlight-color: transparent; }
         
         body { background-color: var(--bg-main); color: var(--text-main); font-size: 16px; line-height: 1.5; height: 100vh; overflow: hidden; }
-        
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; height: 100vh; display: flex; flex-direction: column; padding-bottom: 40px; /* 상태바 공간 확보 */ }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; height: 100vh; display: flex; flex-direction: column; padding-bottom: 40px; }
         header { text-align: center; margin-bottom: 15px; flex-shrink: 0; }
         h1 { color: var(--primary-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: -0.5px; }
 
+        /* [NEW] Overlay for closing menus */
+        .global-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3);
+            z-index: 2000; display: none;
+        }
+        .global-overlay.show { display: block; }
+
+        /* [NEW] Music Slide Panel */
+        .music-panel {
+            position: fixed; top: 20px; left: -420px; width: 400px; height: 220px;
+            background: white; border-radius: 12px; box-shadow: 2px 2px 15px rgba(0,0,0,0.2);
+            z-index: 2200; transition: left 0.3s ease-in-out; display: flex; overflow: hidden;
+        }
+        .music-panel.show { left: 80px; }
+        .mp-video { width: 180px; background: #000; }
+        .mp-list { flex: 1; display: flex; flex-direction: column; padding: 10px; border-left: 1px solid #eee; }
+        .mp-item { font-size: 0.85rem; padding: 5px; cursor: pointer; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; }
+        .mp-item:hover { color: var(--primary); }
+        .mp-add { margin-top: auto; display: flex; gap: 5px; }
+
+        /* Music Button */
+        .music-btn { position: fixed; top: 20px; left: 20px; width: 50px; height: 50px; background: #2c3e50; color: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 2300; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; transition: 0.3s; }
+        .music-btn:hover { transform: scale(1.1) rotate(15deg); }
+
+        /* AI Status Bar */
+        #aiStatusBar { position: fixed; bottom: 0; left: 0; width: 100%; height: 30px; background: #333; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; z-index: 2500; transform: translateY(100%); transition: transform 0.3s ease-in-out; }
+        #aiStatusBar.show { transform: translateY(0); }
+        .ai-loading-icon { display: inline-block; width: 10px; height: 10px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 10px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Lock Screen */
         #lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-main); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         #lockCard { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; width: 320px; }
         #lockInput { font-size: 1.2rem; text-align: center; margin-bottom: 5px; letter-spacing: 2px; }
         .lock-msg { font-size: 0.8rem; color: var(--danger); min-height: 20px; margin-bottom: 10px;}
 
+        /* Tabs */
         .nav-tabs { display: flex; flex-shrink: 0; background: var(--card-bg); border-radius: 8px; margin-bottom: 15px; padding: 4px; border: 1px solid var(--border-color); }
         .nav-item { flex: 1; text-align: center; padding: 12px; cursor: pointer; color: var(--text-sub); border-radius: 6px; font-weight: bold; transition: 0.2s; }
         .nav-item.active { color: var(--primary-dark); background-color: #eaf6fc; }
         .nav-item-home { flex: 0.5; min-width: 60px; color: var(--primary-dark); }
 
-        /* [수정] 플로팅 메뉴 (우상단 & 좌상단 뮤직) */
+        /* Float Menu */
         .float-btn { position: fixed; top: 20px; right: 20px; width: 50px; height: 50px; background: var(--primary); color: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 2100; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; transition: 0.3s; }
         .float-btn:hover { background: var(--primary-dark); transform: scale(1.05); }
         .float-menu { position: fixed; top: 80px; right: 20px; display: none; flex-direction: column; gap: 10px; z-index: 2100; }
@@ -41,36 +71,23 @@
         .float-menu-item { background: white; padding: 10px 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; font-weight: bold; color: var(--text-main); text-align: right; border: 1px solid var(--border-color); transition: 0.2s; }
         .float-menu-item:hover { background: #eaf6fc; color: var(--primary); }
 
-        /* [NEW] 뮤직 플레이어 버튼 (좌상단) */
-        .music-btn { position: fixed; top: 20px; left: 20px; width: 50px; height: 50px; background: #2c3e50; color: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 2100; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; transition: 0.3s; }
-        .music-btn:hover { transform: scale(1.1) rotate(15deg); }
-
-        /* [NEW] AI 상태바 (하단 고정) */
-        #aiStatusBar { 
-            position: fixed; bottom: 0; left: 0; width: 100%; height: 30px; background: #333; color: #fff; 
-            display: flex; align-items: center; justify-content: center; font-size: 0.85rem; z-index: 2500;
-            transform: translateY(100%); transition: transform 0.3s ease-in-out;
-        }
-        #aiStatusBar.show { transform: translateY(0); }
-        .ai-loading-icon { display: inline-block; width: 10px; height: 10px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 10px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
+        /* Layout */
         .section { display: none; flex: 1; overflow: hidden; height: 100%; }
         .section.active { display: block; animation: fadeIn 0.2s; display: flex; flex-direction: column; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
         .pc-only { display: block; }
         .mobile-only { display: none; }
         .split-container { display: flex; gap: 20px; height: 100%; overflow: hidden; }
         .split-left { width: 360px; flex-shrink: 0; display: flex; flex-direction: column; gap: 15px; height: 100%; overflow-y: auto; }
         .split-right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 15px; height: 100%; overflow: hidden; }
+        .split-half { flex: 1; display: flex; flex-direction: column; overflow: hidden; } /* 1:1 split for custom right */
 
         .card { background: var(--card-bg); border-radius: 8px; padding: 20px; border: 1px solid var(--border-color); box-shadow: 0 1px 2px rgba(0,0,0,0.03); display: flex; flex-direction: column; }
         .card.full-height { height: 100%; }
         .card.scrollable { overflow-y: auto; }
         .card-header { font-size: 1.1rem; color: var(--primary-dark); font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; flex-shrink: 0; border-bottom: 2px solid var(--bg-main); display: flex; justify-content: space-between; align-items: center; }
 
-        /* 태그 스타일 */
+        /* UI Elements */
         .tag-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
         .tag { position: relative; padding: 8px 30px 8px 16px; background: var(--bg-main); border-radius: 20px; font-size: 0.95rem; cursor: pointer; border: 1px solid var(--border-color); transition: 0.2s; user-select: none; }
         .tag.selected { background: var(--primary); color: white; border-color: var(--primary); }
@@ -78,10 +95,19 @@
         .tag .x-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; line-height: 16px; text-align: center; border-radius: 50%; font-size: 0.8rem; background: rgba(0,0,0,0.1); color: inherit; display: none; }
         .tag:hover .x-btn { display: block; }
         
-        /* 북마크 필터용 태그 (심플) */
         .bm-filter-tag { padding: 5px 12px; background: #fff; border: 1px solid #ddd; border-radius: 15px; font-size: 0.85rem; cursor: pointer; color: #666; transition: 0.2s; }
         .bm-filter-tag:hover { background: #f0f0f0; }
         .bm-filter-tag.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* Custom Mode */
+        .custom-item-row { padding: 10px; border: 1px solid #eee; border-radius: 6px; margin-bottom: 5px; cursor: pointer; display: flex; justify-content: space-between; }
+        .custom-item-row.active { border-color: var(--primary); background: #f9fcff; }
+        .bar-chart-container { display: flex; flex-direction: column; gap: 5px; height: 100%; overflow-y: auto; padding-right: 5px; }
+        .bar-row { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; }
+        .bar-label { width: 60px; text-align: right; }
+        .bar-track { flex: 1; background: #eee; height: 10px; border-radius: 5px; overflow: hidden; }
+        .bar-fill { height: 100%; background: var(--primary); }
+        .bar-val { width: 30px; }
 
         .switch-container { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text-sub); }
         .switch { position: relative; display: inline-block; width: 36px; height: 20px; margin-bottom: 0; }
@@ -99,11 +125,8 @@
         .check-circle.checked { border-color: var(--primary); background: var(--primary); }
         .check-circle.checked::after { content: 'v'; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; font-weight:bold; }
         
-        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        label { display: block; margin-bottom: 6px; color: var(--text-sub); font-size: 0.9rem; font-weight: bold; }
         input, select, textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; background: #fcfdfd; }
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); background: white; }
-        
         .btn { display: inline-flex; justify-content: center; align-items: center; height: 42px; min-width: 80px; padding: 0 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 1rem; font-weight: bold; transition: 0.2s; white-space: nowrap; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-primary:hover { background: var(--primary-dark); }
@@ -140,24 +163,13 @@
         .cal-dot { width: 6px; height: 6px; background: var(--primary); border-radius: 50%; margin-top: 4px; display: none; }
         .cal-day.has-memo .cal-dot { display: block; }
         
-        /* 메모 한줄 강제 처리 (엄격 모드) */
-        .memo-mini-item { 
-            padding: 10px 8px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 0.9rem; color: var(--text-main);
-            display: block; width: 100%; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; height: 40px; line-height: 20px;
-        }
+        .memo-mini-item { padding: 10px 8px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 0.9rem; color: var(--text-main); display: block; width: 100%; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; height: 40px; line-height: 20px; }
         .memo-mini-item:hover { color: var(--primary); }
         .memo-mini-item.done-memo { text-decoration: line-through; opacity: 0.6; color: #aaa; }
-        
-        .memo-list-item { 
-            background: white; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; padding: 12px;
-            display: flex; align-items: center; gap: 10px;
-        }
+        .memo-list-item { background: white; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; padding: 12px; display: flex; align-items: center; gap: 10px; }
         .memo-list-item:hover { border-color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .memo-list-date { font-size: 0.85rem; color: var(--text-sub); white-space: nowrap; flex-shrink: 0; }
-        .memo-list-content { 
-            font-size: 0.95rem; color: var(--text-main); 
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-grow: 1;
-        }
+        .memo-list-content { font-size: 0.95rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-grow: 1; }
         .memo-list-item.done-memo .memo-list-content { text-decoration: line-through; opacity: 0.6; }
 
         .student-nav-item { background: white; border: 1px solid var(--border-color); padding: 12px 15px; border-radius: 8px; cursor: pointer; margin-bottom: 8px; transition: 0.2s; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center; }
@@ -208,20 +220,15 @@
     </style>
 </head>
 <body>
-    <div id="aiStatusBar">
-        <span class="ai-loading-icon"></span>
-        <span id="aiStatusText">AI 대기 중...</span>
+    <div id="aiStatusBar"><span class="ai-loading-icon"></span><span id="aiStatusText">AI 대기 중...</span></div>
+    <div class="global-overlay" id="globalOverlay" onclick="closeAllOverlays()"></div>
+
+    <div class="music-panel" id="musicPanel">
+        <div class="mp-video"><iframe id="musicIframe" width="100%" height="100%" src="" frameborder="0" allow="autoplay; encrypted-media"></iframe></div>
+        <div class="mp-list" id="musicList"></div>
     </div>
 
-    <div id="lockScreen">
-        <div id="lockCard">
-            <h2 style="color:var(--primary-dark); margin-bottom:20px;">쫑알수첩 Pro</h2>
-            <p style="margin-bottom:10px; color:var(--text-sub);">관리자 인증이 필요합니다.</p>
-            <input type="password" id="lockInput" placeholder="Password" onkeyup="checkCaps(event)">
-            <div id="lockMsg" class="lock-msg"></div>
-            <button class="btn btn-primary" onclick="unlockApp()" style="width:100%;">접속</button>
-        </div>
-    </div>
+    <div id="lockScreen"><div id="lockCard"><h2 style="color:var(--primary-dark); margin-bottom:20px;">쫑알수첩 Pro</h2><p style="margin-bottom:10px; color:var(--text-sub);">관리자 인증이 필요합니다.</p><input type="password" id="lockInput" placeholder="Password" onkeyup="checkCaps(event)"><div id="lockMsg" class="lock-msg"></div><button class="btn btn-primary" onclick="unlockApp()" style="width:100%;">접속</button></div></div>
 
     <div class="float-btn" onclick="toggleFloatMenu()">+</div>
     <div class="float-menu" id="floatMenu">
@@ -229,11 +236,10 @@
         <div class="float-menu-item" onclick="changeSection('calendar')">달력</div>
         <div class="float-menu-item" onclick="changeSection('memo')">메모</div>
     </div>
-
-    <div class="music-btn" onclick="openMusicModal()">🎵</div>
+    <div class="music-btn" onclick="toggleMusicPanel()">🎵</div>
 
     <div class="container">
-        <header><h1>쫑알수첩 v19.0</h1></header>
+        <header><h1>쫑알수첩 v20.0</h1></header>
         <nav class="nav-tabs">
             <div class="nav-item nav-item-home active" onclick="changeSection('home')">HOME</div>
             <div class="nav-item" onclick="changeSection('record')">기록하기</div>
@@ -271,45 +277,53 @@
         </div>
 
         <div id="record" class="section">
-            <div class="mobile-only">
-                 <div class="card scrollable">
-                    <label>날짜</label><input type="date" id="mDate" style="margin-bottom:15px;">
-                    <div style="display:flex; gap:10px; margin-bottom:15px;">
-                        <button class="btn active" id="mBtnSub" onclick="setMobileMode('subject')">과목</button>
-                        <button class="btn" id="mBtnBeh" onclick="setMobileMode('behavior')">행동</button>
-                    </div>
-                    <textarea id="mInput" style="width:100%; height:150px; resize:none;" placeholder="입력..."></textarea>
-                    <button class="btn btn-primary" style="width:100%;" onclick="saveMobileRecord()">✨ 저장</button>
-                </div>
-            </div>
             <div class="pc-only full-height">
                 <div class="split-container">
                     <div class="split-left">
                         <div class="card full-height scrollable">
-                            <div class="card-header"><span>기본 정보</span><div style="display:flex; gap:5px;"><button class="btn-sm active" id="btnSubject" onclick="setMode('subject')">과목</button><button class="btn-sm inactive" id="btnBehavior" onclick="setMode('behavior')">행동</button></div></div>
+                            <div class="card-header"><span>기본 정보</span><div style="display:flex; gap:5px;"><button class="btn-sm active" id="btnSubject" onclick="setMode('subject')">과목</button><button class="btn-sm inactive" id="btnBehavior" onclick="setMode('behavior')">행동</button><button class="btn-sm inactive" id="btnCustom" onclick="setMode('custom')">기타</button></div></div>
                             <label>날짜</label><input type="date" id="rDate">
-                            <div id="periodArea"><label>교시</label><select id="rPeriod"><option value="">(선택안함)</option><option>1교시</option><option>2교시</option><option>3교시</option><option>4교시</option><option>5교시</option><option>6교시</option></select></div>
-                            <div id="subjectArea">
-                                <label>과목 선택</label>
-                                <div class="tag-container" id="subjectTags"></div>
-                                <label>주제</label><input type="text" id="rTopic" placeholder="예: 시 낭송하기">
+                            <div id="normalModeOptions">
+                                <div id="periodArea"><label>교시</label><select id="rPeriod"><option value="">(선택안함)</option><option>1교시</option><option>2교시</option><option>3교시</option><option>4교시</option><option>5교시</option><option>6교시</option></select></div>
+                                <div id="subjectArea">
+                                    <label>과목 선택</label><div class="tag-container" id="subjectTags"></div>
+                                    <label>주제</label><input type="text" id="rTopic" placeholder="예: 시 낭송하기">
+                                </div>
+                            </div>
+                            <div id="customModeOptions" style="display:none;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                                    <label style="margin:0;">나만의 항목</label>
+                                    <button class="btn-sm" onclick="openCustomItemModal()">+ 항목 생성</button>
+                                </div>
+                                <div id="customItemsList"></div>
                             </div>
                         </div>
                     </div>
                     <div class="split-right">
-                        <div class="card full-height scrollable">
-                            <div class="card-header">
-                                <div style="display:flex; align-items:center; gap:15px;">
-                                    <span>학생별 기록</span>
-                                    <div class="switch-container"><label class="switch"><input type="checkbox" id="aiToggle" checked><span class="slider"></span></label><span>AI</span></div>
+                        <div class="card full-height scrollable" id="recordRightCard">
+                            <div id="normalRecordView">
+                                <div class="card-header">
+                                    <div style="display:flex; align-items:center; gap:15px;"><span>학생별 기록</span><div class="switch-container"><label class="switch"><input type="checkbox" id="aiToggle" checked><span class="slider"></span></label><span>AI</span></div></div>
+                                    <button class="btn btn-primary" id="btnSaveAll" onclick="saveData()">저장하기</button>
                                 </div>
-                                <button class="btn btn-primary" id="btnSaveAll" onclick="saveData()">저장하기</button>
+                                <div style="display:flex; padding-bottom:10px; border-bottom:1px solid #eee; font-weight:bold; color:var(--text-sub); font-size:0.9rem;">
+                                    <div style="width:90px;">이름</div><div style="flex-grow:1; text-align:center;">내용</div>
+                                    <div id="checkHeader" style="width:220px; display:flex; justify-content:space-between; font-size:0.75rem;"><span>매우잘함</span><span>잘함</span><span>보통</span><span>노력요함</span></div>
+                                </div>
+                                <div id="recordList"></div>
                             </div>
-                            <div style="display:flex; padding-bottom:10px; border-bottom:1px solid #eee; font-weight:bold; color:var(--text-sub); font-size:0.9rem;">
-                                <div style="width:90px;">이름</div><div style="flex-grow:1; text-align:center;">내용</div>
-                                <div id="checkHeader" style="width:220px; display:flex; justify-content:space-between; font-size:0.75rem;"><span>매우잘함</span><span>잘함</span><span>보통</span><span>노력요함</span></div>
+                            <div id="customRecordView" style="display:none; height:100%;">
+                                <div class="split-container">
+                                    <div class="split-half">
+                                        <div class="card-header"><span>빠른 체크</span><button class="btn-sm active" onclick="saveCustomData()">저장</button></div>
+                                        <div id="customCheckList" style="overflow-y:auto; flex:1;"></div>
+                                    </div>
+                                    <div class="split-half" style="border-left:1px solid #eee; padding-left:15px;">
+                                        <div class="card-header">통계 (오늘/누적)</div>
+                                        <div id="customStatsChart" class="bar-chart-container"></div>
+                                    </div>
+                                </div>
                             </div>
-                            <div id="recordList"></div>
                         </div>
                     </div>
                 </div>
@@ -318,155 +332,36 @@
 
         <div id="students" class="section">
             <div class="split-container">
-                <div class="split-left">
-                    <div class="card full-height scrollable">
-                        <div class="card-header">학생 명단</div>
-                        <div style="margin-bottom: 15px;"><button class="btn btn-outline" style="width:100%;" onclick="openStudentManageModal()">+ 학생 명단 관리</button></div>
-                        <div id="studentNavList"></div>
-                    </div>
-                </div>
-                <div class="split-right">
-                    <div class="card full-height scrollable">
-                        <div class="card-header"><span id="viewerTitle">기록 상세</span><div style="display:flex; gap:5px;"><select id="viewSubjectFilter" style="margin-bottom:0; width:100px; padding:6px;" onchange="loadHistory()"></select><button class="btn-sm active" id="viewSubBtn" onclick="viewTab('subject')">과목</button><button class="btn-sm inactive" id="viewBehBtn" onclick="viewTab('behavior')">행동</button></div></div>
-                        <div style="margin-bottom:10px; display:flex; gap:10px;">
-                            <button class="btn btn-sm btn-primary" style="flex:1" onclick="saveSelectedHistory()">일괄 저장 (수정된 항목)</button>
-                            <button class="btn btn-sm btn-del" style="flex:1" onclick="deleteSelectedHistory()">선택 삭제</button>
-                        </div>
-                        <div id="historyViewer"></div>
-                    </div>
-                </div>
+                <div class="split-left"><div class="card full-height scrollable"><div class="card-header">학생 명단</div><div style="margin-bottom: 15px;"><button class="btn btn-outline" style="width:100%;" onclick="openStudentManageModal()">+ 학생 명단 관리</button></div><div id="studentNavList"></div></div></div>
+                <div class="split-right"><div class="card full-height scrollable"><div class="card-header"><span id="viewerTitle">기록 상세</span><div style="display:flex; gap:5px;"><select id="viewSubjectFilter" style="margin-bottom:0; width:100px; padding:6px;" onchange="loadHistory()"></select><button class="btn-sm active" id="viewSubBtn" onclick="viewTab('subject')">과목</button><button class="btn-sm inactive" id="viewBehBtn" onclick="viewTab('behavior')">행동</button></div></div><div style="margin-bottom:10px; display:flex; gap:10px;"><button class="btn btn-sm btn-primary" style="flex:1" onclick="saveSelectedHistory()">일괄 저장 (수정된 항목)</button><button class="btn btn-sm btn-del" style="flex:1" onclick="deleteSelectedHistory()">선택 삭제</button></div><div id="historyViewer"></div></div></div>
             </div>
         </div>
-
         <div id="neis" class="section pc-only-tab">
             <div class="mobile-block-overlay"><span>⚙️</span><p>해당 기능은 PC/태블릿에서<br>사용 가능해요!</p></div>
             <div class="split-container pc-only">
-                <div class="split-left">
-                    <div class="card full-height scrollable">
-                        <div class="card-header">NEIS 옵션</div>
-                        <label>유형</label><select id="neisType" onchange="toggleNeisType()"><option value="subject">과목별 세특</option><option value="behavior">행동특성</option></select>
-                        <div id="neisSubOption"><label>대상 과목</label><select id="neisSubjectSelect"></select></div>
-                        <div id="neisBehOption" style="display:none;"><label>키워드</label><input type="text" id="neisKeyword" placeholder="예: 배려, 협력"></div>
-                        <label style="margin-top:15px;">분량</label><div style="display:flex; gap:10px;"><input type="range" id="neisLen" min="100" max="1000" step="50" value="300" oninput="document.getElementById('lenVal').innerText=this.value"><span style="color:var(--primary); font-weight:bold;"><span id="lenVal">300</span>자</span></div>
-                        <button class="btn btn-primary" id="btnGenNeis" style="margin-top:15px;" onclick="generateNeisCards()">자료 생성하기</button>
-                    </div>
-                </div>
-                <div class="split-right">
-                    <div class="card full-height scrollable">
-                        <div class="card-header">생성 결과</div>
-                        <div id="neisResultList"></div>
-                    </div>
-                </div>
+                <div class="split-left"><div class="card full-height scrollable"><div class="card-header">NEIS 옵션</div><label>유형</label><select id="neisType" onchange="toggleNeisType()"><option value="subject">과목별 세특</option><option value="behavior">행동특성</option></select><div id="neisSubOption"><label>대상 과목</label><select id="neisSubjectSelect"></select></div><div id="neisBehOption" style="display:none;"><label>키워드</label><input type="text" id="neisKeyword" placeholder="예: 배려, 협력"></div><label style="margin-top:15px;">분량</label><div style="display:flex; gap:10px;"><input type="range" id="neisLen" min="100" max="1000" step="50" value="300" oninput="document.getElementById('lenVal').innerText=this.value"><span style="color:var(--primary); font-weight:bold;"><span id="lenVal">300</span>자</span></div><button class="btn btn-primary" id="btnGenNeis" style="margin-top:15px;" onclick="generateNeisCards()">자료 생성하기</button></div></div>
+                <div class="split-right"><div class="card full-height scrollable"><div class="card-header">생성 결과</div><div id="neisResultList"></div></div></div>
             </div>
         </div>
-
         <div id="bookmarks" class="section">
             <div class="split-container">
-                <div class="split-left">
-                    <div class="card full-height scrollable">
-                        <div class="card-header">북마크 추가</div>
-                        <input type="hidden" id="bmEditRow" value="">
-                        <label>URL</label><input type="text" id="bmUrl" placeholder="https://..." style="margin-bottom:10px;">
-                        <label>제목</label><input type="text" id="bmTitle" placeholder="자동 완성 됨">
-                        <input type="hidden" id="bmStar"> 
-                        <label>태그</label>
-                        <div class="tag-container" id="bmTagArea"></div>
-                        <div style="display:flex; gap:5px; margin-bottom:15px;"><input type="text" id="newBmTagInput" placeholder="새 태그" style="margin:0; flex:1;"><button class="btn-sm active" onclick="addNewBmTag()">+</button></div>
-                        <label>메모</label><textarea id="bmMemo" style="height:120px;" placeholder="활용 팁..."></textarea>
-                        <div style="display:flex; gap:10px; margin-top:10px;"><button class="btn btn-outline" style="flex:1" onclick="clearBmInput()">취소</button><button class="btn btn-primary" style="flex:1" onclick="saveBookmark()" id="btnSaveBm">저장</button></div>
-                    </div>
-                </div>
-                <div class="split-right">
-                    <div class="card full-height scrollable">
-                        <div class="card-header">
-                            <span>북마크 목록</span>
-                            <div id="bmFilterContainer" style="display:flex; gap:5px; flex-wrap:wrap; margin-left:10px;"></div>
-                        </div>
-                        <div id="bmList"></div>
-                    </div>
-                </div>
+                <div class="split-left"><div class="card full-height scrollable"><div class="card-header">북마크 추가</div><input type="hidden" id="bmEditRow" value=""><label>URL</label><input type="text" id="bmUrl" placeholder="https://..." style="margin-bottom:10px;"><label>제목</label><input type="text" id="bmTitle" placeholder="자동 완성 됨"><input type="hidden" id="bmStar"> <label>태그</label><div class="tag-container" id="bmTagArea"></div><div style="display:flex; gap:5px; margin-bottom:15px;"><input type="text" id="newBmTagInput" placeholder="새 태그" style="margin:0; flex:1;"><button class="btn-sm active" onclick="addNewBmTag()">+</button></div><label>메모</label><textarea id="bmMemo" style="height:120px;" placeholder="활용 팁..."></textarea><div style="display:flex; gap:10px; margin-top:10px;"><button class="btn btn-outline" style="flex:1" onclick="clearBmInput()">취소</button><button class="btn btn-primary" style="flex:1" onclick="saveBookmark()" id="btnSaveBm">저장</button></div></div></div>
+                <div class="split-right"><div class="card full-height scrollable"><div class="card-header"><span>북마크 목록</span><div id="bmFilterContainer" style="display:flex; gap:5px; flex-wrap:wrap; margin-left:10px;"></div></div><div id="bmList"></div></div></div>
             </div>
         </div>
-        
         <div id="calendar" class="section">
              <div class="split-container">
-                <div class="split-left">
-                    <div class="card scrollable">
-                        <div class="card-header" style="justify-content:center; gap:15px;">
-                            <button class="arrow-btn" onclick="moveMonth(-1)">◀</button><span id="calMonth"></span><button class="arrow-btn" onclick="moveMonth(1)">▶</button>
-                            <button class="btn-sm" style="margin-left:5px;" onclick="goToToday()">오늘</button>
-                        </div>
-                        <div class="cal-grid" id="calGrid"></div>
-                    </div>
-                    <div class="card scrollable" style="flex:1; margin-top:10px;">
-                        <div class="card-header">오늘 일정</div>
-                        <div id="todayTodoListCal" style="font-size:0.95rem; line-height:1.6;">일정 없음</div>
-                    </div>
-                </div>
-                <div class="split-right">
-                    <div class="card full-height scrollable">
-                         <div class="card-header"><span id="calDetailTitle">선택 날짜 일정</span></div>
-                         <div style="display:flex; gap:5px; margin-bottom:15px;"><input type="text" id="newEvent" placeholder="일정 등록 (구글 캘린더)" style="margin:0;"><button class="btn-primary" onclick="addEvent()" style="border-radius:6px; width:70px;">등록</button></div>
-                         <div id="dailyEvents" style="margin-bottom:20px;"></div>
-                         <hr style="margin:20px 0; border:0; border-top:1px dashed #eee;">
-                         <div class="card-header"><span>출석 체크</span><div style="display:flex; gap:5px;"><button class="btn-sm" onclick="openMonthAttSummary()">월별 통계</button><button class="btn-sm active" onclick="saveAttendance()">저장</button></div></div>
-                         <div id="attList"></div>
-                    </div>
-                </div>
+                <div class="split-left"><div class="card scrollable"><div class="card-header" style="justify-content:center; gap:15px;"><button class="arrow-btn" onclick="moveMonth(-1)">◀</button><span id="calMonth"></span><button class="arrow-btn" onclick="moveMonth(1)">▶</button><button class="btn-sm" style="margin-left:5px;" onclick="goToToday()">오늘</button></div><div class="cal-grid" id="calGrid"></div></div><div class="card scrollable" style="flex:1; margin-top:10px;"><div class="card-header">오늘 일정</div><div id="todayTodoListCal" style="font-size:0.95rem; line-height:1.6;">일정 없음</div></div></div>
+                <div class="split-right"><div class="card full-height scrollable"><div class="card-header"><span id="calDetailTitle">선택 날짜 일정</span></div><div style="display:flex; gap:5px; margin-bottom:15px;"><input type="text" id="newEvent" placeholder="일정 등록 (구글 캘린더)" style="margin:0;"><button class="btn-primary" onclick="addEvent()" style="border-radius:6px; width:70px;">등록</button></div><div id="dailyEvents" style="margin-bottom:20px;"></div><hr style="margin:20px 0; border:0; border-top:1px dashed #eee;"><div class="card-header"><span>출석 체크</span><div style="display:flex; gap:5px;"><button class="btn-sm" onclick="openMonthAttSummary()">월별 통계</button><button class="btn-sm active" onclick="saveAttendance()">저장</button></div></div><div id="attList"></div></div></div>
              </div>
         </div>
-
         <div id="memo" class="section">
             <div class="split-container">
-                <div class="split-left">
-                    <div class="card full-height scrollable">
-                         <div class="card-header"><span>메모</span><div style="display:flex; gap:5px;"><button class="btn-sm active" id="btnMemoModeCal" onclick="setMemoMode('cal')">달력</button><button class="btn-sm inactive" id="btnMemoModeList" onclick="setMemoMode('list')">목록</button></div></div>
-                         <div id="memoSearchArea" style="margin-bottom:10px; display:none;">
-                             <input type="text" id="memoSearchInput" placeholder="메모 검색..." oninput="renderMemoList()">
-                         </div>
-                         <div id="memoCalView">
-                             <div class="card-header" style="justify-content:center; gap:15px; border-bottom:none;"><button class="arrow-btn" onclick="moveMemoMonth(-1)">◀</button><span id="memoMonthTitle"></span><button class="arrow-btn" onclick="moveMemoMonth(1)">▶</button></div>
-                             <div class="cal-grid" id="memoCalGrid"></div>
-                             <div id="memoDatePreview" style="margin-top:15px; border-top:1px solid #eee; padding-top:10px; display:none;"></div>
-                         </div>
-                         <div id="memoListView" style="display:none;"></div>
-                    </div>
-                </div>
-                <div class="split-right">
-                     <div class="card full-height scrollable">
-                        <div class="card-header">작성 <span id="memoDateDisp" style="font-size:0.9rem; color:var(--text-sub); font-weight:normal;"></span></div>
-                        <input type="hidden" id="memoEditRow">
-                        <textarea id="memoContent" style="height:300px; resize:none;" placeholder="내용을 입력하세요..."></textarea>
-                        <div style="display:flex; gap:15px; margin-bottom:15px;"><label><input type="checkbox" id="memoPinned"> 중요</label><label><input type="checkbox" id="memoDone"> 완료</label></div>
-                        <div style="text-align:right;"><button class="btn btn-danger" id="btnDelMemo" style="display:none; margin-right:10px;" onclick="deleteMemo()">삭제</button><button class="btn btn-primary" onclick="saveMemo()">저장</button><button class="btn btn-outline" style="margin-left:10px;" onclick="clearMemoInput()">새 메모</button></div>
-                     </div>
-                </div>
+                <div class="split-left"><div class="card full-height scrollable"><div class="card-header"><span>메모</span><div style="display:flex; gap:5px;"><button class="btn-sm active" id="btnMemoModeCal" onclick="setMemoMode('cal')">달력</button><button class="btn-sm inactive" id="btnMemoModeList" onclick="setMemoMode('list')">목록</button></div></div><div id="memoSearchArea" style="margin-bottom:10px; display:none;"><input type="text" id="memoSearchInput" placeholder="메모 검색..." oninput="renderMemoList()"></div><div id="memoCalView"><div class="card-header" style="justify-content:center; gap:15px; border-bottom:none;"><button class="arrow-btn" onclick="moveMemoMonth(-1)">◀</button><span id="memoMonthTitle"></span><button class="arrow-btn" onclick="moveMemoMonth(1)">▶</button></div><div class="cal-grid" id="memoCalGrid"></div><div id="memoDatePreview" style="margin-top:15px; border-top:1px solid #eee; padding-top:10px; display:none;"></div></div><div id="memoListView" style="display:none;"></div></div></div>
+                <div class="split-right"><div class="card full-height scrollable"><div class="card-header">작성 <span id="memoDateDisp" style="font-size:0.9rem; color:var(--text-sub); font-weight:normal;"></span></div><input type="hidden" id="memoEditRow"><textarea id="memoContent" style="height:300px; resize:none;" placeholder="내용을 입력하세요..."></textarea><div style="display:flex; gap:15px; margin-bottom:15px;"><label><input type="checkbox" id="memoPinned"> 중요</label><label><input type="checkbox" id="memoDone"> 완료</label></div><div style="text-align:right;"><button class="btn btn-danger" id="btnDelMemo" style="display:none; margin-right:10px;" onclick="deleteMemo()">삭제</button><button class="btn btn-primary" onclick="saveMemo()">저장</button><button class="btn btn-outline" style="margin-left:10px;" onclick="clearMemoInput()">새 메모</button></div></div></div>
             </div>
         </div>
-
-        <div id="data" class="section pc-only-tab">
-             <div class="mobile-block-overlay"><span>⚙️</span><p>해당 기능은 PC/태블릿에서<br>사용 가능해요!</p></div>
-             <div class="split-container pc-only">
-                 <div class="split-left">
-                     <div class="card full-height scrollable">
-                         <div class="card-header">참고 자료</div>
-                         <input type="file" id="uploadInput" style="margin-bottom:10px;"><button class="btn btn-outline" id="btnUpload" style="width:100%; margin-bottom:15px;" onclick="uploadFile()">업로드</button>
-                         <div id="fileList"></div>
-                     </div>
-                 </div>
-                 <div class="split-right">
-                     <div class="card full-height scrollable">
-                         <div class="card-header">설정</div>
-                         <div id="publicModeSettings" style="display:none; background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:20px;"><label>Gemini API Key</label><input type="password" id="settingApiKey"><button class="btn-sm active" style="width:100%;" onclick="savePublicSettings()">저장</button></div>
-                         <label>AI 페르소나</label><textarea id="personaText" style="height:150px;" placeholder="예: 초등학교 교사 말투..."></textarea><div style="text-align:right;"><button class="btn btn-primary" id="btnPersona" onclick="savePersona()">저장</button></div>
-                         <hr style="margin:20px 0;">
-                         <div class="card-header" style="color:var(--danger); border-bottom:none;">데이터 관리</div>
-                         <button class="btn btn-danger" style="width:100%" onclick="reqConfirm('데이터를 초기화하시겠습니까?', archiveData)">[새 학년 준비] 데이터 백업 및 초기화</button>
-                     </div>
-                 </div>
-             </div>
-        </div>
-
+        <div id="data" class="section pc-only-tab"><div class="mobile-block-overlay"><span>⚙️</span><p>해당 기능은 PC/태블릿에서<br>사용 가능해요!</p></div><div class="split-container pc-only"><div class="split-left"><div class="card full-height scrollable"><div class="card-header">참고 자료</div><input type="file" id="uploadInput" style="margin-bottom:10px;"><button class="btn btn-outline" id="btnUpload" style="width:100%; margin-bottom:15px;" onclick="uploadFile()">업로드</button><div id="fileList"></div></div></div><div class="split-right"><div class="card full-height scrollable"><div class="card-header">설정</div><div id="publicModeSettings" style="display:none; background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:20px;"><label>Gemini API Key</label><input type="password" id="settingApiKey"><button class="btn-sm active" style="width:100%;" onclick="savePublicSettings()">저장</button></div><label>AI 페르소나</label><textarea id="personaText" style="height:150px;" placeholder="예: 초등학교 교사 말투..."></textarea><div style="text-align:right;"><button class="btn btn-primary" id="btnPersona" onclick="savePersona()">저장</button></div><hr style="margin:20px 0;"><div class="card-header" style="color:var(--danger); border-bottom:none;">데이터 관리</div><button class="btn btn-danger" style="width:100%" onclick="reqConfirm('데이터를 초기화하시겠습니까?', archiveData)">[새 학년 준비] 데이터 백업 및 초기화</button></div></div></div></div>
     </div>
 
     <div id="toast"></div>
@@ -476,24 +371,7 @@
     <div id="manageStudentModal" class="modal-overlay"><div class="modal-card" style="width:500px;"><div class="modal-title" style="font-weight:bold; margin-bottom:15px;">학생 명단 관리</div><div id="manageStudentRows" style="max-height:300px; overflow-y:auto; margin-bottom:15px;"></div><button class="btn-sm active" onclick="addStudentRow()">+ 행 추가</button><div style="text-align:right; margin-top:15px;"><button class="btn btn-outline" onclick="closeStudentManageModal()">취소</button> <button class="btn btn-primary" id="btnManageStSave" onclick="saveStudentManagement()">전체 저장</button></div></div></div>
     <div id="addLinkModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="font-weight:bold; margin-bottom:15px;">바로가기 추가</div><label>이모지</label><input type="text" id="qlEmoji" placeholder="🏫"><label>이름 (짧게)</label><input type="text" id="qlName" placeholder="나이스"><label>URL</label><input type="text" id="qlUrl" placeholder="https://..."><div style="text-align:right;"><button class="btn btn-outline" onclick="document.getElementById('addLinkModal').classList.remove('open')">취소</button> <button class="btn btn-primary" onclick="confirmAddLink()">추가</button></div></div></div>
     <div id="monthAttModal" class="modal-overlay"><div class="modal-card" style="width:600px;"><div class="modal-title" style="font-weight:bold; margin-bottom:15px;">월별 출석 현황</div><div class="modal-body" id="monthAttBody" style="max-height:400px; overflow-y:auto; margin-bottom:15px;"></div><div style="text-align:right;"><button class="btn btn-outline" onclick="document.getElementById('monthAttModal').classList.remove('open')">닫기</button></div></div></div>
-    
-    <div id="musicModal" class="modal-overlay">
-        <div class="modal-card" style="width:350px; background:#f9f9f9;">
-            <div class="modal-title" style="font-weight:bold; margin-bottom:10px;">감성 뮤직 플레이어 🎧</div>
-            <div id="youtubePlayer" style="width:100%; height:200px; background:#000; margin-bottom:15px;">
-                <iframe id="musicIframe" width="100%" height="100%" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-            </div>
-            <div id="playlistContainer" style="max-height:150px; overflow-y:auto; margin-bottom:10px;">
-                </div>
-            <div style="display:flex; gap:5px;">
-                <input type="text" id="newMusicUrl" placeholder="유튜브 링크 입력" style="flex:1; font-size:0.8rem; margin:0;">
-                <button class="btn-sm active" onclick="addMusic()">추가</button>
-            </div>
-            <div style="text-align:right; margin-top:10px;">
-                <button class="btn btn-outline" onclick="document.getElementById('musicModal').classList.remove('open'); document.getElementById('musicIframe').src='';">닫기</button>
-            </div>
-        </div>
-    </div>
+    <div id="customItemModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="font-weight:bold; margin-bottom:15px;">항목 생성</div><label>항목 이름</label><input type="text" id="ciName" placeholder="예: 우유 당번"><label>척도 타입</label><select id="ciType"><option value="check">체크리스트 (O/X)</option><option value="switch">스위치 (ON/OFF)</option><option value="select">선택 (상/중/하)</option></select><div style="text-align:right; margin-top:10px;"><button class="btn btn-outline" onclick="document.getElementById('customItemModal').classList.remove('open')">취소</button> <button class="btn btn-primary" onclick="addCustomItem()">추가</button></div></div></div>
 
     <script>
         const PRO_BACKEND_URL = "https://script.google.com/macros/s/AKfycbxn2nB0ZNXwXSdfx4-XVUWTD3Z_GCb_L2_SkhLyiKu5qrZrpwGTLM9Y4BhQRbveIk4o8Q/exec"; 
@@ -502,27 +380,39 @@
         
         let currentMode = 'subject'; let mobileMode = 'subject'; let selectedStudentName = null; let viewTabMode = 'subject';
         let studentList = []; let subjectList = ["국어", "수학", "사회", "과학", "영어", "체육", "음악", "미술"];
+        let customItems = []; let currentCustomItem = null;
         let targetSubjectToDelete = null; let aiPersona = ""; let aiJobQueue = []; let totalAiJobs = 0;
         let curYear = new Date().getFullYear(); let curMonth = new Date().getMonth(); let selectedDate = formatDateYMD(new Date());
         let bmList = []; let currentBmFilter = null; let bmTags = ["수업", "업무", "자료", "영상"]; let selectedBmTags = [];
         let memoList = []; let memoMode = 'cal'; let curMemoMonth = new Date().getMonth(); let curMemoYear = new Date().getFullYear(); let selectedMemoDate = formatDateYMD(new Date());
         let calendarEvents = []; let homeQuickLinks = [];
-        let musicPlaylist = JSON.parse(localStorage.getItem('myMusicList')) || [
-            {name: "Lo-fi Study", id: "jfKfPfyJRdk"},
-            {name: "Piano Relax", id: "WJ3-F02-F_Y"}
-        ];
+        let musicPlaylist = [];
 
-        window.onload = () => { checkLock(); document.getElementById('rDate').valueAsDate = new Date(); document.getElementById('mDate').valueAsDate = new Date(); initEnvironment(); renderMusicList(); };
+        window.onload = () => { checkLock(); document.getElementById('rDate').valueAsDate = new Date(); document.getElementById('mDate').valueAsDate = new Date(); initEnvironment(); };
         function checkCaps(e) { const caps = e.getModifierState && e.getModifierState("CapsLock"); document.getElementById('lockMsg').innerText = caps ? "💡 Caps Lock 켜짐" : "비밀번호 입력 (한/영 확인)"; if(e.keyCode===13) unlockApp(); }
         function checkLock() { if(sessionStorage.getItem('isUnlocked')==='true') { document.getElementById('lockScreen').style.display='none'; loadAllData(); } }
         function unlockApp() { if(document.getElementById('lockInput').value === 'ekdms320') { sessionStorage.setItem('isUnlocked', 'true'); document.getElementById('lockScreen').style.display='none'; loadAllData(); } else { alert('비밀번호 오류'); document.getElementById('lockInput').value=''; } }
-        async function loadAllData() { loadStudents(); renderSubjectTags(); renderBmTags(); loadFiles(); loadHomeData(); loadGoogleEvents().then(()=>{ renderHomeToDo(); renderCalendar(); showDailyView(new Date().getDate()); }); }
+        async function loadAllData() { 
+            loadStudents(); renderSubjectTags(); renderBmTags(); loadFiles(); loadHomeData(); loadMusicData(); loadCustomItems();
+            loadGoogleEvents().then(()=>{ renderHomeToDo(); renderCalendar(); showDailyView(new Date().getDate()); }); 
+        }
 
-        function toggleFloatMenu() { document.getElementById('floatMenu').classList.toggle('show'); }
+        // Global Overlay Logic
+        function closeAllOverlays() {
+            document.getElementById('floatMenu').classList.remove('show');
+            document.getElementById('musicPanel').classList.remove('show');
+            document.getElementById('globalOverlay').classList.remove('show');
+        }
+        function toggleFloatMenu() { 
+            const m = document.getElementById('floatMenu'); 
+            m.classList.toggle('show'); 
+            if(m.classList.contains('show')) document.getElementById('globalOverlay').classList.add('show');
+            else document.getElementById('globalOverlay').classList.remove('show');
+        }
         function changeSection(id) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            document.getElementById('floatMenu').classList.remove('show');
+            closeAllOverlays();
             document.querySelectorAll('.nav-tabs .nav-item').forEach(e => e.classList.remove('active'));
             const nav = document.querySelector(`.nav-tabs .nav-item[onclick="changeSection('${id}')"]`);
             if(nav) nav.classList.add('active');
@@ -531,46 +421,52 @@
         function reqConfirm(msg, callback) { document.getElementById('confirmMsg').innerText = msg; document.getElementById('confirmModal').classList.add('open'); document.getElementById('btnConfirmYes').onclick = () => { document.getElementById('confirmModal').classList.remove('open'); callback(); }; }
 
         // [MUSIC PLAYER]
-        function openMusicModal() { document.getElementById('musicModal').classList.add('open'); }
+        function toggleMusicPanel() { 
+            const p = document.getElementById('musicPanel'); 
+            p.classList.toggle('show');
+            if(p.classList.contains('show')) document.getElementById('globalOverlay').classList.add('show');
+            else document.getElementById('globalOverlay').classList.remove('show');
+        }
+        async function loadMusicData() {
+            const data = await sendRequest('manage_music', {mode: 'get'});
+            musicPlaylist = data || [];
+            if(musicPlaylist.length === 0) musicPlaylist = [{name: "Lo-fi Study", id: "jfKfPfyJRdk"}];
+            renderMusicList();
+        }
         function renderMusicList() {
-            const c = document.getElementById('playlistContainer'); c.innerHTML = '';
+            const c = document.getElementById('musicList'); c.innerHTML = '';
             musicPlaylist.forEach((m, i) => {
-                const d = document.createElement('div'); d.style.cssText = "padding:8px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center; cursor:pointer;";
-                d.innerHTML = `<span onclick="playMusic('${m.id}')">🎵 ${m.name}</span> <span style="color:red; font-size:0.8rem;" onclick="removeMusic(${i})">x</span>`;
+                const d = document.createElement('div'); d.className = 'mp-item';
+                d.innerHTML = `<span onclick="playMusic('${m.id}')">🎵 ${m.name}</span> <span style="color:#e74c3c;" onclick="removeMusic(${i})">x</span>`;
                 c.appendChild(d);
             });
+            const addDiv = document.createElement('div'); addDiv.className = 'mp-add';
+            addDiv.innerHTML = `<input type="text" id="newMusicUrl" placeholder="유튜브 링크" style="flex:1; margin:0; font-size:0.8rem;"><button class="btn-sm active" onclick="addMusic()">+</button>`;
+            c.appendChild(addDiv);
         }
         function playMusic(id) { document.getElementById('musicIframe').src = `https://www.youtube.com/embed/${id}?autoplay=1`; }
-        function addMusic() {
+        async function addMusic() {
             const url = document.getElementById('newMusicUrl').value;
-            let id = "";
-            if (url.includes("v=")) id = url.split("v=")[1].split("&")[0];
-            else if (url.includes("youtu.be/")) id = url.split("youtu.be/")[1];
-            
+            let id = ""; if (url.includes("v=")) id = url.split("v=")[1].split("&")[0]; else if (url.includes("youtu.be/")) id = url.split("youtu.be/")[1];
             if (id) {
                 const name = prompt("노래 제목:", "새 노래");
-                musicPlaylist.push({name: name || "노래", id: id});
-                localStorage.setItem('myMusicList', JSON.stringify(musicPlaylist));
+                musicPlaylist.push({name: name||"노래", id: id});
                 renderMusicList();
+                await sendRequest('manage_music', {mode:'save', playlist: musicPlaylist});
                 document.getElementById('newMusicUrl').value = "";
-            } else { alert("유효한 유튜브 링크를 입력하세요."); }
+            } else alert("유효한 링크 필요");
         }
-        function removeMusic(idx) {
+        async function removeMusic(idx) {
             musicPlaylist.splice(idx, 1);
-            localStorage.setItem('myMusicList', JSON.stringify(musicPlaylist));
             renderMusicList();
+            await sendRequest('manage_music', {mode:'save', playlist: musicPlaylist});
         }
 
         // [AI Status Bar]
         function updateAiStatus(current, total, name) {
-            const bar = document.getElementById('aiStatusBar');
-            const txt = document.getElementById('aiStatusText');
-            if(current > total) {
-                bar.classList.remove('show');
-            } else {
-                bar.classList.add('show');
-                txt.innerText = `[AI 작업 중] ${current}/${total} : ${name} 처리 중...`;
-            }
+            const bar = document.getElementById('aiStatusBar'); const txt = document.getElementById('aiStatusText');
+            if(current > total) bar.classList.remove('show');
+            else { bar.classList.add('show'); txt.innerText = `[AI 작업 중] ${current}/${total} : ${name} 처리 중...`; }
         }
 
         // [HOME Logic]
@@ -583,8 +479,122 @@
         async function saveHomeQuickRecord() { const t=document.getElementById('homeQuickInput').value.trim(); if(!t) return; showToast("AI 처리 중"); try{ const a=await sendRequest('call_ai',{prompt:`입력:"${t}". 규칙: 이름/과목/내용 분리. JSON출력:{"name":"이름","type":"과목","text":"내용"}`}); const j=JSON.parse(a.text.replace(/```json/g,"").replace(/```/g,"")); await sendRequest('save_record',{date:formatDateYMD(new Date()), name:j.name, type:j.type, text:j.text, check:"없음"}); document.getElementById('homeQuickInput').value=""; showToast("저장 완료"); }catch(e){showToast("실패");} }
         const da=document.getElementById('homeImgArea'); da.addEventListener('dragover',e=>{e.preventDefault();da.style.background='#eee';}); da.addEventListener('drop',e=>{e.preventDefault();da.style.background='#fafafa'; if(e.dataTransfer.files.length>0){document.getElementById('homeImgInput').files=e.dataTransfer.files; uploadHomeImage(document.getElementById('homeImgInput'));}});
 
-        // [Record Logic]
-        function setMode(m) { currentMode=m; document.getElementById('btnSubject').className=m==='subject'?'btn-sm active':'btn-sm inactive'; document.getElementById('btnBehavior').className=m==='behavior'?'btn-sm active':'btn-sm inactive'; document.getElementById('subjectArea').style.display=m==='subject'?'block':'none'; document.getElementById('checkHeader').style.visibility=m==='subject'?'visible':'hidden'; renderRecordList(); }
+        // [Record Logic - Normal & Custom]
+        function setMode(m) { 
+            currentMode=m; 
+            document.getElementById('btnSubject').className=m==='subject'?'btn-sm active':'btn-sm inactive'; 
+            document.getElementById('btnBehavior').className=m==='behavior'?'btn-sm active':'btn-sm inactive'; 
+            document.getElementById('btnCustom').className=m==='custom'?'btn-sm active':'btn-sm inactive'; 
+            
+            if (m === 'custom') {
+                document.getElementById('normalModeOptions').style.display = 'none';
+                document.getElementById('customModeOptions').style.display = 'block';
+                document.getElementById('normalRecordView').style.display = 'none';
+                document.getElementById('customRecordView').style.display = 'block';
+                renderCustomItems();
+            } else {
+                document.getElementById('normalModeOptions').style.display = 'block';
+                document.getElementById('customModeOptions').style.display = 'none';
+                document.getElementById('normalRecordView').style.display = 'block';
+                document.getElementById('customRecordView').style.display = 'none';
+                
+                document.getElementById('subjectArea').style.display=m==='subject'?'block':'none'; 
+                document.getElementById('checkHeader').style.visibility=m==='subject'?'visible':'hidden'; 
+                renderRecordList(); 
+            }
+        }
+
+        // [CUSTOM MODE LOGIC]
+        async function loadCustomItems() { customItems = await sendRequest('manage_custom_items', {mode:'get'}) || []; }
+        function renderCustomItems() {
+            const list = document.getElementById('customItemsList'); list.innerHTML = '';
+            customItems.forEach((item, idx) => {
+                const div = document.createElement('div'); div.className = `custom-item-row ${currentCustomItem===idx ? 'active':''}`;
+                div.innerText = item.name;
+                div.onclick = () => { currentCustomItem = idx; renderCustomItems(); renderCustomCheckList(); renderCustomStats(); };
+                list.appendChild(div);
+            });
+        }
+        function openCustomItemModal() { document.getElementById('customItemModal').classList.add('open'); }
+        async function addCustomItem() {
+            const name = document.getElementById('ciName').value;
+            const type = document.getElementById('ciType').value;
+            if(name) {
+                customItems.push({name, type, options: ""});
+                await sendRequest('manage_custom_items', {mode:'save', items: customItems});
+                document.getElementById('customItemModal').classList.remove('open');
+                loadCustomItems().then(renderCustomItems);
+            }
+        }
+        function renderCustomCheckList() {
+            const container = document.getElementById('customCheckList'); container.innerHTML = '';
+            if (currentCustomItem === null) return;
+            const itemDef = customItems[currentCustomItem];
+            
+            studentList.forEach(st => {
+                const row = document.createElement('div'); row.className = 'student-row';
+                let inputHtml = '';
+                if(itemDef.type === 'check') inputHtml = `<input type="checkbox" class="cust-val" style="width:20px; height:20px; margin:0;">`;
+                else if(itemDef.type === 'switch') inputHtml = `<label class="switch"><input type="checkbox" class="cust-val"><span class="slider"></span></label>`;
+                else if(itemDef.type === 'select') inputHtml = `<select class="cust-val" style="margin:0;"><option>상</option><option>중</option><option>하</option></select>`;
+                
+                row.innerHTML = `<div class="st-name">${st.name}</div><div style="flex:1;"></div>${inputHtml}`;
+                container.appendChild(row);
+            });
+        }
+        async function saveCustomData() {
+            if(currentCustomItem === null) return;
+            const itemDef = customItems[currentCustomItem];
+            const rows = document.querySelectorAll('#customCheckList .student-row');
+            const data = [];
+            const today = document.getElementById('rDate').value;
+            
+            rows.forEach(row => {
+                const name = row.querySelector('.st-name').innerText;
+                const el = row.querySelector('.cust-val');
+                let val = "";
+                if(itemDef.type === 'select') val = el.value;
+                else val = el.checked ? (itemDef.type==='check'?'O':'ON') : '';
+                
+                if(val) data.push({date: today, item: itemDef.name, name: name, value: val});
+            });
+            
+            if(data.length > 0) {
+                await sendRequest('custom_record', {mode:'save', data: data});
+                showToast("저장 완료");
+                renderCustomStats(); // 통계 갱신
+            } else { showToast("선택된 내용 없음"); }
+        }
+        async function renderCustomStats() {
+            if(currentCustomItem === null) return;
+            const chart = document.getElementById('customStatsChart'); chart.innerHTML = '로딩...';
+            const allData = await sendRequest('custom_record', {mode:'get'});
+            const today = document.getElementById('rDate').value;
+            const itemDef = customItems[currentCustomItem];
+            
+            // 오늘 현황 계산
+            const todayData = allData.filter(d => d.date === today && d.item === itemDef.name);
+            let summary = {};
+            
+            // 간단히 카운트 (O, ON, 상중하 등)
+            todayData.forEach(d => { summary[d.value] = (summary[d.value] || 0) + 1; });
+            
+            chart.innerHTML = '';
+            // 총 참여 학생 수 등 표시
+            chart.innerHTML += `<div style="margin-bottom:10px; font-weight:bold;">📅 오늘 (${today})</div>`;
+            for (let k in summary) {
+                const pct = (summary[k] / studentList.length) * 100;
+                chart.innerHTML += `
+                    <div class="bar-row">
+                        <div class="bar-label">${k || 'V'}</div>
+                        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+                        <div class="bar-val">${summary[k]}</div>
+                    </div>`;
+            }
+            if(todayData.length === 0) chart.innerHTML += '<div style="color:#999; font-size:0.8rem;">오늘 기록 없음</div>';
+        }
+
+        // [Normal Record Logic]
         function renderSubjectTags() { 
             const c=document.getElementById('subjectTags'); c.innerHTML=''; 
             subjectList.forEach(s=>{ 
@@ -634,23 +644,20 @@
                     name: item.name, type: type, text: fullText, check: item.check
                 });
             }
-            
             inputs.forEach(i=>i.value=''); document.querySelectorAll('.check-circle').forEach(c=>c.classList.remove('checked')); 
             
             if(ai && list.length > 0) {
                 aiJobQueue = list.map(item => ({...item, type:type, topic: document.getElementById('rTopic').value}));
                 totalAiJobs = aiJobQueue.length;
                 processNextAiJob();
-            } else {
-                showToast("완료");
-            }
+            } else { showToast("완료"); }
         }
 
+        // [Updated AI Queue with 8s Delay]
         async function processNextAiJob() {
             if(aiJobQueue.length === 0) { 
                 updateAiStatus(totalAiJobs + 1, totalAiJobs, "완료");
-                showToast("모든 기록 완료"); 
-                return; 
+                showToast("모든 기록 완료"); return; 
             }
             const job = aiJobQueue.shift();
             updateAiStatus(totalAiJobs - aiJobQueue.length, totalAiJobs, job.name);
@@ -674,7 +681,7 @@
                     }
                 } catch(e) {}
                 processNextAiJob();
-            }, 4000); 
+            }, 8000); // 8초 딜레이 (429 방지)
         }
 
         // [Student Manager]
@@ -688,10 +695,8 @@
         // [Bookmarks]
         function renderBmTags() { 
             const c=document.getElementById('bmTagArea'); c.innerHTML=''; 
-            // 입력창 태그 목록 (삭제 가능)
             bmTags.forEach(t=>{const b=document.createElement('div');b.className='tag';b.innerHTML=`${t} <span class="x-btn" onclick="removeBmTag('${t}', event)">x</span>`;if(selectedBmTags.includes(t))b.classList.add('selected');b.onclick=(e)=>{if(e.target.classList.contains('x-btn'))return;if(selectedBmTags.includes(t))selectedBmTags=selectedBmTags.filter(x=>x!==t);else selectedBmTags.push(t);renderBmTags();};c.appendChild(b);});
             
-            // [NEW] 필터용 태그 렌더링
             const fc = document.getElementById('bmFilterContainer'); fc.innerHTML = '';
             const allBtn = document.createElement('div'); allBtn.className = `bm-filter-tag ${currentBmFilter===null?'active':''}`; allBtn.innerText = "전체"; allBtn.onclick = () => filterBookmark(null);
             fc.appendChild(allBtn);
@@ -735,25 +740,20 @@
             document.getElementById('btnMemoModeList').className=m==='list'?'btn-sm active':'btn-sm inactive'; 
             document.getElementById('memoCalView').style.display=m==='cal'?'block':'none'; 
             document.getElementById('memoListView').style.display=m==='list'?'block':'none'; 
-            
-            // [NEW] 검색창은 목록 모드에서만 보임
             document.getElementById('memoSearchArea').style.display = m==='list'?'block':'none';
-            
             if(m==='cal') renderMemoCalendar(); else renderMemoList(); 
         }
         async function loadMemos() { memoList=await sendRequest('get_memos')||[]; setMemoMode(memoMode); }
         function moveMemoMonth(d) { curMemoMonth+=d; if(curMemoMonth>11){curMemoMonth=0;curMemoYear++;}else if(curMemoMonth<0){curMemoMonth=11;curMemoYear--;} renderMemoCalendar(); }
-        function renderMemoCalendar() { const g=document.getElementById('memoCalGrid'); g.innerHTML=''; document.getElementById('memoMonthTitle').innerText=`${curMemoYear}.${curMemoMonth+1}`; const f=new Date(curMemoYear,curMemoMonth,1); const l=new Date(curMemoYear,curMemoMonth+1,0); ['일','월','화','수','목','금','토'].forEach(d=>g.innerHTML+=`<div style="font-weight:bold">${d}</div>`); for(i=0;i<f.getDay();i++)g.appendChild(document.createElement('div')); for(i=1;i<=l.getDate();i++){const dStr=`${curMemoYear}-${String(curMemoMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; const d=document.createElement('div');d.className='cal-day';if(dStr===selectedMemoDate)d.classList.add('selected');if(memoList.some(m=>m.date===dStr))d.classList.add('has-memo');d.innerHTML=`<span>${i}</span><div class="cal-dot"></div>`;d.onclick=()=>{selectedMemoDate=dStr;renderMemoCalendar();renderMemoPreview();openMemoForm();};g.appendChild(d);} renderMemoPreview(); }
+        function renderMemoCalendar() { const g=document.getElementById('memoCalGrid'); g.innerHTML=''; document.getElementById('memoMonthTitle').innerText=`${curMemoYear}.${curMemoMonth+1}`; const f=new Date(curMemoYear,curMemoMonth,1); const l=new Date(curYear,curMemoMonth+1,0); ['일','월','화','수','목','금','토'].forEach(d=>g.innerHTML+=`<div style="font-weight:bold">${d}</div>`); for(i=0;i<f.getDay();i++)g.appendChild(document.createElement('div')); for(i=1;i<=l.getDate();i++){const dStr=`${curYear}-${String(curMemoMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; const d=document.createElement('div');d.className='cal-day';if(dStr===selectedMemoDate)d.classList.add('selected');if(memoList.some(m=>m.date===dStr))d.classList.add('has-memo');d.innerHTML=`<span>${i}</span><div class="cal-dot"></div>`;d.onclick=()=>{selectedMemoDate=dStr;renderMemoCalendar();renderMemoPreview();openMemoForm();};g.appendChild(d);} renderMemoPreview(); }
+        
         function renderMemoPreview() { const a=document.getElementById('memoDatePreview'); const t=memoList.filter(m=>m.date===selectedMemoDate); if(t.length===0){a.style.display='none';return;} a.style.display='block'; a.innerHTML=''; t.forEach(m=>{const d=document.createElement('div');d.className='memo-mini-item'+(m.done?' done-memo':'');d.innerText=(m.pinned?'★ ':'')+m.content;d.onclick=()=>openMemoForm(m);a.appendChild(d);}); }
         
-        // [수정] 메모 목록 필터링
         function renderMemoList() { 
             const keyword = document.getElementById('memoSearchInput').value.toLowerCase();
             const l=document.getElementById('memoListView'); l.innerHTML=''; 
-            
             let filtered = memoList.filter(m => m.content.toLowerCase().includes(keyword));
             filtered.sort((a,b)=>new Date(b.date)-new Date(a.date)); 
-            
             filtered.forEach(m=>{
                 const d=document.createElement('div');d.className='memo-list-item'+(m.done?' done-memo':'');
                 d.innerHTML=`<div class="memo-list-date"><span>${m.date}</span><span>${m.pinned?'★':''}</span></div><div class="memo-list-content">${m.content}</div>`;
