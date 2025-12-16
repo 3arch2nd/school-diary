@@ -740,8 +740,30 @@
         }
 
         // [HOME Logic]
-        async function loadHomeData() { const d=await sendRequest('get_home_data');
-            if(d){ if(d.image) { document.getElementById('homeMainImg').src=d.image; document.getElementById('homeMainImg').style.display='block'; document.querySelector('.home-image-msg').style.display='none'; } homeQuickLinks=d.links||[]; renderQuickLinks(); } }
+        // [수정됨] 홈 데이터 로드 함수 (URL 변환 로직 추가)
+        async function loadHomeData() { 
+            const d = await sendRequest('get_home_data');
+            if (d) { 
+                if (d.image) { 
+                    // 구글 드라이브 URL 보정 (view -> thumbnail/export 링크로 변환)
+                    let finalUrl = d.image;
+                    if(finalUrl.includes('drive.google.com') && finalUrl.includes('/view')) {
+                         // /file/d/ID/view 형식을 ID만 추출해서 변환
+                         const idMatch = finalUrl.match(/\/d\/(.+?)\//);
+                         if(idMatch && idMatch[1]) {
+                             // lh3 링크가 가장 안정적으로 이미지를 보여줍니다.
+                             finalUrl = `https://lh3.googleusercontent.com/d/${idMatch[1]}`;
+                         }
+                    }
+
+                    document.getElementById('homeMainImg').src = finalUrl; 
+                    document.getElementById('homeMainImg').style.display = 'block'; 
+                    document.querySelector('.home-image-msg').style.display = 'none'; 
+                } 
+                homeQuickLinks = d.links || []; 
+                renderQuickLinks(); 
+            } 
+        }
         function renderQuickLinks() { const g=document.getElementById('quickLinkGrid');
             g.innerHTML=''; homeQuickLinks.slice(0,5).forEach((l,i)=>{ const d=document.createElement('div'); d.className='quick-link-item'; d.innerHTML=`<div class="ql-emoji">${l.emoji}</div><div class="ql-name">${l.name}</div>`; d.onclick=()=>window.open(l.url,'_blank'); d.oncontextmenu=(e)=>{e.preventDefault();reqConfirm('삭제하시겠습니까?',()=>{homeQuickLinks.splice(i,1);saveHomeLinks();})}; g.appendChild(d); }); if(homeQuickLinks.length<5){ const a=document.createElement('div'); a.className='quick-link-item'; a.innerHTML='<div style="font-size:2rem; color:var(--primary)">+</div><div class="ql-name">추가</div>';
             a.onclick=()=>document.getElementById('addLinkModal').classList.add('open'); g.appendChild(a); } }
@@ -749,9 +771,59 @@
             homeQuickLinks.push({emoji:document.getElementById('qlEmoji').value||'🔗', name:document.getElementById('qlName').value||'링크', url:u}); saveHomeLinks(); document.getElementById('addLinkModal').classList.remove('open'); document.getElementById('qlUrl').value=''; }
         async function saveHomeLinks() { renderQuickLinks();
             await sendRequest('save_home_config', {key:"QuickLinks", value:JSON.stringify(homeQuickLinks)}); }
-        async function uploadHomeImage(inp) { if(inp.files.length===0) return; const f=inp.files[0];
-            const r=new FileReader(); r.onload=async(e)=>{ const b=e.target.result.split(',')[1]; const res=await sendRequest('upload_file', {name:"home_"+Date.now(), mimeType:f.type, data:b}); if(res){ document.getElementById('homeMainImg').src=res.url; document.getElementById('homeMainImg').style.display='block'; document.querySelector('.home-image-msg').style.display='none'; await sendRequest('save_home_config',{key:"MainImage", value:res.url});
-            } }; r.readAsDataURL(f); }
+        // [수정됨] 이미지 즉시 프리뷰 및 백그라운드 업로드 함수
+        async function uploadHomeImage(inp) {
+            // 1. 파일 선택 여부 확인
+            if (inp.files.length === 0) return;
+            
+            const f = inp.files[0];
+            const r = new FileReader();
+
+            r.onload = async (e) => {
+                // 💡 핵심: 읽자마자 바로 화면에 꽂아버립니다! (서버 기다리지 않음)
+                const base64Data = e.target.result;
+                
+                // 화면 즉시 적용
+                const imgTag = document.getElementById('homeMainImg');
+                imgTag.src = base64Data;
+                imgTag.style.display = 'block';
+                document.querySelector('.home-image-msg').style.display = 'none';
+
+                // 2. 여기서부터는 백그라운드 작업 (사용자 눈에는 이미 적용됨)
+                showToast("☁️ 이미지를 서버에 저장 중...");
+                
+                try {
+                    // Base64 헤더 제거 후 데이터 추출
+                    const rawData = base64Data.split(',')[1];
+                    
+                    // 서버로 전송
+                    const res = await sendRequest('upload_file', {
+                        name: "home_" + Date.now(),
+                        mimeType: f.type,
+                        data: rawData
+                    });
+
+                    if (res) {
+                        // 저장 완료 후, 반환된 URL을 설정 파일에만 업데이트
+                        await sendRequest('save_home_config', {
+                            key: "MainImage",
+                            value: res.url
+                        });
+                        showToast("✅ 이미지 저장 완료!");
+                        console.log("Saved URL:", res.url); // 개발자 도구에서 URL 확인용
+                    }
+                } catch (err) {
+                    console.error("이미지 업로드 실패:", err);
+                    showToast("❌ 서버 저장 실패 (화면엔 유지됨)");
+                }
+            };
+            
+            // 파일을 DataURL(Base64)로 읽기 시작
+            r.readAsDataURL(f);
+            
+            // (선택사항) input 초기화 - 같은 파일 다시 선택 가능하게
+            inp.value = ''; 
+        }
         function renderHomeToDo() { const t=formatDateYMD(new Date()); const l=calendarEvents.filter(e=>e.date===t);
             document.getElementById('homeToDoList').innerHTML = l.length>0 ? l.map(e=>`• ${e.title}`).join('<br>') : "일정 없음"; }
         
