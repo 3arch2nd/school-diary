@@ -4,7 +4,7 @@
     <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>쫑알수첩 Pro (Personal)</title>
+    <title>쫑알수첩 Pro (Stable)</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -31,7 +31,6 @@
             flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding-right: 5px;
         }
 
-        /* 레이아웃 강제 지정 (스크롤 및 전체 높이) */
         .pc-only.full-height, .mobile-only.full-height {
             display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; height: 100%;
         }
@@ -60,9 +59,10 @@
         .ai-loading-icon { display: inline-block; width: 10px; height: 10px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 10px; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        #lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-main); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #lockCard { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; width: 320px; }
-        #lockInput { font-size: 1.2rem; text-align: center; margin-bottom: 5px; letter-spacing: 2px; }
+        /* Lock Screen [긴급 수정: Z-Index 최상위 보장 및 입력 활성화] */
+        #lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-main); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; }
+        #lockCard { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; width: 320px; position: relative; z-index: 100000; }
+        #lockInput { font-size: 1.2rem; text-align: center; margin-bottom: 5px; letter-spacing: 2px; position: relative; z-index: 100001; background: white; }
         .lock-msg { font-size: 0.8rem; color: var(--danger); min-height: 20px; margin-bottom: 10px;}
 
         .nav-tabs { display: flex; flex-shrink: 0; background: var(--card-bg); border-radius: 8px; margin-bottom: 15px; padding: 4px; border: 1px solid var(--border-color); }
@@ -81,8 +81,6 @@
 
         .card { background: var(--card-bg); border-radius: 8px; padding: 20px; border: 1px solid var(--border-color); box-shadow: 0 1px 2px rgba(0,0,0,0.03); display: flex; flex-direction: column; }
         .card.full-height { height: 100%; min-height: 0; flex: 1; }
-        
-        /* [수정] 카드 헤더: 제목과 버튼들이 양끝 정렬되도록 수정 */
         .card-header { font-size: 1.1rem; color: var(--primary-dark); font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; flex-shrink: 0; border-bottom: 2px solid var(--bg-main); display: flex; justify-content: space-between; align-items: center; width: 100%; }
 
         .float-btn { position: fixed; top: 20px; right: 20px; width: 50px; height: 50px; background: var(--primary); color: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 2100; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; transition: 0.3s; }
@@ -97,25 +95,26 @@
         .tag .x-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; line-height: 16px; text-align: center; border-radius: 50%; font-size: 0.8rem; background: rgba(0,0,0,0.1); color: inherit; display: none; }
         .tag:hover .x-btn { display: block; }
         
-        /* [중요] 그리드 시스템 재정의: 헤더와 본문이 동일한 클래스 사용 */
+        /* [중요] 그리드 시스템 재정의 (v20.4) */
         .grid-row { display: flex; align-items: center; width: 100%; gap: 10px; }
         .col-name { width: 90px; flex-shrink: 0; font-weight: bold; text-align: center; }
+        
+        /* [수정] 내용 칸 너비 확보를 위해 flex-grow를 적극 활용 */
         .col-content { flex: 1; min-width: 0; }
         
-        /* [수정] 체크박스 영역 너비 축소 및 간격 조정 (260px -> 200px) */
-        .col-check { width: 200px; flex-shrink: 0; display: flex; justify-content: space-between; padding: 0 5px; }
+        /* [수정] 체크박스 영역 너비 대폭 축소 (260px -> 180px) */
+        .col-check { width: 180px; flex-shrink: 0; display: flex; justify-content: space-between; padding: 0 2px; }
         
-        /* 학생 목록 스타일 */
         .student-row { padding: 10px 5px; border-bottom: 1px solid var(--bg-main); background: white; margin-bottom: 2px; }
         .st-input { width: 100%; height: 42px; margin: 0 !important; } 
         
-        /* 헤더 전용 스타일 */
-        .record-header-row { padding: 12px 5px; border-bottom: 2px solid #eee; background: #fafafa; border-radius: 6px 6px 0 0; color: var(--text-sub); font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; }
-        .col-check span { width: 30px; text-align: center; display: inline-block; letter-spacing: -1px; word-break: keep-all; line-height: 1.2; }
+        .record-header-row { padding: 12px 5px; border-bottom: 2px solid #eee; background: #fafafa; border-radius: 6px 6px 0 0; color: var(--text-sub); font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; }
+        .col-check span { width: 40px; text-align: center; display: inline-block; letter-spacing: -1px; word-break: keep-all; line-height: 1.2; font-size: 0.75rem; }
 
-        .check-circle { width: 30px; height: 30px; border: 2px solid var(--border-color); border-radius: 50%; cursor: pointer; position: relative; background: var(--bg-main); }
+        /* [수정] 체크 동그라미 크기 축소 (30px -> 24px) */
+        .check-circle { width: 24px; height: 24px; border: 2px solid var(--border-color); border-radius: 50%; cursor: pointer; position: relative; background: var(--bg-main); }
         .check-circle.checked { border-color: var(--primary); background: var(--primary); }
-        .check-circle.checked::after { content: 'v'; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 16px; font-weight:bold; }
+        .check-circle.checked::after { content: 'v'; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; font-weight:bold; }
 
         .custom-item-row { padding: 10px; border: 1px solid #eee; border-radius: 6px; margin-bottom: 5px; cursor: pointer; display: flex; justify-content: space-between; }
         .custom-item-row.active { border-color: var(--primary); background: #f9fcff; }
@@ -531,8 +530,22 @@
 
         window.onload = () => { checkLock(); document.getElementById('rDate').valueAsDate = new Date(); document.getElementById('mobDate').valueAsDate = new Date(); initEnvironment(); };
         function checkCaps(e) { const caps = e.getModifierState && e.getModifierState("CapsLock"); document.getElementById('lockMsg').innerText = caps ? "💡 Caps Lock 켜짐" : "비밀번호 입력 (한/영 확인)"; if(e.keyCode===13) unlockApp(); }
-        function checkLock() { if(sessionStorage.getItem('isUnlocked')==='true') { document.getElementById('lockScreen').style.display='none'; loadAllData(); } }
-        function unlockApp() { if(document.getElementById('lockInput').value === 'ekdms320') { sessionStorage.setItem('isUnlocked', 'true'); document.getElementById('lockScreen').style.display='none'; loadAllData(); } else { alert('비밀번호 오류'); document.getElementById('lockInput').value=''; } }
+        function checkLock() { 
+            let unlocked = false;
+            try { unlocked = sessionStorage.getItem('isUnlocked') === 'true'; } catch(e) {}
+            if(unlocked) { document.getElementById('lockScreen').style.display='none'; loadAllData(); } 
+        }
+        function unlockApp() { 
+            const pw = document.getElementById('lockInput').value;
+            if(pw === 'ekdms320') { 
+                try { sessionStorage.setItem('isUnlocked', 'true'); } catch(e) {}
+                document.getElementById('lockScreen').style.display='none'; 
+                loadAllData(); 
+            } else { 
+                alert('비밀번호 오류'); 
+                document.getElementById('lockInput').value=''; 
+            } 
+        }
         async function loadAllData() { 
             loadStudents();
             renderSubjectTags(); renderBmTags(); loadFiles(); loadHomeData(); loadMusicData(); loadCustomItems();
@@ -1125,7 +1138,8 @@
         function showToast(m) { const t=document.getElementById("toast");t.innerText=m;t.className="show";setTimeout(()=>{t.className=t.className.replace("show","")},3000); }
         function formatDateYMD(d) { if(!d)return""; const D=new Date(d); return `${D.getFullYear()}-${String(D.getMonth()+1).padStart(2,'0')}-${String(D.getDate()).padStart(2,'0')}`; }
         function initEnvironment() { if(IS_PRO_MODE) document.getElementById('publicModeSettings').style.display='none'; else { document.getElementById('publicModeSettings').style.display='block'; sendRequest('load_settings').then(res=>{if(res)document.getElementById('settingApiKey').value=res.apiKey}); } }
-        function sendRequest(a,p={}) { if(IS_PRO_MODE){p.action=a;return fetch(PRO_BACKEND_URL,{method:'POST',mode:'cors',body:JSON.stringify(p)}).then(r=>r.json()).then(j=>j.data).catch(e=>null);}else return new Promise(r=>{google.script.run.withSuccessHandler(res=>r(res.data)).withFailureHandler(e=>r(null)).dispatch(a,p)});}<br>        async function loadFiles() { const l=document.getElementById('fileList'); l.innerHTML='로딩...'; const f=await sendRequest('get_files')||[]; l.innerHTML=''; if(f.length===0) l.innerHTML='<div style="color:#999;font-size:0.9rem">파일 없음</div>'; f.forEach(d=>{ const r=document.createElement('div'); r.style.display='flex'; r.style.justifyContent='space-between'; r.style.marginBottom='5px'; r.innerHTML=`<a href="${d.url}" target="_blank" style="text-decoration:none;color:var(--primary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.name}</a> <button class="btn-sm btn-del" onclick="deleteFile(${d.row})">삭제</button>`; l.appendChild(r); }); }
+        function sendRequest(a,p={}) { if(IS_PRO_MODE){p.action=a;return fetch(PRO_BACKEND_URL,{method:'POST',mode:'cors',body:JSON.stringify(p)}).then(r=>r.json()).then(j=>j.data).catch(e=>null);}else return new Promise(r=>{google.script.run.withSuccessHandler(res=>r(res.data)).withFailureHandler(e=>r(null)).dispatch(a,p)});}
+        async function loadFiles() { const l=document.getElementById('fileList'); l.innerHTML='로딩...'; const f=await sendRequest('get_files')||[]; l.innerHTML=''; if(f.length===0) l.innerHTML='<div style="color:#999;font-size:0.9rem">파일 없음</div>'; f.forEach(d=>{ const r=document.createElement('div'); r.style.display='flex'; r.style.justifyContent='space-between'; r.style.marginBottom='5px'; r.innerHTML=`<a href="${d.url}" target="_blank" style="text-decoration:none;color:var(--primary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.name}</a> <button class="btn-sm btn-del" onclick="deleteFile(${d.row})">삭제</button>`; l.appendChild(r); }); }
         function uploadFile() { const i=document.getElementById('uploadInput'); if(i.files.length===0)return; const f=i.files[0]; const r=new FileReader(); r.onload=async(e)=>{ await sendRequest('upload_file',{name:f.name,mimeType:f.type,data:e.target.result.split(',')[1]}); loadFiles(); }; r.readAsDataURL(f); }
         async function deleteFile(r) { reqConfirm('삭제하시겠습니까?', async()=>{ await sendRequest('delete_file',{row:r}); loadFiles(); }); }
         
