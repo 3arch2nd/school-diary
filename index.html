@@ -771,57 +771,57 @@
             homeQuickLinks.push({emoji:document.getElementById('qlEmoji').value||'🔗', name:document.getElementById('qlName').value||'링크', url:u}); saveHomeLinks(); document.getElementById('addLinkModal').classList.remove('open'); document.getElementById('qlUrl').value=''; }
         async function saveHomeLinks() { renderQuickLinks();
             await sendRequest('save_home_config', {key:"QuickLinks", value:JSON.stringify(homeQuickLinks)}); }
-        // [수정됨] 이미지 즉시 프리뷰 및 백그라운드 업로드 함수
+// [수정됨] 홈 이미지 업로드 함수 (즉시 프리뷰 + 서버 저장)
         async function uploadHomeImage(inp) {
-            // 1. 파일 선택 여부 확인
+            // 1. 파일 선택 확인
             if (inp.files.length === 0) return;
             
             const f = inp.files[0];
             const r = new FileReader();
 
-            r.onload = async (e) => {
-                // 💡 핵심: 읽자마자 바로 화면에 꽂아버립니다! (서버 기다리지 않음)
+            // 2. 파일을 다 읽으면 실행될 로직 (보내주신 잘 되는 코드 스타일 적용)
+            r.onload = async function(e) {
+                // [프리뷰] 읽은 즉시 화면에 뿌림 (서버 응답 기다리지 않음 -> 속도 빠름)
                 const base64Data = e.target.result;
-                
-                // 화면 즉시 적용
                 const imgTag = document.getElementById('homeMainImg');
+                
                 imgTag.src = base64Data;
                 imgTag.style.display = 'block';
                 document.querySelector('.home-image-msg').style.display = 'none';
 
-                // 2. 여기서부터는 백그라운드 작업 (사용자 눈에는 이미 적용됨)
-                showToast("☁️ 이미지를 서버에 저장 중...");
+                // [서버 전송] 백그라운드에서 조용히 업로드
+                showToast("☁️ 서버에 이미지 저장 중...");
                 
                 try {
-                    // Base64 헤더 제거 후 데이터 추출
+                    // "data:image/png;base64," 같은 헤더 제거
                     const rawData = base64Data.split(',')[1];
-                    
-                    // 서버로 전송
+
                     const res = await sendRequest('upload_file', {
-                        name: "home_" + Date.now(),
+                        name: "home_img_" + Date.now(), // 파일명 유니크하게
                         mimeType: f.type,
                         data: rawData
                     });
 
-                    if (res) {
-                        // 저장 완료 후, 반환된 URL을 설정 파일에만 업데이트
+                    if (res && res.url) {
+                        // 서버가 준 '직접 링크(uc?export=view)'를 설정에 저장
+                        // 이렇게 해야 나중에 다른 기기에서 접속해도 보임
                         await sendRequest('save_home_config', {
                             key: "MainImage",
                             value: res.url
                         });
                         showToast("✅ 이미지 저장 완료!");
-                        console.log("Saved URL:", res.url); // 개발자 도구에서 URL 확인용
+                        console.log("Server URL:", res.url); // 확인용 로그
                     }
                 } catch (err) {
-                    console.error("이미지 업로드 실패:", err);
+                    console.error(err);
                     showToast("❌ 서버 저장 실패 (화면엔 유지됨)");
                 }
             };
             
-            // 파일을 DataURL(Base64)로 읽기 시작
+            // 파일 읽기 시작
             r.readAsDataURL(f);
             
-            // (선택사항) input 초기화 - 같은 파일 다시 선택 가능하게
+            // 같은 파일 다시 선택 가능하게 초기화
             inp.value = ''; 
         }
         function renderHomeToDo() { const t=formatDateYMD(new Date()); const l=calendarEvents.filter(e=>e.date===t);
