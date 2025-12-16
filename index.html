@@ -520,12 +520,8 @@
             </div>
         </div>
    
-        <div id="neis" class="section pc-only-tab">
-            <div class="mobile-block-overlay">
-                <span>⚙️</span>
-                <p>해당 기능은 PC/태블릿에서<br>사용 가능해요!</p>
-            </div>
-
+       <div id="neis" class="section pc-only-tab">
+            <div class="mobile-block-overlay"><span>⚙️</span><p>PC에서 사용 가능</p></div>
             <div class="split-container pc-only">
                 <div class="split-left">
                     <div class="card full-height">
@@ -537,7 +533,6 @@
                                     <input type="checkbox" id="useRefFiles" style="width:20px; height:20px; margin-right:10px;"> 
                                     <span>📚 업로드 자료 반영</span>
                                 </label>
-                                <div style="font-size:0.8rem; color:#888; margin-top:5px; margin-left:30px;">(최근 업로드한 파일 3개를 참고합니다)</div>
                             </div>
 
                             <label>유형</label>
@@ -551,11 +546,6 @@
                                 <select id="neisSubjectSelect"></select>
                             </div>
                             
-                            <div id="neisBehOption" style="display:none;">
-                                <label>공통 키워드 (반 전체)</label>
-                                <input type="text" id="neisKeyword" placeholder="예: 배려, 협력, 봉사">
-                            </div>
-
                             <label style="margin-top:15px;">분량 목표</label>
                             <div style="display:flex; gap:10px; align-items:center;">
                                 <input type="range" id="neisLen" min="100" max="1000" step="50" value="300" 
@@ -566,11 +556,27 @@
                             </div>
 
                             <hr style="margin: 20px 0;">
-                            <div style="display:flex; gap:10px;">
-                                <button class="btn btn-outline" style="flex:1;" onclick="prepareNeisUI()">1. 명단 세팅</button>
-                                <button class="btn btn-primary" id="btnGenNeis" style="flex:1;" onclick="startNeisGeneration()">2. AI 일괄 생성</button>
+
+                            <div id="btnGroupSubject">
+                                <button class="btn btn-primary" style="width:100%;" onclick="startSubjectGeneration()">
+                                    ✨ 과목 세특 일괄 생성
+                                </button>
+                                <div style="font-size:0.85rem; color:#888; text-align:center; margin-top:5px;">
+                                    기존 기록을 바탕으로 바로 작성합니다.
+                                </div>
                             </div>
+
+                            <div id="btnGroupBehavior" style="display:none;">
+                                <div style="display:flex; gap:10px;">
+                                    <button class="btn btn-outline" style="flex:1;" onclick="prepareBehaviorUI()">1. 키워드 세팅</button>
+                                    <button class="btn btn-primary" style="flex:1;" onclick="startBehaviorGeneration()">2. AI 생성</button>
+                                </div>
+                                <div style="font-size:0.85rem; color:#888; text-align:center; margin-top:5px;">
+                                    학생별 키워드를 입력한 후 생성하세요.
+                                </div>
                             </div>
+
+                        </div>
                     </div>
                 </div>
 
@@ -580,7 +586,7 @@
                             <div class="card-header">생성 결과</div>
                             <div id="neisResultList">
                                 <div style="text-align:center; padding:50px; color:#aaa;">
-                                    좌측에서 <b>[1. 명단 세팅]</b> 버튼을 눌러주세요.
+                                    좌측 옵션을 선택해주세요.
                                 </div>
                             </div>
                         </div>
@@ -1668,110 +1674,122 @@
             showToast("페르소나 저장 완료!"); 
             clearLoading(btn); 
         }
-// [1단계] 명단과 개별 입력창을 먼저 보여주는 함수
-        function prepareNeisUI() {
-            const container = document.getElementById('neisResultList');
+// [UI] 유형 선택에 따라 버튼과 옵션 표시 변경
+        function toggleNeisType() {
+            const type = document.getElementById('neisType').value;
             
+            // 과목 선택 옵션 보이기/숨기기
+            document.getElementById('neisSubOption').style.display = (type === 'subject') ? 'block' : 'none';
+            
+            // 버튼 그룹 교체
+            if (type === 'subject') {
+                document.getElementById('btnGroupSubject').style.display = 'block';
+                document.getElementById('btnGroupBehavior').style.display = 'none';
+            } else {
+                document.getElementById('btnGroupSubject').style.display = 'none';
+                document.getElementById('btnGroupBehavior').style.display = 'block';
+            }
+        }
+
+        // ===========================================
+        // [CASE 1] 과목별 세특 (일괄 자동 생성)
+        // ===========================================
+        async function startSubjectGeneration() {
+            const container = document.getElementById('neisResultList');
             if(studentList.length === 0) { showToast("학생 명단이 없습니다."); return; }
             
-            container.innerHTML = ""; // 초기화
+            // 1. 화면 초기화 및 카드 뼈대 만들기
+            container.innerHTML = "";
             const targetLen = document.getElementById('neisLen').value;
-
+            
             studentList.forEach(st => {
                 const card = document.createElement('div');
-                card.className = 'card';
-                card.style.marginBottom = '15px';
-                // id를 부여해서 나중에 값을 가져올 수 있게 함
-                card.id = `neis_card_${st.id}`; 
-                
+                card.className = 'card'; card.style.marginBottom = '15px'; card.id = `neis_card_${st.id}`;
                 card.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                        <span style="font-weight:bold; color:var(--primary-dark); font-size:1.1rem;">${st.name}</span>
-                        <div style="display:flex; gap:5px;">
-                            <button class="btn-sm" onclick="generateSingleStudent('${st.id}', '${st.name}')">이 학생만 생성</button>
-                        </div>
-                    </div>
-                    
-                    <input type="text" class="individual-keyword" placeholder="이 학생만의 키워드 (예: 반장, 리더십, 묵묵히 청소함)..." 
-                        style="margin-bottom:10px; background:#fffbe6; border:1px solid #ffd591;">
-                    
-                    <textarea class="n-textarea" style="width:100%; height:150px; resize:vertical; padding:10px; border:1px solid #eee; border-radius:4px;" placeholder="위 버튼을 누르면 AI가 생성합니다."></textarea>
-                    
-                    <div style="text-align:right; margin-top:5px;">
-                        <button class="btn-copy btn-sm">복사</button>
-                    </div>
+                    <div style="font-weight:bold; margin-bottom:8px; color:var(--primary-dark);">${st.name} <span style="font-size:0.8rem; color:#aaa;">(과목세특)</span></div>
+                    <textarea class="n-textarea" style="width:100%; height:120px; padding:10px; border:1px solid #eee;">⏳ 생성 대기 중...</textarea>
+                    <div style="text-align:right; margin-top:5px;"><button class="btn-copy btn-sm" onclick="copyResult(this)">복사</button></div>
                 `;
-                
-                // 복사 버튼 기능 미리 연결
-                card.querySelector('.btn-copy').onclick = function() {
-                    const txt = card.querySelector('textarea').value;
-                    if(!txt) return;
-                    navigator.clipboard.writeText(txt).then(() => {
-                        showToast(`${st.name} 복사 완료!`);
-                        this.innerText = "완료";
-                        setTimeout(()=> this.innerText="복사", 1500);
-                    });
-                };
-                
                 container.appendChild(card);
             });
-            
-            showToast("명단 세팅 완료! 키워드를 입력하세요.");
-        }
 
-        // [2단계] 전체 학생 일괄 생성 함수
-        async function startNeisGeneration() {
-            const container = document.getElementById('neisResultList');
-            if(container.children.length === 0) { showToast("먼저 '1. 명단 세팅'을 눌러주세요."); return; }
-            
-            const btn = document.getElementById('btnGenNeis');
+            // 2. 순차적 생성 시작
+            const btn = document.querySelector('#btnGroupSubject button');
             setLoading(btn, "전체 생성 중...");
             
-            // 순차적으로 모든 학생 처리
             for(const st of studentList) {
-                await generateSingleStudent(st.id, st.name);
+                await generateSingleStudent(st.id, st.name, 'subject', ""); // 키워드 없이 호출
             }
-            
             clearLoading(btn);
-            showToast("모든 작업 완료!");
+            showToast("과목 세특 생성 완료! 🎉");
         }
 
-        // [개별 생성 로직] (한 명씩 AI 요청 보내는 함수)
-        async function generateSingleStudent(id, name) {
+        // ===========================================
+        // [CASE 2] 행동특성 (1. 키워드 세팅 -> 2. 생성)
+        // ===========================================
+        
+        // 1단계: 입력창 깔아주기
+        function prepareBehaviorUI() {
+            const container = document.getElementById('neisResultList');
+            if(studentList.length === 0) { showToast("학생 명단이 없습니다."); return; }
+            
+            container.innerHTML = "";
+            studentList.forEach(st => {
+                const card = document.createElement('div');
+                card.className = 'card'; card.style.marginBottom = '15px'; card.id = `neis_card_${st.id}`;
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                        <span style="font-weight:bold; color:var(--primary-dark);">${st.name}</span>
+                        <button class="btn-sm" onclick="generateSingleStudent('${st.id}', '${st.name}', 'behavior', getIndivKey('${st.id}'))">이 학생만 생성</button>
+                    </div>
+                    <input type="text" class="individual-keyword" placeholder="키워드 (예: 반장, 봉사, 배려)..." style="margin-bottom:10px; background:#fffbe6; border:1px solid #ffd591;">
+                    <textarea class="n-textarea" style="width:100%; height:150px; padding:10px; border:1px solid #eee;" placeholder="키워드 입력 후 생성 버튼을 누르세요."></textarea>
+                    <div style="text-align:right; margin-top:5px;"><button class="btn-copy btn-sm" onclick="copyResult(this)">복사</button></div>
+                `;
+                container.appendChild(card);
+            });
+            showToast("키워드를 입력해주세요.");
+        }
+
+        // 2단계: 입력된 키워드로 일괄 생성
+        async function startBehaviorGeneration() {
+            const container = document.getElementById('neisResultList');
+            if(container.children.length === 0) { showToast("먼저 '1. 키워드 세팅'을 해주세요."); return; }
+            
+            const btn = document.querySelector('#btnGroupBehavior .btn-primary');
+            setLoading(btn, "생성 중...");
+            
+            for(const st of studentList) {
+                // 입력된 키워드 가져오기
+                const keyword = getIndivKey(st.id);
+                await generateSingleStudent(st.id, st.name, 'behavior', keyword);
+            }
+            clearLoading(btn);
+            showToast("행동특성 생성 완료! 🎉");
+        }
+
+        // ===========================================
+        // [공통] AI 요청 함수 (한 명 처리)
+        // ===========================================
+        async function generateSingleStudent(id, name, typeMode, finalKeyword) {
             const card = document.getElementById(`neis_card_${id}`);
             if(!card) return;
             
             const textarea = card.querySelector('textarea');
-            const indivInput = card.querySelector('.individual-keyword');
-            
-            // UI 상태 변경
-            const orgPlaceholder = textarea.placeholder;
-            textarea.placeholder = "내용을 작성하고 있습니다...";
-            textarea.value = "생성 중...";
+            textarea.value = "⏳ 작성 중...";
             
             // 옵션값 수집
-            const typeMode = document.getElementById('neisType').value;
-            const targetType = typeMode === 'subject' ? document.getElementById('neisSubjectSelect').value : '행동';
+            let targetType = typeMode === 'subject' ? document.getElementById('neisSubjectSelect').value : '행동';
             const len = document.getElementById('neisLen').value;
             const currentPersona = document.getElementById('personaText').value;
             const useRefEl = document.getElementById('useRefFiles');
             const useRef = useRefEl ? useRefEl.checked : false;
-            
-            // [핵심] 키워드 합치기 (공통 키워드 + 개별 키워드)
-            const commonKeyword = document.getElementById('neisKeyword').value.trim();
-            const indivKeyword = indivInput.value.trim();
-            
-            // 키워드가 둘 다 있으면 콤마로 연결, 하나만 있으면 그것만 사용
-            let finalKeyword = "";
-            if(commonKeyword && indivKeyword) finalKeyword = `${commonKeyword}, ${indivKeyword}`;
-            else finalKeyword = commonKeyword || indivKeyword;
 
-            // 서버 요청
             try {
                 const data = await sendRequest('generate_neis_individual', { 
                     name: name, 
                     type: targetType, 
-                    keyword: finalKeyword, // 합쳐진 키워드 전송
+                    keyword: finalKeyword, // 과목일 땐 빈값, 행동일 땐 개별키워드 들어감
                     length: len,
                     persona: currentPersona,
                     useRef: useRef
@@ -1779,13 +1797,31 @@
                 
                 const finalTxt = data && data.text 
                     ? data.text.replace(/['"]/g, "").replace(/\*\*/g, "").replace(/##/g, "").trim()
-                    : "생성 실패. 기록을 확인해주세요.";
+                    : "기록이 없어 생성하지 못했습니다.";
                 
                 textarea.value = finalTxt;
                 
             } catch(e) {
-                textarea.value = "오류 발생: " + e.message;
+                textarea.value = "오류: " + e.message;
             }
+        }
+
+        // 헬퍼: 개별 키워드 값 가져오기
+        function getIndivKey(id) {
+            const card = document.getElementById(`neis_card_${id}`);
+            if(!card) return "";
+            const input = card.querySelector('.individual-keyword');
+            return input ? input.value.trim() : "";
+        }
+
+        // 헬퍼: 복사 기능
+        function copyResult(btn) {
+            const txt = btn.closest('.card').querySelector('textarea').value;
+            if(!txt) return;
+            navigator.clipboard.writeText(txt).then(() => {
+                const org = btn.innerText; btn.innerText = "완료"; btn.style.background="#27ae60"; btn.style.color="white";
+                setTimeout(()=> { btn.innerText = org; btn.style.background=""; btn.style.color=""; }, 1500);
+            });
         }
         function toggleNeisType() { const t=document.getElementById('neisType').value; document.getElementById('neisSubOption').style.display=t==='subject'?'block':'none'; document.getElementById('neisBehOption').style.display=t==='behavior'?'block':'none'; }
 
