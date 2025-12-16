@@ -89,18 +89,20 @@
         .float-menu-item:hover { background: #eaf6fc; color: var(--primary); }
 
         /* Layout */
-        .section { display: none; flex: 1; overflow: hidden; height: 100%; }
-        .section.active { display: block; animation: fadeIn 0.2s; display: flex; flex-direction: column; }
+        .section { display: none; flex: 1; overflow: hidden; height: 100%; flex-direction: column; } /* Fixed Flex direction */
+        .section.active { display: flex; animation: fadeIn 0.2s; } /* Changed to flex */
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .pc-only { display: block; }
         .mobile-only { display: none; }
-        .split-container { display: flex; gap: 20px; height: 100%; overflow: hidden; }
-        .split-left { width: 360px; flex-shrink: 0; display: flex; flex-direction: column; gap: 15px; height: 100%; overflow-y: auto; }
+        
+        /* [Fixed] Scroll Layout Logic */
+        .split-container { display: flex; gap: 20px; height: 100%; overflow: hidden; min-height: 0; flex: 1; }
+        .split-left { width: 360px; flex-shrink: 0; display: flex; flex-direction: column; gap: 15px; height: 100%; overflow: hidden; }
         .split-right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 15px; height: 100%; overflow: hidden; }
         .split-half { flex: 1; display: flex; flex-direction: column; overflow: hidden; } 
 
         .card { background: var(--card-bg); border-radius: 8px; padding: 20px; border: 1px solid var(--border-color); box-shadow: 0 1px 2px rgba(0,0,0,0.03); display: flex; flex-direction: column; }
-        .card.full-height { height: 100%; }
+        .card.full-height { height: 100%; min-height: 0; } /* Fixed height */
         .card.scrollable { overflow-y: auto; }
         .card-header { font-size: 1.1rem; color: var(--primary-dark); font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; flex-shrink: 0; border-bottom: 2px solid var(--bg-main); display: flex; justify-content: space-between; align-items: center; }
 
@@ -242,7 +244,6 @@
             .quick-link-grid { grid-template-columns: repeat(3, 1fr); }
             .float-btn { top: auto; bottom: 30px; }
             .float-menu { top: auto; bottom: 90px; }
-            /* [Modified] Hide Music on Mobile */
             .music-capsule { display: none !important; }
         }
     </style>
@@ -320,6 +321,38 @@
         </div>
 
         <div id="record" class="section">
+            <div class="mobile-only full-height">
+                <div class="card full-height scrollable" style="display:flex; flex-direction:column;">
+                    <div class="card-header" style="flex-shrink:0; display:block;">
+                        <div style="display:flex; gap:5px; margin-bottom:10px; justify-content:center;">
+                            <button class="btn-sm active" id="mobBtnSub" onclick="setMobileMode('subject')">과목</button>
+                            <button class="btn-sm inactive" id="mobBtnBeh" onclick="setMobileMode('behavior')">행동</button>
+                            <button class="btn-sm inactive" id="mobBtnCust" onclick="setMobileMode('custom')">기타</button>
+                        </div>
+                        <input type="date" id="mobDate" style="margin-bottom:0;">
+                    </div>
+
+                    <div id="mobViewQuick" style="flex:1; display:flex; flex-direction:column; padding-top:15px;">
+                        <div style="background:#f0f8ff; padding:15px; border-radius:8px; flex:1; display:flex; flex-direction:column;">
+                            <div style="font-size:0.9rem; color:var(--text-sub); margin-bottom:10px;">
+                                <span id="mobQuickTip">예: 김철수/수학/발표 잘함</span>
+                            </div>
+                            <textarea id="mobQuickInput" style="flex:1; resize:none; margin-bottom:15px;" placeholder="내용을 입력하세요..."></textarea>
+                            <button class="btn btn-primary" style="width:100%; height:50px;" onclick="saveMobileQuickRecord()">✨ AI 기록 저장</button>
+                        </div>
+                    </div>
+
+                    <div id="mobViewCustom" style="flex:1; display:none; flex-direction:column; padding-top:15px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <label style="margin:0;">항목 선택</label>
+                            <select id="mobCustomSelect" style="width:60%; margin:0;" onchange="renderMobileCustomList()"></select>
+                        </div>
+                        <div id="mobCustomList" style="flex:1; overflow-y:auto; border:1px solid #eee; border-radius:8px; padding:10px; margin-bottom:10px;"></div>
+                        <button class="btn btn-primary" style="width:100%; height:50px;" onclick="saveMobileCustom()">저장하기</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="pc-only full-height">
                 <div class="split-container">
                     <div class="split-left">
@@ -344,7 +377,7 @@
                     </div>
                     <div class="split-right">
                         <div class="card full-height" id="recordRightCard" style="display:flex; flex-direction:column;">
-                            <div id="normalRecordView" style="display:flex; flex-direction:column; height:100%;">
+                            <div id="normalRecordView" style="display:flex; flex-direction:column; height:100%; overflow:hidden;">
                                 <div class="card-header" style="flex-shrink:0;">
                                     <div style="display:flex; align-items:center; gap:15px;"><span>학생별 기록</span><div class="switch-container"><label class="switch"><input type="checkbox" id="aiToggle" checked><span class="slider"></span></label><span>AI</span></div></div>
                                     <button class="btn btn-primary" id="btnSaveAll" onclick="saveData()">저장하기</button>
@@ -353,11 +386,11 @@
                                     <div style="width:90px;">이름</div><div style="flex-grow:1; text-align:center;">내용</div>
                                     <div id="checkHeader" style="width:220px; display:flex; justify-content:space-between; font-size:0.75rem;"><span>매우잘함</span><span>잘함</span><span>보통</span><span>노력요함</span></div>
                                 </div>
-                                <div id="recordList" style="flex:1; overflow-y:auto;"></div>
+                                <div id="recordList" style="flex:1; overflow-y:auto; min-height:0;"></div>
                             </div>
                             
-                            <div id="customRecordView" style="display:none; height:100%; flex-direction:column;">
-                                <div class="split-container" style="flex:1; overflow:hidden;">
+                            <div id="customRecordView" style="display:none; height:100%; flex-direction:column; overflow:hidden;">
+                                <div class="split-container" style="flex:1; overflow:hidden; min-height:0;">
                                     <div class="split-half" style="display:flex; flex-direction:column; overflow:hidden;">
                                         <div class="card-header" style="flex-shrink:0;"><span>빠른 체크</span><button class="btn-sm active" onclick="saveCustomData()">저장</button></div>
                                         <div id="customCheckList" style="overflow-y:auto; flex:1;"></div>
@@ -390,7 +423,7 @@
                     <div class="card full-height" style="display:flex; flex-direction:column;">
                         <div class="card-header" style="flex-shrink:0;"><span id="viewerTitle">기록 상세</span><div style="display:flex; gap:5px;"><select id="viewSubjectFilter" style="margin-bottom:0; width:100px; padding:6px;" onchange="loadHistory()"></select><button class="btn-sm active" id="viewSubBtn" onclick="viewTab('subject')">과목</button><button class="btn-sm inactive" id="viewBehBtn" onclick="viewTab('behavior')">행동</button></div></div>
                         <div style="margin-bottom:10px; display:flex; gap:10px; flex-shrink:0;"><button class="btn btn-sm btn-primary" style="flex:1" onclick="saveSelectedHistory()">일괄 저장 (수정된 항목)</button><button class="btn btn-sm btn-del" style="flex:1" onclick="deleteSelectedHistory()">선택 삭제</button></div>
-                        <div id="historyViewer" style="flex:1; overflow-y:auto;"></div>
+                        <div id="historyViewer" style="flex:1; overflow-y:auto; min-height:0;"></div>
                     </div>
                 </div>
             </div>
@@ -416,7 +449,18 @@
         </div>
         <div id="memo" class="section">
             <div class="split-container">
-                <div class="split-left"><div class="card full-height scrollable"><div class="card-header"><span>메모</span><div style="display:flex; gap:5px;"><button class="btn-sm active" id="btnMemoModeCal" onclick="setMemoMode('cal')">달력</button><button class="btn-sm inactive" id="btnMemoModeList" onclick="setMemoMode('list')">목록</button></div></div><div id="memoSearchArea" style="margin-bottom:10px; display:none;"><input type="text" id="memoSearchInput" placeholder="메모 검색..." oninput="renderMemoList()"></div><div id="memoCalView"><div class="card-header" style="justify-content:center; gap:15px; border-bottom:none;"><button class="arrow-btn" onclick="moveMemoMonth(-1)">◀</button><span id="memoMonthTitle"></span><button class="arrow-btn" onclick="moveMemoMonth(1)">▶</button></div><div class="cal-grid" id="memoCalGrid"></div><div id="memoDatePreview" style="margin-top:15px; border-top:1px solid #eee; padding-top:10px; display:none;"></div></div><div id="memoListView" style="display:none;"></div></div></div>
+                <div class="split-left"><div class="card full-height scrollable"><div class="card-header"><span>메모</span><div style="display:flex; gap:5px;"><button class="btn-sm active" id="btnMemoModeCal" onclick="setMemoMode('cal')">달력</button><button class="btn-sm inactive" id="btnMemoModeList" onclick="setMemoMode('list')">목록</button></div></div><div id="memoSearchArea" style="margin-bottom:10px; display:none;"><input type="text" id="memoSearchInput" placeholder="메모 검색..." oninput="renderMemoList()"></div>
+                <div id="memoCalView">
+                    <div class="card-header" style="justify-content:center; gap:15px; border-bottom:none;">
+                        <button class="arrow-btn" onclick="moveMemoMonth(-1)">◀</button>
+                        <span id="memoMonthTitle"></span>
+                        <button class="arrow-btn" onclick="moveMemoMonth(1)">▶</button>
+                        <button class="btn-sm" style="margin-left:5px;" onclick="goToMemoToday()">오늘</button>
+                    </div>
+                    <div class="cal-grid" id="memoCalGrid"></div>
+                    <div id="memoDatePreview" style="margin-top:15px; border-top:1px solid #eee; padding-top:10px; display:none;"></div>
+                </div>
+                <div id="memoListView" style="display:none;"></div></div></div>
                 <div class="split-right"><div class="card full-height scrollable"><div class="card-header">작성 <span id="memoDateDisp" style="font-size:0.9rem; color:var(--text-sub); font-weight:normal;"></span></div><input type="hidden" id="memoEditRow"><textarea id="memoContent" style="height:300px; resize:none;" placeholder="내용을 입력하세요..."></textarea><div style="display:flex; gap:15px; margin-bottom:15px;"><label><input type="checkbox" id="memoPinned"> 중요</label><label><input type="checkbox" id="memoDone"> 완료</label></div><div style="text-align:right;"><button class="btn btn-danger" id="btnDelMemo" style="display:none; margin-right:10px;" onclick="deleteMemo()">삭제</button><button class="btn btn-primary" onclick="saveMemo()">저장</button><button class="btn btn-outline" style="margin-left:10px;" onclick="clearMemoInput()">새 메모</button></div></div></div>
             </div>
         </div>
@@ -451,7 +495,7 @@
         let musicPlaylist = [];
         let attendanceCache = [];
 
-        window.onload = () => { checkLock(); document.getElementById('rDate').valueAsDate = new Date(); initEnvironment(); };
+        window.onload = () => { checkLock(); document.getElementById('rDate').valueAsDate = new Date(); document.getElementById('mobDate').valueAsDate = new Date(); initEnvironment(); };
         function checkCaps(e) { const caps = e.getModifierState && e.getModifierState("CapsLock"); document.getElementById('lockMsg').innerText = caps ? "💡 Caps Lock 켜짐" : "비밀번호 입력 (한/영 확인)"; if(e.keyCode===13) unlockApp(); }
         function checkLock() { if(sessionStorage.getItem('isUnlocked')==='true') { document.getElementById('lockScreen').style.display='none'; loadAllData(); } }
         function unlockApp() { if(document.getElementById('lockInput').value === 'ekdms320') { sessionStorage.setItem('isUnlocked', 'true'); document.getElementById('lockScreen').style.display='none'; loadAllData(); } else { alert('비밀번호 오류'); document.getElementById('lockInput').value=''; } }
@@ -548,7 +592,7 @@
         async function uploadHomeImage(inp) { if(inp.files.length===0) return; const f=inp.files[0]; const r=new FileReader(); r.onload=async(e)=>{ const b=e.target.result.split(',')[1]; const res=await sendRequest('upload_file', {name:"home_"+Date.now(), mimeType:f.type, data:b}); if(res){ document.getElementById('homeMainImg').src=res.url; document.getElementById('homeMainImg').style.display='block'; document.querySelector('.home-image-msg').style.display='none'; await sendRequest('save_home_config',{key:"MainImage", value:res.url}); } }; r.readAsDataURL(f); }
         function renderHomeToDo() { const t=formatDateYMD(new Date()); const l=calendarEvents.filter(e=>e.date===t); document.getElementById('homeToDoList').innerHTML = l.length>0 ? l.map(e=>`• ${e.title}`).join('<br>') : "일정 없음"; }
         
-        // [Modified] Separate Quick Record functions for Mobile/PC to handle different IDs
+        // Quick Record
         async function saveHomeQuickRecord(source) { 
             let inputId = 'homeQuickInput';
             if(source === 'mobile') inputId = 'homeQuickInputMobile';
@@ -589,6 +633,102 @@
                 document.getElementById('checkHeader').style.visibility=m==='subject'?'visible':'hidden'; 
                 renderRecordList();
             }
+        }
+        
+        // [New] Mobile Record Mode Logic
+        function setMobileMode(m) {
+            mobileMode = m;
+            document.getElementById('mobBtnSub').className = m === 'subject' ? 'btn-sm active' : 'btn-sm inactive';
+            document.getElementById('mobBtnBeh').className = m === 'behavior' ? 'btn-sm active' : 'btn-sm inactive';
+            document.getElementById('mobBtnCust').className = m === 'custom' ? 'btn-sm active' : 'btn-sm inactive';
+            
+            if(m === 'custom') {
+                document.getElementById('mobViewQuick').style.display = 'none';
+                document.getElementById('mobViewCustom').style.display = 'flex';
+                // Load Custom items into select
+                const s = document.getElementById('mobCustomSelect'); s.innerHTML = '';
+                loadCustomItems().then(() => {
+                    customItems.forEach((item, idx) => {
+                       const opt = document.createElement('option'); opt.value = idx; opt.innerText = item.name;
+                       s.appendChild(opt);
+                    });
+                    if(customItems.length > 0) renderMobileCustomList();
+                });
+            } else {
+                document.getElementById('mobViewQuick').style.display = 'flex';
+                document.getElementById('mobViewCustom').style.display = 'none';
+                const tip = document.getElementById('mobQuickTip');
+                if(m === 'subject') tip.innerText = "예: 김철수/수학/발표 잘함";
+                else tip.innerText = "예: 김철수/친구를 잘 도와줌";
+            }
+        }
+
+        async function saveMobileQuickRecord() {
+            const t = document.getElementById('mobQuickInput').value.trim();
+            if(!t) return;
+            showToast("AI 처리 중...");
+            try {
+                let prompt = "";
+                if(mobileMode === 'subject') {
+                    prompt = `입력:"${t}". 규칙: 이름/과목/내용 분리. JSON출력:{"name":"이름","type":"과목","text":"내용"}`;
+                } else {
+                    prompt = `입력:"${t}". 규칙: 이름/내용 분리. 과목은 '행동'으로 고정. JSON출력:{"name":"이름","type":"행동","text":"내용"}`;
+                }
+                const a = await sendRequest('call_ai', {prompt});
+                const j = JSON.parse(a.text.replace(/```json/g,"").replace(/```/g,""));
+                await sendRequest('save_record', {
+                    date: document.getElementById('mobDate').value, 
+                    name: j.name, type: j.type, text: j.text, check: "없음"
+                });
+                document.getElementById('mobQuickInput').value = "";
+                showToast("저장 완료");
+            } catch(e) { showToast("실패"); }
+        }
+
+        function renderMobileCustomList() {
+             const idx = document.getElementById('mobCustomSelect').value;
+             const container = document.getElementById('mobCustomList');
+             container.innerHTML = '';
+             if(idx === null || idx === undefined) return;
+             
+             const itemDef = customItems[idx];
+             studentList.forEach(st => {
+                 const row = document.createElement('div'); row.className = 'student-row';
+                 let inputHtml = '';
+                 if(itemDef.type === 'check') inputHtml = `<input type="checkbox" class="mob-cust-val" style="width:20px; height:20px; margin:0;">`;
+                 else if(itemDef.type === 'switch') inputHtml = `<label class="switch"><input type="checkbox" class="mob-cust-val"><span class="slider"></span></label>`;
+                 else if(itemDef.type === 'select') inputHtml = `<select class="mob-cust-val" style="margin:0;"><option>상</option><option>중</option><option>하</option></select>`;
+                 
+                 row.innerHTML = `<div class="st-name">${st.name}</div><div style="flex:1;"></div>${inputHtml}`;
+                 container.appendChild(row);
+             });
+        }
+
+        async function saveMobileCustom() {
+             const idx = document.getElementById('mobCustomSelect').value;
+             if(idx === null) return;
+             const itemDef = customItems[idx];
+             const rows = document.querySelectorAll('#mobCustomList .student-row');
+             const data = [];
+             const date = document.getElementById('mobDate').value;
+             
+             rows.forEach(row => {
+                 const name = row.querySelector('.st-name').innerText;
+                 const el = row.querySelector('.mob-cust-val');
+                 let val = "";
+                 if(itemDef.type === 'select') val = el.value;
+                 else val = el.checked ? (itemDef.type==='check'?'O':'ON') : '';
+                 if(val) data.push({date: date, item: itemDef.name, name: name, value: val});
+             });
+             
+             if(data.length > 0) {
+                 await sendRequest('custom_record', {mode:'save', data: data});
+                 showToast("저장 완료");
+                 // Reset inputs
+                 document.querySelectorAll('.mob-cust-val').forEach(e => {
+                     if(e.type === 'checkbox') e.checked = false;
+                 });
+             } else { showToast("선택된 내용 없음"); }
         }
 
         // [CUSTOM MODE LOGIC]
@@ -898,8 +1038,9 @@
         }
         async function loadMemos() { memoList=await sendRequest('get_memos')||[]; setMemoMode(memoMode); }
         function moveMemoMonth(d) { curMemoMonth+=d; if(curMemoMonth>11){curMemoMonth=0;curMemoYear++;}else if(curMemoMonth<0){curMemoMonth=11;curMemoYear--;} renderMemoCalendar(); }
-        
-        // [Modified] Fix Memo Calendar Dots (Check content validity)
+        // [New] Go to Today for Memo
+        function goToMemoToday() { const t=new Date(); curMemoYear=t.getFullYear(); curMemoMonth=t.getMonth(); selectedMemoDate=formatDateYMD(t); renderMemoCalendar(); renderMemoPreview(); }
+
         function renderMemoCalendar() { 
             const g=document.getElementById('memoCalGrid'); g.innerHTML=''; 
             document.getElementById('memoMonthTitle').innerText=`${curMemoYear}.${curMemoMonth+1}`; 
