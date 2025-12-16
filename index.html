@@ -18,26 +18,24 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Gowun Dodum', sans-serif;
             -webkit-tap-highlight-color: transparent; }
         
-        /* [Layout Fix 1] Force Body Height */
+        /* Layout Structure */
         body { background-color: var(--bg-main); color: var(--text-main); font-size: 16px; line-height: 1.5; height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
-        
-        /* [Layout Fix 2] Main Container strictly flex */
         .container { 
-            width: 100%; max-width: 1400px; margin: 0 auto; padding: 10px; 
+            width: 100%; max-width: 1400px; margin: 0 auto; padding: 20px; 
             height: 100%; flex: 1; display: flex; flex-direction: column; overflow: hidden;
         }
         
-        header { text-align: center; margin-bottom: 10px; flex-shrink: 0; }
-        h1 { color: var(--primary-dark); font-size: 1.5rem; font-weight: bold; letter-spacing: -0.5px; margin: 0; }
+        header { text-align: center; margin-bottom: 15px; flex-shrink: 0; }
+        h1 { color: var(--primary-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: -0.5px; margin: 0; }
 
-        /* [Crucial Fix] Scroll Wrapper Class - Apply this to scrollable areas */
+        /* Scroll Wrapper - Critical for scrolling */
         .scroll-wrapper {
-            flex: 1;            /* Take all remaining space */
-            min-height: 0;      /* Allow shrinking below content size (Critical for Scroll) */
-            overflow-y: auto;   /* Scroll if content overflows */
-            width: 100%;
-            padding-right: 5px; /* Space for scrollbar */
+            flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding-right: 5px;
         }
+
+        /* Visibility Controls - PC Default */
+        .pc-only { display: block; height: 100%; }
+        .mobile-only { display: none !important; } /* Hidden on PC */
 
         /* Overlay & Modals */
         .global-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 2000; display: none; }
@@ -68,7 +66,7 @@
         .lock-msg { font-size: 0.8rem; color: var(--danger); min-height: 20px; margin-bottom: 10px;}
 
         /* Nav */
-        .nav-tabs { display: flex; flex-shrink: 0; background: var(--card-bg); border-radius: 8px; margin-bottom: 10px; padding: 4px; border: 1px solid var(--border-color); }
+        .nav-tabs { display: flex; flex-shrink: 0; background: var(--card-bg); border-radius: 8px; margin-bottom: 15px; padding: 4px; border: 1px solid var(--border-color); }
         .nav-item { flex: 1; text-align: center; padding: 12px; cursor: pointer; color: var(--text-sub); border-radius: 6px; font-weight: bold; transition: 0.2s; }
         .nav-item.active { color: var(--primary-dark); background-color: #eaf6fc; }
         .nav-item-home { flex: 0.5; min-width: 60px; color: var(--primary-dark); }
@@ -78,18 +76,15 @@
         .section.active { display: flex; animation: fadeIn 0.2s; } 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
-        .pc-only { display: block; height: 100%; }
-        .mobile-only { display: none; height: 100%; }
-        
-        .split-container { display: flex; gap: 15px; height: 100%; overflow: hidden; }
-        .split-left { width: 340px; flex-shrink: 0; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+        .split-container { display: flex; gap: 20px; height: 100%; overflow: hidden; }
+        .split-left { width: 360px; flex-shrink: 0; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
         .split-right { flex: 1; min-width: 0; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
         .split-half { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
         /* Card System */
-        .card { background: var(--card-bg); border-radius: 8px; padding: 15px; border: 1px solid var(--border-color); box-shadow: 0 1px 2px rgba(0,0,0,0.03); display: flex; flex-direction: column; }
-        .card.full-height { flex: 1; height: 100%; min-height: 0; overflow: hidden; } /* Fix for flex height */
-        .card-header { font-size: 1.1rem; color: var(--primary-dark); font-weight: bold; margin-bottom: 10px; padding-bottom: 8px; flex-shrink: 0; border-bottom: 2px solid var(--bg-main); display: flex; justify-content: space-between; align-items: center; }
+        .card { background: var(--card-bg); border-radius: 8px; padding: 20px; border: 1px solid var(--border-color); box-shadow: 0 1px 2px rgba(0,0,0,0.03); display: flex; flex-direction: column; }
+        .card.full-height { flex: 1; height: 100%; min-height: 0; overflow: hidden; } 
+        .card-header { font-size: 1.1rem; color: var(--primary-dark); font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; flex-shrink: 0; border-bottom: 2px solid var(--bg-main); display: flex; justify-content: space-between; align-items: center; }
 
         /* Float Menu */
         .float-btn { position: fixed; top: 20px; right: 20px; width: 50px; height: 50px; background: var(--primary); color: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 2100; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; transition: 0.3s; }
@@ -105,10 +100,10 @@
         .tag .x-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; line-height: 16px; text-align: center; border-radius: 50%; font-size: 0.8rem; background: rgba(0,0,0,0.1); color: inherit; display: none; }
         .tag:hover .x-btn { display: block; }
         
-        .student-row { display: flex; align-items: center; gap: 10px; padding: 10px 5px; border-bottom: 1px solid var(--bg-main); background: white; }
-        .st-name { width: 80px; font-weight: bold; color: var(--primary-dark); flex-shrink: 0; }
+        .student-row { display: flex; align-items: center; gap: 15px; padding: 12px 10px; border-bottom: 1px solid var(--bg-main); background: white; }
+        .st-name { width: 90px; font-weight: bold; color: var(--primary-dark); flex-shrink: 0; }
         .st-input { flex-grow: 1; margin-bottom: 0 !important; height: 40px; }
-        .st-check-group { display: flex; gap: 5px; width: 140px; flex-shrink: 0; justify-content: space-between; }
+        .st-check-group { display: flex; gap: 8px; width: 220px; flex-shrink: 0; justify-content: space-between; }
         .check-circle { width: 28px; height: 28px; border: 2px solid var(--border-color); border-radius: 50%; cursor: pointer; position: relative; background: var(--bg-main); }
         .check-circle.checked { border-color: var(--primary); background: var(--primary); }
         .check-circle.checked::after { content: 'v'; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; font-weight:bold; }
@@ -211,20 +206,20 @@
             .container { padding: 10px; }
             .nav-item { font-size: 0.9rem; padding: 10px 5px; }
             .pc-only { display: none !important; }
-            .mobile-only { display: flex !important; } /* Force Flex for mobile containers */
+            .mobile-only { display: block !important; }
+            .home-image-area { display: none !important; } /* Hide Image on Mobile */
             
             .split-container { flex-direction: column; overflow-y: auto; }
             .split-left, .split-right { width: 100%; height: auto; overflow: visible; flex: 1; min-height: 0; }
             .card { min-height: 0; }
             .pc-only-tab .split-container { display: none; }
             .pc-only-tab .mobile-block-overlay { display: flex; }
-            .home-image-area { min-height: 150px; }
             .quick-link-grid { grid-template-columns: repeat(3, 1fr); }
             .float-btn { top: auto; bottom: 30px; }
             .float-menu { top: auto; bottom: 90px; }
             .music-capsule { display: none !important; }
             
-            /* [Crucial Fix for Mobile Record Tab] */
+            /* Mobile Record Full Height Fix */
             .mobile-only.full-height { height: 100%; display: flex; flex-direction: column; overflow: hidden; }
         }
     </style>
@@ -263,7 +258,7 @@
         </nav>
 
         <div id="home" class="section active">
-            <div class="mobile-only" style="margin-bottom: 10px; display:block !important; height: auto;">
+            <div class="mobile-only" style="margin-bottom: 10px; height: auto;">
                 <div class="card">
                      <div class="card-header">빠른 기록 (모바일)</div>
                      <div style="background:#f9f9f9; padding:15px; border-radius:8px;">
