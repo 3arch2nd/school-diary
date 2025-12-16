@@ -4,7 +4,7 @@
     <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>쫑알수첩 Pro (Slim Layout v21.3)</title>
+    <title>쫑알수첩 Pro (Detail Fix v21.4)</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -29,6 +29,23 @@
         h1 { color: var(--primary-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: -0.5px; margin: 0;
         }
 
+        /* [1. 숫자 박스 스피너(화살표) 제거] */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield; /* 파이어폭스 대응 */
+        }
+
+        /* [2. 가로선(hr) 색상 통일] */
+        hr {
+            border: 0;
+            border-top: 1px solid var(--border-color); /* 테마 색상 적용 */
+            margin: 20px 0;
+        }
+
         /* 레이아웃 공통 */
         .scroll-wrapper { flex: 1;
             min-height: 0; overflow-y: auto; width: 100%; padding-right: 5px; }
@@ -42,39 +59,20 @@
         .mobile-only { display: none !important;
         }
 
-        /* [✨ Slim Layout: 체크박스 영역 축소] */
+        /* Slim Layout: 체크박스 영역 축소 */
         .student-row { 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; /* 전체 요소 간격도 살짝 줄임 (15->10) */
-            padding: 12px 10px; 
-            border-bottom: 1px solid var(--bg-main); 
-            background: white; 
-            min-height: 50px;
+            display: flex; align-items: center; gap: 10px; 
+            padding: 12px 10px; border-bottom: 1px solid var(--bg-main); background: white; min-height: 50px;
         }
         .st-name { 
-            width: 80px; /* 이름 영역도 살짝 다이어트 (90->80) */
-            font-weight: bold; 
-            color: var(--primary-dark); 
-            flex-shrink: 0; 
-            text-align: center; 
+            width: 80px; font-weight: bold; color: var(--primary-dark); flex-shrink: 0; text-align: center; 
         }
         .st-input { 
-            flex-grow: 1; /* 남는 공간은 전부 입력창 차지! */
-            margin-bottom: 0 !important; 
-            height: 40px; 
+            flex-grow: 1; margin-bottom: 0 !important; height: 40px; 
         }
-        
-        /* 체크박스 그룹 너비 및 간격 축소 */
         .st-check-group { 
-            display: flex; 
-            gap: 2px; /* 간격 최소화 (8px -> 2px) */
-            width: 160px; /* 전체 너비 축소 (220px -> 160px) */
-            flex-shrink: 0; 
-            justify-content: space-between; 
+            display: flex; gap: 2px; width: 160px; flex-shrink: 0; justify-content: space-between; 
         }
-
-        /* 체크 동그라미 스타일 */
         .check-circle { width: 24px; height: 24px; border: 2px solid var(--border-color); border-radius: 50%;
             cursor: pointer; position: relative; background: var(--bg-main); }
         .check-circle.checked { border-color: var(--primary); background: var(--primary);
@@ -82,18 +80,12 @@
         .check-circle.checked::after { content: 'v'; color: white; position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%); font-size: 14px; font-weight:bold; }
 
-        /* [Header] 헤더 체크박스 라벨 영역도 너비 동기화 */
+        /* Header Checkbox Labels */
         #checkHeader {
-            width: 160px; /* 그룹 너비와 일치 (220px -> 160px) */
-            display: flex; 
-            justify-content: space-between; 
-            font-size: 0.75rem;
+            width: 160px; display: flex; justify-content: space-between; font-size: 0.75rem;
         }
         #checkHeader span {
-            width: 36px; /* 각 라벨의 확보 너비 */
-            text-align: center;
-            letter-spacing: -1px; /* 글자 겹침 방지 */
-            line-height: 1.1;
+            width: 36px; text-align: center; letter-spacing: -1px; line-height: 1.1;
         }
 
         /* 빠른 체크 (Custom) 스타일 */
@@ -106,7 +98,7 @@
         .quick-name { font-weight: bold; color: var(--text-main); }
         .quick-input { flex-shrink: 0; } 
 
-        /* 기타 UI 요소들 */
+        /* UI 요소들 */
         .global-overlay { position: fixed;
             top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 2000; display: none;
         }
@@ -257,11 +249,44 @@
         .float-menu-item { background: white; padding: 10px 20px; border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; font-weight: bold; color: var(--text-main); text-align: right; border: 1px solid var(--border-color); transition: 0.2s;
         }
-        .music-panel { position: fixed; top: 80px; left: -420px; width: 400px; height: 220px;
-            background: white; border-radius: 12px; box-shadow: 2px 2px 15px rgba(0,0,0,0.2); z-index: 2200; transition: left 0.3s ease-in-out; display: flex; overflow: hidden;
+        
+        /* [3. 음악 플레이어 수정 - 다크 테마 & 여백 개선] */
+        .music-panel { 
+            position: fixed; top: 80px; left: -420px; width: 400px; height: 220px;
+            background: #2c3e50; /* 어두운 배경 */
+            color: white; /* 흰 글씨 */
+            border-radius: 12px; box-shadow: 2px 2px 15px rgba(0,0,0,0.3); 
+            z-index: 2200; transition: left 0.3s ease-in-out; display: flex; overflow: hidden;
         }
         .music-panel.show { left: 20px;
         } 
+        .mp-video { width: 40%; background: black; /* iframe 영역 */
+        }
+        .mp-list { 
+            flex: 1; 
+            display: flex; flex-direction: column; 
+            padding: 15px; /* 여백 넉넉하게 */
+            border-left: 1px solid #445566; /* 구분선 색상 */
+            gap: 5px; 
+            overflow-y: auto;
+        }
+        .mp-item { 
+            font-size: 0.8rem; /* 글자 크기 축소 */
+            padding: 5px 0; 
+            border-bottom: 1px solid #445566; /* 구분선 색상 */
+            cursor: pointer; 
+            display: flex; justify-content: space-between;
+            color: #ecf0f1;
+        }
+        .mp-item:hover { color: var(--primary-light); }
+        .mp-add { 
+            margin-top: auto; display: flex; gap: 5px; /* 입력창과 버튼 사이 간격 */
+        }
+        .mp-add input {
+            flex: 1; margin: 0; font-size: 0.8rem; height: 30px; padding: 5px;
+            background: #34495e; color: white; border: 1px solid #556677; /* 인풋 스타일 */
+        }
+        
         .music-capsule { position: fixed; top: 20px; left: 20px; width: 220px;
             height: 50px; background: var(--primary-light); color: var(--primary-dark); border-radius: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 2300; display: flex; align-items: center;
             padding: 0 5px 0 15px; transition: 0.3s; overflow: hidden; border: 2px solid white;
@@ -706,7 +731,7 @@
             </div>
         </div>
         
-        <div id="data" class="section pc-only-tab"><div class="mobile-block-overlay"><span>⚙️</span><p>해당 기능은 PC/태블릿에서<br>사용 가능해요!</p></div><div class="split-container pc-only"><div class="split-left"><div class="card full-height scrollable"><div class="card-header">참고 자료</div><input type="file" id="uploadInput" style="margin-bottom:10px;"><button class="btn btn-outline" id="btnUpload" style="width:100%; margin-bottom:15px;" onclick="uploadFile()">업로드</button><div id="fileList"></div></div></div><div class="split-right"><div class="card full-height scrollable"><div class="card-header">설정</div><div id="publicModeSettings" style="display:none; background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:20px;"><label>Gemini API Key</label><input type="password" id="settingApiKey"><button class="btn-sm active" style="width:100%;" onclick="savePublicSettings()">저장</button></div><label>AI 페르소나</label><textarea id="personaText" style="height:150px;" placeholder="예: 초등학교 교사 말투..."></textarea><div style="text-align:right;"><button class="btn btn-primary" id="btnPersona" onclick="savePersona()">저장</button></div><hr style="margin:20px 0;"><div class="card-header" style="color:var(--danger); border-bottom:none;">데이터 관리</div><button class="btn btn-danger" style="width:100%" onclick="reqConfirm('데이터를 초기화하시겠습니까?', archiveData)">[새 학년 준비] 데이터 백업 및 초기화</button></div></div></div></div>
+        <div id="data" class="section pc-only-tab"><div class="mobile-block-overlay"><span>⚙️</span><p>해당 기능은 PC/태블릿에서<br>사용 가능해요!</p></div><div class="split-container pc-only"><div class="split-left"><div class="card full-height scrollable"><div class="card-header">참고 자료</div><input type="file" id="uploadInput" style="margin-bottom:10px;"><button class="btn btn-outline" id="btnUpload" style="width:100%; margin-bottom:15px;" onclick="uploadFile()">업로드</button><div id="fileList"></div></div></div><div class="split-right"><div class="card full-height scrollable"><div class="card-header">설정</div><div id="publicModeSettings" style="display:none; background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:20px;"><label>Gemini API Key</label><input type="password" id="settingApiKey"><button class="btn-sm active" style="width:100%;" onclick="savePublicSettings()">저장</button></div><label>AI 페르소나</label><textarea id="personaText" style="height:150px;" placeholder="예: 초등학교 교사 말투..."></textarea><div style="text-align:right;"><button class="btn btn-primary" id="btnPersona" onclick="savePersona()">저장</button></div><hr><div class="card-header" style="color:var(--danger); border-bottom:none;">데이터 관리</div><button class="btn btn-danger" style="width:100%" onclick="reqConfirm('데이터를 초기화하시겠습니까?', archiveData)">[새 학년 준비] 데이터 백업 및 초기화</button></div></div></div></div>
     </div>
 
     <div id="toast"></div>
@@ -810,11 +835,12 @@
             c.innerHTML = '';
             musicPlaylist.forEach((m, i) => {
                 const d = document.createElement('div'); d.className = 'mp-item';
-                d.innerHTML = `<span onclick="playMusic('${m.id}', '${m.name}')">🎵 ${m.name}</span> <span style="color:#e74c3c;" onclick="removeMusic(${i})">x</span>`;
+                // [이모지 제거]
+                d.innerHTML = `<span onclick="playMusic('${m.id}', '${m.name}')">${m.name}</span> <span style="color:#e74c3c;" onclick="removeMusic(${i})">x</span>`;
                 c.appendChild(d);
             });
             const addDiv = document.createElement('div'); addDiv.className = 'mp-add';
-            addDiv.innerHTML = `<input type="text" id="newMusicUrl" placeholder="유튜브 링크" style="flex:1; margin:0; font-size:0.8rem;"><button class="btn-sm active" onclick="addMusic()">+</button>`;
+            addDiv.innerHTML = `<input type="text" id="newMusicUrl" placeholder="유튜브 링크"><button class="btn-sm active" onclick="addMusic()">+</button>`;
             c.appendChild(addDiv);
         }
         function playMusic(id, name) { 
