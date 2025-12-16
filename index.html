@@ -4,7 +4,7 @@
     <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>쫑알수첩 Pro (Stable)</title>
+    <title>쫑알수첩 Pro (Final Stable)</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -59,7 +59,7 @@
         .ai-loading-icon { display: inline-block; width: 10px; height: 10px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 10px; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Lock Screen [긴급 수정: Z-Index 최상위 보장 및 입력 활성화] */
+        /* Lock Screen */
         #lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-main); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; }
         #lockCard { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; width: 320px; position: relative; z-index: 100000; }
         #lockInput { font-size: 1.2rem; text-align: center; margin-bottom: 5px; letter-spacing: 2px; position: relative; z-index: 100001; background: white; }
@@ -95,29 +95,37 @@
         .tag .x-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; line-height: 16px; text-align: center; border-radius: 50%; font-size: 0.8rem; background: rgba(0,0,0,0.1); color: inherit; display: none; }
         .tag:hover .x-btn { display: block; }
         
-        /* [중요] 그리드 시스템 재정의 (v20.4) */
-        .grid-row { display: flex; align-items: center; width: 100%; gap: 10px; }
-        .col-name { width: 90px; flex-shrink: 0; font-weight: bold; text-align: center; }
+        /* [핵심 수정] 만능 그리드 시스템 - 과목, 행동, 빠른체크 모두 통일 */
+        .student-row { display: flex; align-items: center; width: 100%; gap: 10px; padding: 10px 5px; border-bottom: 1px solid var(--bg-main); background: white; margin-bottom: 2px; }
         
-        /* [수정] 내용 칸 너비 확보를 위해 flex-grow를 적극 활용 */
-        .col-content { flex: 1; min-width: 0; }
+        /* 이름: 고정 너비 */
+        .st-name { width: 90px; flex-shrink: 0; font-weight: bold; text-align: center; color: var(--primary-dark); }
         
-        /* [수정] 체크박스 영역 너비 대폭 축소 (260px -> 180px) */
-        .col-check { width: 180px; flex-shrink: 0; display: flex; justify-content: space-between; padding: 0 2px; }
-        
-        .student-row { padding: 10px 5px; border-bottom: 1px solid var(--bg-main); background: white; margin-bottom: 2px; }
+        /* 내용/공백: 남은 공간 모두 차지 */
+        .st-content { flex: 1; min-width: 0; display: flex; align-items: center; }
         .st-input { width: 100%; height: 42px; margin: 0 !important; } 
         
-        .record-header-row { padding: 12px 5px; border-bottom: 2px solid #eee; background: #fafafa; border-radius: 6px 6px 0 0; color: var(--text-sub); font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; }
-        .col-check span { width: 40px; text-align: center; display: inline-block; letter-spacing: -1px; word-break: keep-all; line-height: 1.2; font-size: 0.75rem; }
+        /* 체크박스 그룹: 고정 너비 (작게 수정됨 180px) */
+        .st-check-group { width: 180px; flex-shrink: 0; display: flex; justify-content: space-between; padding: 0 2px; }
+        
+        /* 빠른 체크 전용 오른쪽 정렬 */
+        .st-right-end { justify-content: flex-end; }
 
-        /* [수정] 체크 동그라미 크기 축소 (30px -> 24px) */
+        /* 헤더 전용 스타일 */
+        .record-header-row { display: flex; align-items: center; width: 100%; gap: 10px; padding: 12px 5px; border-bottom: 2px solid #eee; background: #fafafa; border-radius: 6px 6px 0 0; color: var(--text-sub); font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; }
+        .col-check-header { width: 180px; flex-shrink: 0; display: flex; justify-content: space-between; padding: 0 2px; }
+        .col-check-header span { width: 40px; text-align: center; display: inline-block; letter-spacing: -1px; word-break: keep-all; line-height: 1.2; font-size: 0.75rem; }
+
         .check-circle { width: 24px; height: 24px; border: 2px solid var(--border-color); border-radius: 50%; cursor: pointer; position: relative; background: var(--bg-main); }
         .check-circle.checked { border-color: var(--primary); background: var(--primary); }
         .check-circle.checked::after { content: 'v'; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; font-weight:bold; }
 
+        /* [핵심 수정] 빠른 체크 스크롤 복구 */
+        #customCheckList { flex: 1; min-height: 0; overflow-y: auto; padding-right: 5px; }
+
         .custom-item-row { padding: 10px; border: 1px solid #eee; border-radius: 6px; margin-bottom: 5px; cursor: pointer; display: flex; justify-content: space-between; }
         .custom-item-row.active { border-color: var(--primary); background: #f9fcff; }
+        
         .bar-chart-container { display: flex; flex-direction: column; height: 100%; overflow: hidden; padding-bottom: 10px; }
         .chart-bars-area { flex: 1; display: flex; align-items: flex-end; gap: 2px; padding-top: 20px; border-bottom: 1px solid #ccc; position: relative; }
         .stat-bar { flex: 1; background: #e0e0e0; border-radius: 3px 3px 0 0; transition: all 0.2s; position: relative; min-height: 20%; cursor: pointer; }
@@ -395,10 +403,10 @@
                                         </div>
                                     </div>
                                     
-                                    <div class="record-header-row grid-row">
-                                        <div class="col-name">이름</div>
-                                        <div class="col-content">내용</div>
-                                        <div id="checkHeader" class="col-check">
+                                    <div class="record-header-row" id="recordHeaderRow">
+                                        <div class="st-name">이름</div>
+                                        <div class="st-content" style="justify-content:center;">내용</div>
+                                        <div class="col-check-header" id="checkHeader">
                                             <span>매우<br>잘함</span>
                                             <span>잘함</span>
                                             <span>보통</span>
@@ -677,7 +685,10 @@
                 document.getElementById('customRecordView').style.display = 'none';
                 
                 document.getElementById('subjectArea').style.display=m==='subject'?'block':'none'; 
+                
+                // [중요 수정] 행동 탭에서는 4단 평가 헤더를 숨김
                 document.getElementById('checkHeader').style.visibility=m==='subject'?'visible':'hidden'; 
+                
                 renderRecordList();
             }
         }
@@ -746,7 +757,7 @@
                  else if(itemDef.type === 'switch') inputHtml = `<label class="switch"><input type="checkbox" class="mob-cust-val"><span class="slider"></span></label>`;
                  else if(itemDef.type === 'select') inputHtml = `<select class="mob-cust-val" style="margin:0;"><option>상</option><option>중</option><option>하</option></select>`;
                  
-                 row.innerHTML = `<div class="st-name">${st.name}</div><div style="flex:1;"></div>${inputHtml}`;
+                 row.innerHTML = `<div class="st-name">${st.name}</div><div class="st-content"></div>${inputHtml}`;
                  container.appendChild(row);
              });
         }
@@ -801,19 +812,25 @@
                 loadCustomItems().then(renderCustomItems);
             }
         }
+        
+        // [중요 수정] 빠른 체크 리스트 생성 (CSS 클래스 통일 및 오른쪽 정렬)
         function renderCustomCheckList() {
             const container = document.getElementById('customCheckList');
             container.innerHTML = '';
             if (currentCustomItem === null) return;
             const itemDef = customItems[currentCustomItem];
             studentList.forEach(st => {
-                const row = document.createElement('div'); row.className = 'student-row';
+                const row = document.createElement('div'); 
+                // 빠른 체크는 오른쪽 정렬이 필요하므로 st-right-end 추가
+                row.className = 'student-row st-right-end'; 
+                
                 let inputHtml = '';
-                if(itemDef.type === 'check') inputHtml = `<input type="checkbox" class="cust-val" style="width:20px; height:20px; margin:0;">`;
+                if(itemDef.type === 'check') inputHtml = `<input type="checkbox" class="cust-val" style="width:24px; height:24px; margin:0;">`;
                 else if(itemDef.type === 'switch') inputHtml = `<label class="switch"><input type="checkbox" class="cust-val"><span class="slider"></span></label>`;
                 else if(itemDef.type === 'select') inputHtml = `<select class="cust-val" style="margin:0;"><option>상</option><option>중</option><option>하</option></select>`;
                 
-                row.innerHTML = `<div class="st-name">${st.name}</div><div style="flex:1;"></div>${inputHtml}`;
+                // st-content를 비워두되 flex로 공간을 차지하게 하여 양옆으로 찢음
+                row.innerHTML = `<div class="st-name" style="text-align:left;">${st.name}</div><div class="st-content"></div>${inputHtml}`;
                 container.appendChild(row);
             });
         }
@@ -929,10 +946,16 @@
              const l=document.getElementById('recordList');
              l.innerHTML='';
              studentList.forEach(st=>{
-                 // [중요] 그리드 클래스(grid-row)를 사용하여 학생 목록 행 생성
-                 const r=document.createElement('div'); r.className='student-row grid-row';
-                 let chk=currentMode==='subject'?`<div class="col-check st-check-group"><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div></div>`:'';
-                 r.innerHTML=`<div class="col-name st-name">${st.name}</div><div class="col-content"><input type="text" class="st-input" id="input_${st.id}" placeholder="내용"></div>${chk}`;
+                 const r=document.createElement('div'); r.className='student-row';
+                 
+                 // [핵심 로직] 행동 탭이면 체크박스 그룹을 아예 빈 문자열로 처리
+                 // 이렇게 하면 st-content가 flex: 1 덕분에 끝까지 늘어나게 됨
+                 let chk = '';
+                 if(currentMode === 'subject') {
+                     chk = `<div class="st-check-group"><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div></div>`;
+                 }
+                 
+                 r.innerHTML=`<div class="st-name">${st.name}</div><div class="st-content"><input type="text" class="st-input" id="input_${st.id}" placeholder="내용"></div>${chk}`;
                  l.appendChild(r);
              });
         }
@@ -946,7 +969,7 @@
             inputs.forEach(i=>{
                 const txt=i.value.trim(); const row=i.closest('.student-row'); const name=row.querySelector('.st-name').innerText;
                 let chk="없음";
-                if(currentMode==='subject'){ const c=row.querySelectorAll('.check-circle'); if(c[0].classList.contains('checked')) chk="매우잘함"; else if(c[1].classList.contains('checked')) chk="잘함"; else if(c[2].classList.contains('checked')) chk="보통"; else if(c[3].classList.contains('checked')) chk="노력요함"; }
+                if(currentMode==='subject'){ const c=row.querySelectorAll('.check-circle'); if(c&&c.length>0) { if(c[0].classList.contains('checked')) chk="매우잘함"; else if(c[1].classList.contains('checked')) chk="잘함"; else if(c[2].classList.contains('checked')) chk="보통"; else if(c[3].classList.contains('checked')) chk="노력요함"; } }
                 if(txt || chk!=="없음") list.push({name, text:txt, check:chk});
             });
             if(list.length===0){showToast("내용 없음");return;}
