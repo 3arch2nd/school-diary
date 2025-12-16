@@ -4,7 +4,7 @@
     <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>쫑알수첩 Pro (v21.7)</title>
+    <title>쫑알수첩 Pro (v21.8)</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -27,7 +27,7 @@
         header { text-align: center; margin-bottom: 15px; flex-shrink: 0;
         }
         
-        /* [2. 제목 디자인 분리] */
+        /* 제목 디자인 분리 */
         h1 { color: var(--primary-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: -0.5px; margin: 0; }
         .version-tag { color: #bdc3c7; font-size: 1rem; font-weight: normal; margin-left: 5px; vertical-align: middle; }
 
@@ -39,12 +39,11 @@
         /* 가로선 통일 */
         hr { border: 0; border-top: 1px solid var(--border-color); margin: 20px 0; }
 
-        /* [0. 호버링 효과: Scale Up] */
+        /* 호버링 효과: Scale Up */
         @media (min-width: 769px) {
             .btn, .nav-item, .float-btn, .music-play-btn, .custom-item-row, .student-nav-item, .quick-link-item, .lock-float-btn {
                 transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
             }
-            /* 떠오르는 것(translateY) 대신 커지게(scale) */
             .btn:hover, .btn-sm:hover:not(.inactive), .float-btn:hover, .music-play-btn:hover, .lock-float-btn:hover {
                 transform: scale(1.08); 
                 box-shadow: 0 4px 12px rgba(0,0,0,0.15);
@@ -60,7 +59,7 @@
             }
         }
 
-        /* [1. 로딩 애니메이션] */
+        /* 로딩 애니메이션 */
         .loading-anim::after {
             content: ''; animation: dots 1.5s steps(4, end) infinite;
         }
@@ -140,16 +139,16 @@
         .stat-bar { flex: 1; background: #e0e0e0; border-radius: 3px 3px 0 0; transition: all 0.2s; position: relative; min-height: 20%; cursor: pointer; }
         .stat-bar:hover { background: var(--primary); transform: scaleY(1.05); transform-origin: bottom; z-index: 100; /* 막대 호버시 앞으로 */ }
         
-        /* [3. 통계 툴팁 개선: 항상 위에, 잘림 방지 로직은 JS와 연동된 CSS 클래스 활용] */
+        /* [통계 툴팁 개선] */
         .stat-bar .tooltip { 
             position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); 
             background: rgba(0,0,0,0.8); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; white-space: nowrap; pointer-events: none; 
             opacity: 0; transition: 0.2s; z-index: 101; /* 툴팁 최상단 */
         }
         .stat-bar:hover .tooltip { opacity: 1; bottom: 105%; }
-        /* 왼쪽 끝: 오른쪽으로 이동 */
+        /* 왼쪽 영역: 툴팁이 오른쪽으로 전개 (Left 기준 정렬) */
         .stat-bar .tooltip.left-align { left: 0; transform: translateX(0); }
-        /* 오른쪽 끝: 왼쪽으로 이동 */
+        /* 오른쪽 영역: 툴팁이 왼쪽으로 전개 (Right 기준 정렬) */
         .stat-bar .tooltip.right-align { left: auto; right: 0; transform: translateX(0); }
 
         .switch-container { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text-sub); margin-right: 10px;}
@@ -171,7 +170,7 @@
         .btn-sm.inactive { background: white; color: var(--text-sub); border-color: var(--border-color); }
         .btn-icon { font-size: 0.8rem; background: none; border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-left: 5px; }
 
-        .float-btn { position: fixed; top: 20px; right: 20px; width: 50px; height: 50px; background: var(--primary); color: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 2100; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; }
+        .float-btn { position: fixed; top: 20px; right: 20px; width: 50px; height: 50px; background: var(--primary); color: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 2100; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; transition: 0.3s; }
         
         .float-menu { 
             position: fixed; top: 80px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 2100;
@@ -179,7 +178,7 @@
             transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         .float-menu.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
-        .float-menu-item { background: white; padding: 10px 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; font-weight: bold; color: var(--text-main); text-align: right; border: 1px solid var(--border-color); }
+        .float-menu-item { background: white; padding: 10px 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; font-weight: bold; color: var(--text-main); text-align: right; border: 1px solid var(--border-color); transition: 0.2s; }
         
         .lock-float-btn {
             position: fixed; top: 25px; right: 25px; width: 40px; height: 40px; border-radius: 50%; background: #e74c3c; color: white;
@@ -188,7 +187,7 @@
         }
         .lock-float-btn.show { right: 80px; opacity: 1; pointer-events: auto; }
 
-        /* [1. 음악 플레이어 수정 (화이트 테마, 간격 좁게)] */
+        /* 음악 플레이어 (화이트 테마) */
         .music-panel { 
             position: fixed; top: 80px; left: -420px; width: 400px; height: 220px;
             background: white; color: #333; border-radius: 12px; box-shadow: 2px 2px 15px rgba(0,0,0,0.2); 
@@ -262,9 +261,6 @@
         .mobile-block-overlay { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; color: var(--text-sub); }
         .mobile-block-overlay span { font-size: 3rem; margin-bottom: 20px; }
 
-        .loading-dots::after { content: ''; animation: dots 1.5s steps(4, end) infinite; }
-        @keyframes dots { 0%, 20% { content: ''; } 40% { content: '.'; } 60% { content: '..'; } 80%, 100% { content: '...'; } }
-        
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 30px; padding: 12px 20px; position: fixed; z-index: 3000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 0.95rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
@@ -300,7 +296,7 @@
     </style>
 </head>
 <body>
-    <div id="aiStatusBar"><span class="ai-loading-icon"></span><span id="aiStatusText">✨ AI 대기 중...</span></div>
+    <div id="aiStatusBar"><span class="ai-loading-icon"></span><span id="aiStatusText">✨ 대기 중...</span></div>
     <div class="global-overlay" id="globalOverlay" onclick="closeAllOverlays()"></div>
 
     <div class="music-panel" id="musicPanel">
@@ -324,7 +320,7 @@
     </div>
 
     <div class="container">
-        <header><h1>쫑알수첩<span class="version-tag">v21.7</span></h1></header>
+        <header><h1>쫑알수첩<span class="version-tag">v21.8</span></h1></header>
         <nav class="nav-tabs">
             <div class="nav-item nav-item-home active" onclick="changeSection('home')">HOME</div>
             <div class="nav-item" onclick="changeSection('record')">기록하기</div>
@@ -991,6 +987,7 @@
             } else { showToast("선택된 내용 없음"); }
         }
 
+        // [3. 3등분 툴팁 로직 적용]
         async function renderCustomStats() {
             if(currentCustomItem === null) return;
             const chartArea = document.getElementById('customStatsChart'); 
@@ -1028,6 +1025,7 @@
             });
             const maxVal = Math.max(...studentStats.map(s => s.count)) || 1; 
             const total = studentStats.length;
+            const oneThird = Math.ceil(total / 3);
 
             chartArea.innerHTML = `<div class="chart-bars-area" id="barsContainer"></div>`;
             const barsContainer = document.getElementById('barsContainer');
@@ -1042,10 +1040,10 @@
                 }
                 bar.style.height = `${heightPct}%`;
                 
-                // [Tooltip 위치 보정 클래스]
+                // [툴팁 정렬 로직]
                 let alignClass = "";
-                if (i < 2) alignClass = "left-align"; // 왼쪽 2개는 오른쪽으로 툴팁
-                else if (i > total - 3) alignClass = "right-align"; // 오른쪽 2개는 왼쪽으로 툴팁
+                if (i < oneThird) alignClass = "left-align"; 
+                else if (i >= total - oneThird) alignClass = "right-align";
                 
                 bar.innerHTML = `<div class="tooltip ${alignClass}">${st.id}. ${st.name} (${st.count}회)</div>`;
                 barsContainer.appendChild(bar);
