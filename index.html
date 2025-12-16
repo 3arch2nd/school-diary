@@ -4,7 +4,7 @@
     <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>쫑알수첩 Pro (Hybrid v21.2)</title>
+    <title>쫑알수첩 Pro (Slim Layout v21.3)</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -42,36 +42,58 @@
         .mobile-only { display: none !important;
         }
 
-        /* [✨ 핵심 복구: Flexbox 시스템 (v20 기반)] 
-           Grid 대신 Flex를 사용하여 유연하게 처리 
-        */
+        /* [✨ Slim Layout: 체크박스 영역 축소] */
         .student-row { 
             display: flex; 
             align-items: center; 
-            gap: 15px; 
+            gap: 10px; /* 전체 요소 간격도 살짝 줄임 (15->10) */
             padding: 12px 10px; 
             border-bottom: 1px solid var(--bg-main); 
             background: white; 
             min-height: 50px;
         }
         .st-name { 
-            width: 90px; 
+            width: 80px; /* 이름 영역도 살짝 다이어트 (90->80) */
             font-weight: bold; 
             color: var(--primary-dark); 
             flex-shrink: 0; 
-            text-align: center; /* v20 스타일 반영 */
+            text-align: center; 
         }
         .st-input { 
-            flex-grow: 1; /* 핵심: 공간 남으면 자동 확장 */
+            flex-grow: 1; /* 남는 공간은 전부 입력창 차지! */
             margin-bottom: 0 !important; 
             height: 40px; 
         }
+        
+        /* 체크박스 그룹 너비 및 간격 축소 */
         .st-check-group { 
             display: flex; 
-            gap: 8px; 
-            width: 220px; 
+            gap: 2px; /* 간격 최소화 (8px -> 2px) */
+            width: 160px; /* 전체 너비 축소 (220px -> 160px) */
             flex-shrink: 0; 
             justify-content: space-between; 
+        }
+
+        /* 체크 동그라미 스타일 */
+        .check-circle { width: 24px; height: 24px; border: 2px solid var(--border-color); border-radius: 50%;
+            cursor: pointer; position: relative; background: var(--bg-main); }
+        .check-circle.checked { border-color: var(--primary); background: var(--primary);
+        }
+        .check-circle.checked::after { content: 'v'; color: white; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); font-size: 14px; font-weight:bold; }
+
+        /* [Header] 헤더 체크박스 라벨 영역도 너비 동기화 */
+        #checkHeader {
+            width: 160px; /* 그룹 너비와 일치 (220px -> 160px) */
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 0.75rem;
+        }
+        #checkHeader span {
+            width: 36px; /* 각 라벨의 확보 너비 */
+            text-align: center;
+            letter-spacing: -1px; /* 글자 겹침 방지 */
+            line-height: 1.1;
         }
 
         /* 빠른 체크 (Custom) 스타일 */
@@ -84,7 +106,7 @@
         .quick-name { font-weight: bold; color: var(--text-main); }
         .quick-input { flex-shrink: 0; } 
 
-        /* 기타 UI 요소들 (Overlay, Status, Tabs 등 최신 v21 기능 유지) */
+        /* 기타 UI 요소들 */
         .global-overlay { position: fixed;
             top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 2000; display: none;
         }
@@ -163,13 +185,6 @@
         }
         .tag:hover .x-btn { display: block;
         }
-
-        .check-circle { width: 24px; height: 24px; border: 2px solid var(--border-color); border-radius: 50%;
-            cursor: pointer; position: relative; background: var(--bg-main); }
-        .check-circle.checked { border-color: var(--primary); background: var(--primary);
-        }
-        .check-circle.checked::after { content: 'v'; color: white; position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); font-size: 14px; font-weight:bold; }
 
         .custom-item-row { padding: 10px;
             border: 1px solid #eee; border-radius: 6px; margin-bottom: 5px; cursor: pointer; display: flex; justify-content: space-between;
@@ -588,9 +603,11 @@
                                             <button class="btn btn-primary" id="btnSaveAll" onclick="saveData()">저장하기</button>
                                         </div>
                                     </div>
-                                    <div style="display:flex; padding-bottom:10px; border-bottom:1px solid #eee; font-weight:bold; color:var(--text-sub); font-size:0.9rem;">
-                                        <div style="width:90px; text-align:center;">이름</div><div style="flex-grow:1; text-align:center;">내용</div>
-                                        <div id="checkHeader" style="width:220px; display:flex; justify-content:space-between; font-size:0.75rem;"><span>매우<br>잘함</span><span>잘함</span><span>보통</span><span>노력<br>요함</span></div>
+                                    <div style="display:flex; padding: 12px 10px; border-bottom:1px solid #eee; font-weight:bold; color:var(--text-sub); font-size:0.9rem; align-items: center; gap: 10px;">
+                                        <div style="width:80px; text-align:center;">이름</div><div style="flex-grow:1; text-align:center;">내용</div>
+                                        <div id="checkHeader">
+                                            <span>매우<br>잘함</span><span>잘함</span><span>보통</span><span>노력<br>요함</span>
+                                        </div>
                                     </div>
                                     
                                     <div id="recordList"></div>
@@ -867,9 +884,6 @@
         da.addEventListener('dragover',e=>{e.preventDefault();da.style.background='#eee';}); da.addEventListener('drop',e=>{e.preventDefault();da.style.background='#fafafa'; if(e.dataTransfer.files.length>0){document.getElementById('homeImgInput').files=e.dataTransfer.files; uploadHomeImage(document.getElementById('homeImgInput'));}});
         
         // [Record Logic - Normal & Custom]
-        /* [✨ 핵심 복구: setMode & Render Logic (v20 기반)] 
-           CSS Grid 대신 Flexbox 제어 로직 사용
-        */
         function setMode(m) { 
             currentMode=m;
             document.getElementById('btnSubject').className=m==='subject'?'btn-sm active':'btn-sm inactive'; 
@@ -889,7 +903,6 @@
                 document.getElementById('customRecordView').style.display = 'none';
                 
                 document.getElementById('subjectArea').style.display=m==='subject'?'block':'none';
-                // v20.0 방식: 헤더 visibility 토글
                 document.getElementById('checkHeader').style.visibility=m==='subject'?'visible':'hidden'; 
                 
                 renderRecordList();
@@ -1158,20 +1171,17 @@
         function closeSubjectModal() { document.getElementById('subjectModal').classList.remove('open');
         }
         
-        // [Grid Rendering Logic - v20 Flexbox 복원]
         function renderRecordList() {
              const l=document.getElementById('recordList');
              l.innerHTML='';
              studentList.forEach(st=>{
                  const r=document.createElement('div'); 
-                 r.className='student-row'; // v20 클래스 사용
+                 r.className='student-row'; 
                  
-                 // 행동 모드일 경우 체크박스 html 자체를 생성하지 않음 (빈 문자열)
                  let chk = currentMode === 'subject' 
                     ? `<div class="st-check-group"><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div></div>`
                     : '';
                  
-                 // Flex Layout: 이름 | 인풋(flex-grow) | 체크박스(혹은 없음)
                  r.innerHTML=`<div class="st-name">${st.name}</div><input type="text" class="st-input" id="input_${st.id}" placeholder="내용">${chk}`;
                  l.appendChild(r);
              });
