@@ -4,7 +4,7 @@
     <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>쫑알수첩 Pro (Final Fix)</title>
+    <title>쫑알수첩 Pro (Final v20.5)</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -95,30 +95,33 @@
         .tag .x-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; line-height: 16px; text-align: center; border-radius: 50%; font-size: 0.8rem; background: rgba(0,0,0,0.1); color: inherit; display: none; }
         .tag:hover .x-btn { display: block; }
         
-        /* [핵심 솔루션] 통합 격자 시스템 (과목/행동/빠른체크 공통) */
+        /* [FINAL] 완벽한 그리드 시스템 (과목/행동/빠른체크 통합) */
         .grid-row { display: flex; align-items: center; width: 100%; gap: 10px; padding: 10px 5px; border-bottom: 1px solid var(--bg-main); background: white; margin-bottom: 2px; }
         
         /* 1. 이름 (고정) */
         .col-name { width: 80px; flex-shrink: 0; font-weight: bold; text-align: center; color: var(--primary-dark); }
         
-        /* 2. 내용 (가변 - 여기가 핵심) */
+        /* 2. 내용 (가변) */
         .col-content { flex: 1; min-width: 0; display: flex; align-items: center; }
         .st-input { width: 100%; height: 42px; margin: 0 !important; } 
         
-        /* 3. 체크박스 (고정) */
-        .col-check { width: 170px; flex-shrink: 0; display: flex; justify-content: space-between; padding: 0 2px; }
+        /* 3. 체크박스 (고정) - 180px */
+        .col-check { width: 180px; flex-shrink: 0; display: flex; justify-content: space-between; padding: 0 2px; }
         
         /* 헤더 스타일 */
         .record-header-row { display: flex; align-items: center; width: 100%; gap: 10px; padding: 12px 5px; border-bottom: 2px solid #eee; background: #fafafa; border-radius: 6px 6px 0 0; color: var(--text-sub); font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; }
-        .col-check span { width: 38px; text-align: center; display: inline-block; letter-spacing: -1px; word-break: keep-all; line-height: 1.2; font-size: 0.75rem; }
+        .col-check-header { width: 180px; flex-shrink: 0; display: flex; justify-content: space-between; padding: 0 2px; }
+        .col-check-header span { width: 40px; text-align: center; display: inline-block; letter-spacing: -1px; word-break: keep-all; line-height: 1.2; font-size: 0.75rem; }
 
         .check-circle { width: 24px; height: 24px; border: 2px solid var(--border-color); border-radius: 50%; cursor: pointer; position: relative; background: var(--bg-main); }
         .check-circle.checked { border-color: var(--primary); background: var(--primary); }
         .check-circle.checked::after { content: 'v'; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; font-weight:bold; }
 
-        /* [수정] 빠른 체크 스크롤 복구 */
-        #customCheckList { flex: 1; min-height: 0; overflow-y: auto; padding-right: 5px; }
-
+        /* [FINAL] 빠른 체크 전용 (양옆 정렬 + 스크롤) */
+        #customCheckList { flex: 1; min-height: 0; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; }
+        .quick-check-row { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 10px 5px; border-bottom: 1px solid var(--bg-main); background: white; min-height: 50px; }
+        .quick-check-name { font-weight: bold; color: var(--primary-dark); }
+        
         .custom-item-row { padding: 10px; border: 1px solid #eee; border-radius: 6px; margin-bottom: 5px; cursor: pointer; display: flex; justify-content: space-between; }
         .custom-item-row.active { border-color: var(--primary); background: #f9fcff; }
         
@@ -402,7 +405,7 @@
                                     <div class="record-header-row grid-row" id="recordHeaderRow">
                                         <div class="col-name">이름</div>
                                         <div class="col-content" style="justify-content:center;">내용</div>
-                                        <div class="col-check" id="checkHeader">
+                                        <div class="col-check-header" id="checkHeader">
                                             <span>매우<br>잘함</span>
                                             <span>잘함</span>
                                             <span>보통</span>
@@ -682,8 +685,14 @@
                 
                 document.getElementById('subjectArea').style.display=m==='subject'?'block':'none'; 
                 
-                // [중요 수정] 행동 탭에서는 4단 평가 헤더를 숨김
-                document.getElementById('checkHeader').style.visibility=m==='subject'?'visible':'hidden'; 
+                // [문제 해결의 핵심] 행동 모드일 때는 헤더의 체크박스 영역도 아예 없애버림(display:none)
+                // 이렇게 해야 본문(리스트)과 헤더가 똑같이 '전체 너비'를 쓰게 되어 줄이 맞음.
+                const headerCheck = document.getElementById('checkHeader');
+                if(m === 'behavior') {
+                    headerCheck.style.display = 'none';
+                } else {
+                    headerCheck.style.display = 'flex';
+                }
                 
                 renderRecordList();
             }
@@ -817,8 +826,8 @@
             const itemDef = customItems[currentCustomItem];
             studentList.forEach(st => {
                 const row = document.createElement('div'); 
-                // 빠른 체크는 오른쪽 정렬이 필요하므로 grid-row와 함께 사용
-                row.className = 'grid-row student-row'; 
+                // 빠른 체크용 전용 클래스 사용
+                row.className = 'quick-check-row'; 
                 
                 let inputHtml = '';
                 if(itemDef.type === 'check') inputHtml = `<input type="checkbox" class="cust-val" style="width:24px; height:24px; margin:0;">`;
@@ -826,18 +835,18 @@
                 else if(itemDef.type === 'select') inputHtml = `<select class="cust-val" style="margin:0;"><option>상</option><option>중</option><option>하</option></select>`;
                 
                 // st-content를 비워두되 flex로 공간을 차지하게 하여 양옆으로 찢음
-                row.innerHTML = `<div class="col-name st-name" style="text-align:left;">${st.name}</div><div class="col-content st-content"></div>${inputHtml}`;
+                row.innerHTML = `<div class="quick-check-name">${st.name}</div>${inputHtml}`;
                 container.appendChild(row);
             });
         }
         async function saveCustomData() {
             if(currentCustomItem === null) return;
             const itemDef = customItems[currentCustomItem];
-            const rows = document.querySelectorAll('#customCheckList .student-row');
+            const rows = document.querySelectorAll('#customCheckList .quick-check-row'); // Selector 수정
             const data = [];
             const today = document.getElementById('rDate').value;
             rows.forEach(row => {
-                const name = row.querySelector('.st-name').innerText;
+                const name = row.querySelector('.quick-check-name').innerText;
                 const el = row.querySelector('.cust-val');
                 let val = "";
                 if(itemDef.type === 'select') val = el.value;
