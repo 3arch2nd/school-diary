@@ -1602,9 +1602,69 @@
         }
         async function archiveData() { await sendRequest('archive_data'); location.reload();
         }
-        async function generateNeisCards() { showToast("생성 중..."); const t=document.getElementById('neisType').value; const sub=t==='subject'?document.getElementById('neisSubjectSelect').value:'행동'; const k=document.getElementById('neisKeyword').value;
-            const len=document.getElementById('neisLen').value; const resDiv=document.getElementById('neisResultList'); resDiv.innerHTML=''; for(const s of studentList){ const r=document.createElement('div'); r.className='card'; r.style.marginBottom='10px'; const id = `neis_txt_${s.id}`;
-            r.innerHTML=`<div style="display:flex;justify-content:space-between;margin-bottom:5px"><b>${s.name}</b> <button class="btn-icon" onclick="copyText('${id}')">복사</button></div><textarea id="${id}" style="height:100px;width:100%">생성 중<span class="loading-anim"></span>...</textarea>`; resDiv.appendChild(r); const d=await sendRequest('generate_neis_individual',{name:s.name,type:sub,keyword:k,length:len}); r.querySelector('textarea').value=d?d.text:'생성 실패'; } showToast("완료");
+// [수정됨] NEIS 생성 요청 함수
+        async function generateNeisCards() {
+            const container = document.getElementById('neisResultList');
+            if(studentList.length === 0) { showToast("학생 명단이 없습니다."); return; }
+            
+            const btn = document.getElementById('btnGenNeis');
+            setLoading(btn, "AI 작성 중...");
+            
+            container.innerHTML = ""; // 기존 결과 초기화
+            
+            const typeMode = document.getElementById('neisType').value;
+            let targetType = typeMode === 'subject' ? document.getElementById('neisSubjectSelect').value : '행동';
+            let keyword = typeMode === 'behavior' ? document.getElementById('neisKeyword').value : "";
+            let len = document.getElementById('neisLen').value; // 슬라이더 값
+            
+            // 순차적으로 생성 요청 (한꺼번에 하면 에러 날 수 있음)
+            for(const st of studentList) {
+                const card = document.createElement('div');
+                card.className = 'card'; // 기존 스타일 활용
+                card.style.marginBottom = '10px';
+                
+                // 로딩 상태 미리 표시
+                card.innerHTML = `
+                    <div style="font-weight:bold; margin-bottom:5px;">${st.name} <span style="font-size:0.8rem; color:#888;">(${len}자 목표)</span></div>
+                    <textarea class="n-textarea" style="width:100%; height:120px;">작성 중입니다...</textarea>
+                    <div style="text-align:right; margin-top:5px;">
+                        <button class="btn-copy">복사</button>
+                    </div>
+                `;
+                container.appendChild(card);
+                
+                // 서버 요청
+                const data = await sendRequest('generate_neis_individual', { 
+                    name: st.name, 
+                    type: targetType, 
+                    keyword: keyword, 
+                    length: len 
+                });
+                
+                // 결과 반영
+                const textarea = card.querySelector('textarea');
+                const finalTxt = data ? data.text : "생성 실패";
+                textarea.value = finalTxt;
+                
+                // 복사 버튼 이벤트
+                card.querySelector('.btn-copy').onclick = function() {
+                    navigator.clipboard.writeText(textarea.value).then(() => {
+                        const org = this.innerText;
+                        this.innerText = "완료!";
+                        this.style.background = "var(--success)";
+                        this.style.color = "white";
+                        setTimeout(() => {
+                            this.innerText = org;
+                            this.style.background = "";
+                            this.style.color = "";
+                        }, 1500);
+                    });
+                };
+            }
+            
+            clearLoading(btn);
+            showToast("모든 학생 생성 완료!");
+        }
         }
         function toggleNeisType() { const t=document.getElementById('neisType').value; document.getElementById('neisSubOption').style.display=t==='subject'?'block':'none'; document.getElementById('neisBehOption').style.display=t==='behavior'?'block':'none'; }
 
