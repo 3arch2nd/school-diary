@@ -18,7 +18,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Gowun Dodum', sans-serif;
             -webkit-tap-highlight-color: transparent; }
         
-        /* Layout Core */
+        /* [핵심] 전체 레이아웃 높이 고정 */
         body { background-color: var(--bg-main); color: var(--text-main); font-size: 16px; line-height: 1.5; height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
         .container { 
             width: 100%; max-width: 1400px; margin: 0 auto; padding: 20px; 
@@ -28,22 +28,18 @@
         header { text-align: center; margin-bottom: 15px; flex-shrink: 0; }
         h1 { color: var(--primary-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: -0.5px; margin: 0; }
 
-        /* [핵심 1] 공통 스크롤 래퍼 (기록하기 탭용 - 꽉 채우기) */
+        /* [핵심] 만능 스크롤 래퍼: 남은 공간 꽉 채우고 스크롤 생성 */
         .scroll-wrapper {
-            flex: 1;            /* 남은 공간 모두 차지 */
-            min-height: 0;      /* 플렉스박스 스크롤 버그 방지 */
-            overflow-y: auto;   /* 넘치면 스크롤 */
+            flex: 1;            /* 부모의 남은 높이 100% 차지 */
+            min-height: 0;      /* Flexbox 자식의 최소 높이 0으로 설정 (스크롤 생성 필수 조건) */
+            overflow-y: auto;   /* 내용 넘치면 스크롤 */
             width: 100%;
             padding-right: 5px;
         }
 
-        /* [핵심 2] 홈 화면 전용 정렬 (위쪽 정렬 강제) */
-        .home-content-stack {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start; /* 위쪽부터 쌓기 */
-            gap: 15px; /* 아이템 간 간격 */
-            /* height: 100%를 주지 않아서 내용물만큼만 차지하게 함 */
+        /* [핵심] 홈 화면 전용 정렬: 위쪽으로 오밀조밀하게 */
+        .home-stack {
+            display: flex; flex-direction: column; justify-content: flex-start; gap: 15px;
         }
 
         /* Visibility Controls */
@@ -94,9 +90,9 @@
         .split-right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 15px; height: 100%; overflow: hidden; }
         .split-half { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
 
+        /* Card System */
         .card { background: var(--card-bg); border-radius: 8px; padding: 20px; border: 1px solid var(--border-color); box-shadow: 0 1px 2px rgba(0,0,0,0.03); display: flex; flex-direction: column; }
         .card.full-height { height: 100%; min-height: 0; flex: 1; }
-        /* .card.scrollable was problematic, removing its explicit overflow here and letting scroll-wrapper handle it */
         .card-header { font-size: 1.1rem; color: var(--primary-dark); font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; flex-shrink: 0; border-bottom: 2px solid var(--bg-main); display: flex; justify-content: space-between; align-items: center; }
 
         /* Float Menu */
@@ -301,7 +297,7 @@
                 <div class="split-right">
                     <div class="card full-height">
                         <div class="scroll-wrapper">
-                            <div class="home-content-stack">
+                            <div class="home-stack">
                                 <div> <div class="card-header">자주 찾는 사이트</div>
                                     <div class="quick-link-grid" id="quickLinkGrid"></div>
                                 </div>
@@ -332,7 +328,7 @@
                         <input type="date" id="mobDate" style="margin-bottom:0;">
                     </div>
                     
-                    <div class="scroll-wrapper">
+                    <div style="flex:1; overflow-y:auto; min-height:0;">
                         <div id="mobViewQuick" style="display:flex; flex-direction:column; padding-top:15px; height: 100%;">
                             <div style="background:#f0f8ff; padding:15px; border-radius:8px; flex:1; display:flex; flex-direction:column; min-height: 200px;">
                                 <div style="font-size:0.9rem; color:var(--text-sub); margin-bottom:10px;">
@@ -348,7 +344,7 @@
                                 <label style="margin:0;">항목 선택</label>
                                 <select id="mobCustomSelect" style="width:60%; margin:0;" onchange="renderMobileCustomList()"></select>
                             </div>
-                            <div class="scroll-wrapper" style="border:1px solid #eee; border-radius:8px; padding:10px; margin-bottom:10px; flex:1;">
+                            <div style="border:1px solid #eee; border-radius:8px; padding:10px; margin-bottom:10px; flex:1; overflow-y:auto;">
                                 <div id="mobCustomList"></div>
                             </div>
                             <button class="btn btn-primary" style="width:100%; height:50px; flex-shrink:0;" onclick="saveMobileCustom()">저장하기</button>
