@@ -4,7 +4,7 @@
     <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>쫑알수첩 Pro (Final v20.5)</title>
+    <title>쫑알수첩 Pro (Grid System v21.0)</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -15,51 +15,80 @@
             --success: #27ae60; --danger: #e74c3c;
             --att-dot: #ff8fab;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Gowun Dodum', sans-serif;
-            -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Gowun Dodum', sans-serif; -webkit-tap-highlight-color: transparent; }
         
         body { background-color: var(--bg-main); color: var(--text-main); font-size: 16px; line-height: 1.5; height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
-        .container { 
-            width: 100%; max-width: 1400px; margin: 0 auto; padding: 20px; 
-            height: 100%; flex: 1; display: flex; flex-direction: column; overflow: hidden;
-        }
-        
+        .container { width: 100%; max-width: 1400px; margin: 0 auto; padding: 20px; height: 100%; flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         header { text-align: center; margin-bottom: 15px; flex-shrink: 0; }
         h1 { color: var(--primary-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: -0.5px; margin: 0; }
 
-        .scroll-wrapper {
-            flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding-right: 5px;
-        }
-
-        .pc-only.full-height, .mobile-only.full-height {
-            display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; height: 100%;
-        }
-
+        /* [레이아웃] 스크롤 및 전체 화면 고정 */
+        .scroll-wrapper { flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding-right: 5px; }
+        .pc-only.full-height, .mobile-only.full-height { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; height: 100%; }
         .home-stack { display: flex; flex-direction: column; justify-content: flex-start; gap: 15px; }
         .pc-only { display: block; }
         .mobile-only { display: none !important; }
 
+        /* [CSS Grid 시스템] - 기록하기 탭의 핵심 */
+        /* 기본 모드 (과목): 이름(80px) | 내용(나머지) | 체크(180px) */
+        .record-grid {
+            display: grid;
+            grid-template-columns: 80px 1fr 180px; 
+            gap: 10px;
+            align-items: center;
+            width: 100%;
+        }
+
+        /* 행동 모드 (Behavior): 이름(80px) | 내용(나머지) | 체크(숨김) */
+        /* JS가 부모에게 'mode-behavior' 클래스를 붙이면 CSS가 컬럼을 바꿈 */
+        .record-container.mode-behavior .record-grid {
+            grid-template-columns: 80px 1fr 0px; 
+        }
+        
+        /* 행동 모드일 때 3번째 컬럼(체크박스) 숨김 처리 */
+        .record-container.mode-behavior .col-check,
+        .record-container.mode-behavior .col-check-header {
+            display: none;
+            width: 0;
+            overflow: hidden;
+        }
+
+        /* 그리드 내부 요소 스타일 */
+        .grid-row { padding: 10px 5px; border-bottom: 1px solid var(--bg-main); background: white; min-height: 50px; }
+        .grid-header { padding: 12px 5px; border-bottom: 2px solid #eee; background: #fafafa; border-radius: 6px 6px 0 0; color: var(--text-sub); font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; }
+        
+        .col-name { text-align: center; font-weight: bold; color: var(--primary-dark); }
+        .col-content input { width: 100%; height: 42px; margin: 0 !important; }
+        .col-check { display: flex; justify-content: space-between; padding: 0 2px; }
+        
+        /* 헤더의 체크박스 라벨 정렬 */
+        .col-check-header { display: flex; justify-content: space-between; }
+        .col-check-header span { width: 40px; text-align: center; display: inline-block; letter-spacing: -1px; line-height: 1.2; font-size: 0.75rem; }
+
+        /* [빠른 체크 전용 스타일] */
+        #customCheckList { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+        .quick-row { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; /* 양끝 정렬 */
+            width: 100%; 
+            padding: 12px 10px; 
+            border-bottom: 1px solid #f0f0f0; 
+            background: white; 
+            min-height: 50px;
+        }
+        .quick-name { font-weight: bold; color: var(--text-main); }
+        .quick-input { flex-shrink: 0; } /* 입력 요소가 찌그러지지 않게 */
+
+        /* 기타 UI 요소들 */
         .global-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 2000; display: none; }
         .global-overlay.show { display: block; }
         
-        /* Music UI */
-        .music-panel { position: fixed; top: 80px; left: -420px; width: 400px; height: 220px; background: white; border-radius: 12px; box-shadow: 2px 2px 15px rgba(0,0,0,0.2); z-index: 2200; transition: left 0.3s ease-in-out; display: flex; overflow: hidden; }
-        .music-panel.show { left: 20px; } 
-        .mp-video { width: 180px; background: #000; }
-        .mp-list { flex: 1; display: flex; flex-direction: column; padding: 10px; border-left: 1px solid #eee; }
-        .mp-item { font-size: 0.85rem; padding: 5px; cursor: pointer; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; }
-        .mp-item:hover { color: var(--primary); }
-        .mp-add { margin-top: auto; display: flex; gap: 5px; }
-        .music-capsule { position: fixed; top: 20px; left: 20px; width: 220px; height: 50px; background: var(--primary-light); color: var(--primary-dark); border-radius: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 2300; display: flex; align-items: center; padding: 0 5px 0 15px; transition: 0.3s; overflow: hidden; border: 2px solid white; }
-        .music-info { flex: 1; overflow: hidden; white-space: nowrap; font-size: 0.9rem; font-weight: bold; margin-right: 10px; }
-        .music-play-btn { width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-
         #aiStatusBar { position: fixed; bottom: 0; left: 0; width: 100%; height: 30px; background: #333; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; z-index: 2500; transform: translateY(100%); transition: transform 0.3s ease-in-out; }
         #aiStatusBar.show { transform: translateY(0); }
         .ai-loading-icon { display: inline-block; width: 10px; height: 10px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 10px; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Lock Screen */
         #lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-main); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; }
         #lockCard { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; width: 320px; position: relative; z-index: 100000; }
         #lockInput { font-size: 1.2rem; text-align: center; margin-bottom: 5px; letter-spacing: 2px; position: relative; z-index: 100001; background: white; }
@@ -83,45 +112,17 @@
         .card.full-height { height: 100%; min-height: 0; flex: 1; }
         .card-header { font-size: 1.1rem; color: var(--primary-dark); font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; flex-shrink: 0; border-bottom: 2px solid var(--bg-main); display: flex; justify-content: space-between; align-items: center; width: 100%; }
 
-        .float-btn { position: fixed; top: 20px; right: 20px; width: 50px; height: 50px; background: var(--primary); color: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 2100; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; transition: 0.3s; }
-        .float-menu { position: fixed; top: 80px; right: 20px; display: none; flex-direction: column; gap: 10px; z-index: 2100; }
-        .float-menu.show { display: flex; animation: fadeIn 0.2s; }
-        .float-menu-item { background: white; padding: 10px 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; font-weight: bold; color: var(--text-main); text-align: right; border: 1px solid var(--border-color); transition: 0.2s; }
-
         .tag-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
         .tag { position: relative; padding: 8px 30px 8px 16px; background: var(--bg-main); border-radius: 20px; font-size: 0.95rem; cursor: pointer; border: 1px solid var(--border-color); transition: 0.2s; user-select: none; }
         .tag.selected { background: var(--primary); color: white; border-color: var(--primary); }
         .tag-add { padding: 8px 16px; border: 1px dashed var(--primary); background: white; color: var(--primary); text-align:center;}
         .tag .x-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; line-height: 16px; text-align: center; border-radius: 50%; font-size: 0.8rem; background: rgba(0,0,0,0.1); color: inherit; display: none; }
         .tag:hover .x-btn { display: block; }
-        
-        /* [FINAL] 완벽한 그리드 시스템 (과목/행동/빠른체크 통합) */
-        .grid-row { display: flex; align-items: center; width: 100%; gap: 10px; padding: 10px 5px; border-bottom: 1px solid var(--bg-main); background: white; margin-bottom: 2px; }
-        
-        /* 1. 이름 (고정) */
-        .col-name { width: 80px; flex-shrink: 0; font-weight: bold; text-align: center; color: var(--primary-dark); }
-        
-        /* 2. 내용 (가변) */
-        .col-content { flex: 1; min-width: 0; display: flex; align-items: center; }
-        .st-input { width: 100%; height: 42px; margin: 0 !important; } 
-        
-        /* 3. 체크박스 (고정) - 180px */
-        .col-check { width: 180px; flex-shrink: 0; display: flex; justify-content: space-between; padding: 0 2px; }
-        
-        /* 헤더 스타일 */
-        .record-header-row { display: flex; align-items: center; width: 100%; gap: 10px; padding: 12px 5px; border-bottom: 2px solid #eee; background: #fafafa; border-radius: 6px 6px 0 0; color: var(--text-sub); font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; }
-        .col-check-header { width: 180px; flex-shrink: 0; display: flex; justify-content: space-between; padding: 0 2px; }
-        .col-check-header span { width: 40px; text-align: center; display: inline-block; letter-spacing: -1px; word-break: keep-all; line-height: 1.2; font-size: 0.75rem; }
 
         .check-circle { width: 24px; height: 24px; border: 2px solid var(--border-color); border-radius: 50%; cursor: pointer; position: relative; background: var(--bg-main); }
         .check-circle.checked { border-color: var(--primary); background: var(--primary); }
         .check-circle.checked::after { content: 'v'; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; font-weight:bold; }
 
-        /* [FINAL] 빠른 체크 전용 (양옆 정렬 + 스크롤) */
-        #customCheckList { flex: 1; min-height: 0; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; }
-        .quick-check-row { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 10px 5px; border-bottom: 1px solid var(--bg-main); background: white; min-height: 50px; }
-        .quick-check-name { font-weight: bold; color: var(--primary-dark); }
-        
         .custom-item-row { padding: 10px; border: 1px solid #eee; border-radius: 6px; margin-bottom: 5px; cursor: pointer; display: flex; justify-content: space-between; }
         .custom-item-row.active { border-color: var(--primary); background: #f9fcff; }
         
@@ -150,6 +151,16 @@
         .btn-sm.active { background: var(--primary); color: white; border-color: var(--primary); }
         .btn-sm.inactive { background: white; color: var(--text-sub); border-color: var(--border-color); }
         .btn-icon { font-size: 0.8rem; background: none; border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-left: 5px; }
+
+        .float-btn { position: fixed; top: 20px; right: 20px; width: 50px; height: 50px; background: var(--primary); color: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 2100; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; transition: 0.3s; }
+        .float-menu { position: fixed; top: 80px; right: 20px; display: none; flex-direction: column; gap: 10px; z-index: 2100; }
+        .float-menu.show { display: flex; animation: fadeIn 0.2s; }
+        .float-menu-item { background: white; padding: 10px 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; font-weight: bold; color: var(--text-main); text-align: right; border: 1px solid var(--border-color); transition: 0.2s; }
+        .music-panel { position: fixed; top: 80px; left: -420px; width: 400px; height: 220px; background: white; border-radius: 12px; box-shadow: 2px 2px 15px rgba(0,0,0,0.2); z-index: 2200; transition: left 0.3s ease-in-out; display: flex; overflow: hidden; }
+        .music-panel.show { left: 20px; } 
+        .music-capsule { position: fixed; top: 20px; left: 20px; width: 220px; height: 50px; background: var(--primary-light); color: var(--primary-dark); border-radius: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 2300; display: flex; align-items: center; padding: 0 5px 0 15px; transition: 0.3s; overflow: hidden; border: 2px solid white; }
+        .music-info { flex: 1; overflow: hidden; white-space: nowrap; font-size: 0.9rem; font-weight: bold; margin-right: 10px; }
+        .music-play-btn { width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
         .home-image-area { width: 100%; aspect-ratio: 4 / 3; background: #fafafa; border: 2px dashed #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; position: relative; }
         .home-image-area img { width: 100%; height: 100%; object-fit: cover; }
@@ -393,7 +404,7 @@
                     <div class="split-right">
                         <div class="card full-height" id="recordRightCard">
                             <div class="scroll-wrapper">
-                                <div id="normalRecordView">
+                                <div id="normalRecordView" class="record-container mode-subject">
                                     <div class="card-header">
                                         <span>학생별 기록</span>
                                         <div style="display:flex; align-items:center; gap:10px;">
@@ -402,9 +413,9 @@
                                         </div>
                                     </div>
                                     
-                                    <div class="record-header-row grid-row" id="recordHeaderRow">
+                                    <div class="record-grid grid-header">
                                         <div class="col-name">이름</div>
-                                        <div class="col-content" style="justify-content:center;">내용</div>
+                                        <div class="col-content" style="text-align:center;">내용</div>
                                         <div class="col-check-header" id="checkHeader">
                                             <span>매우<br>잘함</span>
                                             <span>잘함</span>
@@ -682,16 +693,17 @@
                 document.getElementById('customModeOptions').style.display = 'none';
                 document.getElementById('normalRecordView').style.display = 'flex'; 
                 document.getElementById('customRecordView').style.display = 'none';
-                
                 document.getElementById('subjectArea').style.display=m==='subject'?'block':'none'; 
                 
-                // [문제 해결의 핵심] 행동 모드일 때는 헤더의 체크박스 영역도 아예 없애버림(display:none)
-                // 이렇게 해야 본문(리스트)과 헤더가 똑같이 '전체 너비'를 쓰게 되어 줄이 맞음.
-                const headerCheck = document.getElementById('checkHeader');
-                if(m === 'behavior') {
-                    headerCheck.style.display = 'none';
+                // [GRID SYSTEM UPDATE]
+                // JS는 이제 스타일을 직접 만지지 않고, 부모 클래스만 갈아 끼웁니다.
+                const container = document.getElementById('normalRecordView');
+                if (m === 'behavior') {
+                    container.classList.remove('mode-subject');
+                    container.classList.add('mode-behavior');
                 } else {
-                    headerCheck.style.display = 'flex';
+                    container.classList.remove('mode-behavior');
+                    container.classList.add('mode-subject');
                 }
                 
                 renderRecordList();
@@ -818,7 +830,7 @@
             }
         }
         
-        // [중요 수정] 빠른 체크 리스트 생성 (CSS 클래스 통일 및 오른쪽 정렬)
+        // [FIX] 빠른 체크 (Quick Check) 전용 렌더링
         function renderCustomCheckList() {
             const container = document.getElementById('customCheckList');
             container.innerHTML = '';
@@ -826,27 +838,26 @@
             const itemDef = customItems[currentCustomItem];
             studentList.forEach(st => {
                 const row = document.createElement('div'); 
-                // 빠른 체크용 전용 클래스 사용
-                row.className = 'quick-check-row'; 
+                // Quick Check용 전용 클래스 사용
+                row.className = 'quick-row'; 
                 
                 let inputHtml = '';
                 if(itemDef.type === 'check') inputHtml = `<input type="checkbox" class="cust-val" style="width:24px; height:24px; margin:0;">`;
                 else if(itemDef.type === 'switch') inputHtml = `<label class="switch"><input type="checkbox" class="cust-val"><span class="slider"></span></label>`;
                 else if(itemDef.type === 'select') inputHtml = `<select class="cust-val" style="margin:0;"><option>상</option><option>중</option><option>하</option></select>`;
                 
-                // st-content를 비워두되 flex로 공간을 차지하게 하여 양옆으로 찢음
-                row.innerHTML = `<div class="quick-check-name">${st.name}</div>${inputHtml}`;
+                row.innerHTML = `<div class="quick-name">${st.name}</div><div class="quick-input">${inputHtml}</div>`;
                 container.appendChild(row);
             });
         }
         async function saveCustomData() {
             if(currentCustomItem === null) return;
             const itemDef = customItems[currentCustomItem];
-            const rows = document.querySelectorAll('#customCheckList .quick-check-row'); // Selector 수정
+            const rows = document.querySelectorAll('#customCheckList .quick-row');
             const data = [];
             const today = document.getElementById('rDate').value;
             rows.forEach(row => {
-                const name = row.querySelector('.quick-check-name').innerText;
+                const name = row.querySelector('.quick-name').innerText;
                 const el = row.querySelector('.cust-val');
                 let val = "";
                 if(itemDef.type === 'select') val = el.value;
@@ -951,16 +962,13 @@
              const l=document.getElementById('recordList');
              l.innerHTML='';
              studentList.forEach(st=>{
-                 // [핵심] Grid-row 클래스 적용하여 레이아웃 고정
-                 const r=document.createElement('div'); r.className='grid-row student-row';
+                 // [GRID] 여기서는 클래스(CSS)가 모든 것을 제어하므로 HTML 구조는 단순화
+                 const r=document.createElement('div'); 
+                 r.className='record-grid grid-row'; // Grid Class 적용
                  
-                 let chk = '';
-                 if(currentMode === 'subject') {
-                     chk = `<div class="col-check st-check-group"><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div></div>`;
-                 }
+                 let chk = `<div class="col-check st-check-group"><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div></div>`;
                  
-                 // [핵심] 내용 칸이 늘어나도록 col-content st-content 클래스 적용
-                 r.innerHTML=`<div class="col-name st-name">${st.name}</div><div class="col-content st-content"><input type="text" class="st-input" id="input_${st.id}" placeholder="내용"></div>${chk}`;
+                 r.innerHTML=`<div class="col-name">${st.name}</div><div class="col-content"><input type="text" class="st-input" id="input_${st.id}" placeholder="내용"></div>${chk}`;
                  l.appendChild(r);
              });
         }
@@ -972,7 +980,7 @@
             let type="행동"; if(currentMode==='subject'){ const t=document.querySelector('#subjectTags .tag.selected'); if(!t){showToast("과목 선택 필요");return;} type=t.innerText.split(' ')[0]; }
             let list=[];
             inputs.forEach(i=>{
-                const txt=i.value.trim(); const row=i.closest('.student-row'); const name=row.querySelector('.st-name').innerText;
+                const txt=i.value.trim(); const row=i.closest('.grid-row'); const name=row.querySelector('.col-name').innerText;
                 let chk="없음";
                 if(currentMode==='subject'){ const c=row.querySelectorAll('.check-circle'); if(c&&c.length>0) { if(c[0].classList.contains('checked')) chk="매우잘함"; else if(c[1].classList.contains('checked')) chk="잘함"; else if(c[2].classList.contains('checked')) chk="보통"; else if(c[3].classList.contains('checked')) chk="노력요함"; } }
                 if(txt || chk!=="없음") list.push({name, text:txt, check:chk});
