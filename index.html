@@ -28,14 +28,14 @@
         header { text-align: center; margin-bottom: 15px; flex-shrink: 0; }
         h1 { color: var(--primary-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: -0.5px; margin: 0; }
 
-        /* Scroll Wrapper - Critical for scrolling */
+        /* Scroll Wrapper */
         .scroll-wrapper {
             flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding-right: 5px;
         }
 
-        /* Visibility Controls - PC Default */
-        .pc-only { display: block; height: 100%; }
-        .mobile-only { display: none !important; } /* Hidden on PC */
+        /* Visibility Controls */
+        .pc-only { display: block; height: auto; } /* height auto로 변경하여 불필요한 확장 방지 */
+        .mobile-only { display: none !important; }
 
         /* Overlay & Modals */
         .global-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 2000; display: none; }
@@ -84,7 +84,7 @@
         /* Card System */
         .card { background: var(--card-bg); border-radius: 8px; padding: 20px; border: 1px solid var(--border-color); box-shadow: 0 1px 2px rgba(0,0,0,0.03); display: flex; flex-direction: column; }
         .card.full-height { flex: 1; height: 100%; min-height: 0; overflow: hidden; } 
-        .card-header { font-size: 1.1rem; color: var(--primary-dark); font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; flex-shrink: 0; border-bottom: 2px solid var(--bg-main); display: flex; justify-content: space-between; align-items: center; }
+        .card-header { font-size: 1.1rem; color: var(--primary-dark); font-weight: bold; margin-bottom: 10px; padding-bottom: 8px; flex-shrink: 0; border-bottom: 2px solid var(--bg-main); display: flex; justify-content: space-between; align-items: center; }
 
         /* Float Menu */
         .float-btn { position: fixed; top: 20px; right: 20px; width: 50px; height: 50px; background: var(--primary); color: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 2100; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; transition: 0.3s; }
@@ -139,7 +139,8 @@
         .home-image-area { width: 100%; aspect-ratio: 4 / 3; background: #fafafa; border: 2px dashed #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; position: relative; }
         .home-image-area img { width: 100%; height: 100%; object-fit: cover; }
         .home-image-msg { color: #aaa; font-weight: bold; pointer-events: none; }
-        .quick-link-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }
+        /* Fix spacing in quick link grid */
+        .quick-link-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 10px; }
         .quick-link-item { background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100px; }
         .ql-emoji { font-size: 2rem; margin-bottom: 5px; }
         .ql-name { font-size: 0.85rem; color: var(--text-main); font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
@@ -285,7 +286,7 @@
                 </div>
                 <div class="split-right">
                     <div class="card full-height">
-                        <div class="scroll-wrapper">
+                        <div class="scroll-wrapper" style="display:flex; flex-direction:column; justify-content:flex-start;">
                             <div class="card-header">자주 찾는 사이트</div>
                             <div class="quick-link-grid" id="quickLinkGrid"></div>
                             <div class="card-header pc-only">빠른 기록</div>
