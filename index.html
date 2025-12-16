@@ -4,7 +4,7 @@
     <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>쫑알수첩 Pro (Final Refined v21.9)</title>
+    <title>쫑알수첩 Pro (Final v21.9)</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -294,7 +294,7 @@
             .pc-only-tab .mobile-block-overlay { display: flex; }
             
             /* [수정 3] 모바일 레이아웃 최적화 */
-            .quick-link-section { display: none !important; } /* 자주 찾는 사이트 섹션 전체 숨김 */
+            .pc-only-section { display: none !important; } /* 자주 찾는 사이트 섹션 전체 숨김 */
             .home-stack .card:last-child { min-height: 300px; } /* 빠른 기록 영역 확보 */
             #homeToDoList { font-size: 1.1rem; line-height: 2; } /* 오늘의 할 일 키우기 */
             .home-image-area { display: none !important; }
@@ -585,7 +585,13 @@
             </div>
         </div>
         
-        <div id="data" class="section pc-only-tab"><div class="mobile-block-overlay"><span>⚙️</span><p>해당 기능은 PC/태블릿에서<br>사용 가능해요!</p></div><div class="split-container pc-only"><div class="split-left"><div class="card full-height scrollable"><div class="card-header">참고 자료</div><input type="file" id="uploadInput" style="margin-bottom:10px;"><button class="btn btn-outline" id="btnUpload" style="width:100%; margin-bottom:15px;" onclick="uploadFile()">업로드</button><div id="fileList"></div></div></div><div class="split-right"><div class="card full-height scrollable"><div class="card-header">설정</div><div id="publicModeSettings" style="display:none; background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:20px;"><label>Gemini API Key</label><input type="password" id="settingApiKey"><button class="btn-sm active" style="width:100%;" onclick="savePublicSettings()">저장</button></div><label>AI 페르소나</label><textarea id="personaText" style="height:150px;" placeholder="예: 초등학교 교사 말투..."></textarea><div style="text-align:right;"><button class="btn btn-primary" id="btnPersona" onclick="savePersona()">저장</button></div><hr><div class="card-header" style="color:var(--danger); border-bottom:none;">데이터 관리</div><button class="btn btn-danger" style="width:100%" onclick="reqConfirm('데이터를 초기화하시겠습니까?', archiveData)">[새 학년 준비] 데이터 백업 및 초기화</button></div></div></div></div>
+        <div id="data" class="section pc-only-tab"><div class="mobile-block-overlay"><span>⚙️</span><p>해당 기능은 PC/태블릿에서<br>사용 가능해요!</p></div><div class="split-container pc-only"><div class="split-left"><div class="card full-height scrollable"><div class="card-header">참고 자료</div><input type="file" id="uploadInput" style="margin-bottom:10px;"><button class="btn btn-outline" id="btnUpload" style="width:100%; margin-bottom:15px;" onclick="uploadFile()">업로드</button><div id="fileList"></div></div></div><div class="split-right"><div class="card full-height scrollable"><div class="card-header">설정</div><div id="publicModeSettings" style="display:none; background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:20px;"><label>Gemini API Key</label><input type="password" id="settingApiKey"><button class="btn-sm active" style="width:100%;" onclick="savePublicSettings()">저장</button></div><label>AI 페르소나</label><textarea id="personaText" style="height:150px;" placeholder="예: 초등학교 교사 말투..."></textarea><div style="text-align:right;"><button class="btn btn-primary" id="btnPersona" onclick="savePersona()">저장</button></div>
+        
+        <hr style="margin: 15px 0;">
+        <label>API 연결 테스트</label>
+        <button class="btn btn-outline" style="width:100%; margin-bottom:15px;" onclick="checkAvailableModels()">사용 가능 모델 검색</button>
+
+        <hr><div class="card-header" style="color:var(--danger); border-bottom:none;">데이터 관리</div><button class="btn btn-danger" style="width:100%" onclick="reqConfirm('데이터를 초기화하시겠습니까?', archiveData)">[새 학년 준비] 데이터 백업 및 초기화</button></div></div></div></div>
     </div>
 
     <div id="toast"></div>
@@ -1436,6 +1442,25 @@
             r.innerHTML=`<div style="display:flex;justify-content:space-between;margin-bottom:5px"><b>${s.name}</b> <button class="btn-icon" onclick="copyText('${id}')">복사</button></div><textarea id="${id}" style="height:100px;width:100%">생성 중<span class="loading-anim"></span>...</textarea>`; resDiv.appendChild(r); const d=await sendRequest('generate_neis_individual',{name:s.name,type:sub,keyword:k,length:len}); r.querySelector('textarea').value=d?d.text:'생성 실패'; } showToast("완료");
         }
         function toggleNeisType() { const t=document.getElementById('neisType').value; document.getElementById('neisSubOption').style.display=t==='subject'?'block':'none'; document.getElementById('neisBehOption').style.display=t==='behavior'?'block':'none'; }
+
+        // [NEW] 사용 가능한 AI 모델 조회 함수
+        async function checkAvailableModels() {
+            showToast("✨ AI 모델 검색 중...");
+            const models = await sendRequest('check_ai_models');
+            
+            if (models && Array.isArray(models)) {
+                let msg = "===== ✅ 사용 가능 모델 목록 =====\n\n";
+                models.forEach(m => {
+                    if(m.id.includes('gemini')) {
+                        msg += `🔹 ${m.name}\n   ID: ${m.id}\n   (입력: ${m.inputLimit} / 출력: ${m.outputLimit})\n\n`;
+                    }
+                });
+                alert(msg);
+                console.table(models);
+            } else {
+                alert("❌ 모델 목록을 불러오지 못했습니다.\nAPI 키를 확인하거나 잠시 후 다시 시도해주세요.\n\n" + JSON.stringify(models));
+            }
+        }
     </script>
 </body>
 </html>
