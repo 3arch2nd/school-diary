@@ -4,7 +4,7 @@
     <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>쫑알수첩 Pro (Grid System v21.0_Fix)</title>
+    <title>쫑알수첩 Pro (Grid Fix v21.1)</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -29,7 +29,7 @@
         h1 { color: var(--primary-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: -0.5px; margin: 0;
         }
 
-        /* [레이아웃] 스크롤 및 전체 화면 고정 */
+        /* 레이아웃 공통 */
         .scroll-wrapper { flex: 1;
             min-height: 0; overflow-y: auto; width: 100%; padding-right: 5px; }
         .pc-only.full-height, .mobile-only.full-height { display: flex;
@@ -42,8 +42,8 @@
         .mobile-only { display: none !important;
         }
 
-        /* [🐛 CSS Grid 시스템 수정됨] - 기록하기 탭 레이아웃 고정 */
-        /* 기본 모드 (과목): 이름(80px) | 내용(나머지) | 체크(180px) */
+        /* [핵심 수정] 기록하기 Grid 시스템 재정의 */
+        /* 기본: 3컬럼 (이름 | 내용 | 체크) */
         .record-grid {
             display: grid;
             grid-template-columns: 80px 1fr 180px; 
@@ -51,20 +51,18 @@
             align-items: center;
             width: 100%;
         }
-
-        /* 행동 모드 (Behavior): 이름(80px) | 내용(나머지) - 2컬럼으로 명확히 변경 */
-        /* JS가 부모에게 'mode-behavior' 클래스를 붙이면 CSS가 컬럼 구조를 2개로 바꿈 */
+        /* 행동 모드: 2컬럼 (이름 | 내용) - 체크박스 컬럼 아예 삭제 */
         .record-container.mode-behavior .record-grid {
-            grid-template-columns: 80px 1fr !important; /* 0px 컬럼 제거 */
+            grid-template-columns: 80px 1fr !important;
         }
         
-        /* 행동 모드일 때 3번째 컬럼(체크박스) 완벽히 숨김 처리 */
+        /* 행동 모드일 때 체크박스 요소 숨김 */
         .record-container.mode-behavior .col-check,
         .record-container.mode-behavior .col-check-header {
             display: none !important;
         }
 
-        /* 그리드 내부 요소 스타일 */
+        /* 그리드 내부 요소 */
         .grid-row { padding: 10px 5px;
             border-bottom: 1px solid var(--bg-main); background: white; min-height: 50px; }
         .grid-header { padding: 12px 5px;
@@ -78,31 +76,22 @@
         .col-check { display: flex; justify-content: space-between; padding: 0 2px;
         }
         
-        /* 헤더의 체크박스 라벨 정렬 */
         .col-check-header { display: flex;
             justify-content: space-between; }
         .col-check-header span { width: 40px; text-align: center; display: inline-block;
             letter-spacing: -1px; line-height: 1.2; font-size: 0.75rem; }
 
-        /* [빠른 체크 전용 스타일] */
+        /* 빠른 체크 스타일 */
         #customCheckList { flex: 1;
             overflow-y: auto; display: flex; flex-direction: column; }
         .quick-row { 
-            display: flex;
-            align-items: center; 
-            justify-content: space-between; /* 양끝 정렬 */
-            width: 100%;
-            padding: 12px 10px; 
-            border-bottom: 1px solid #f0f0f0; 
-            background: white; 
-            min-height: 50px;
+            display: flex; align-items: center; justify-content: space-between; 
+            width: 100%; padding: 12px 10px; border-bottom: 1px solid #f0f0f0; background: white; min-height: 50px;
         }
-        .quick-name { font-weight: bold; color: var(--text-main);
-        }
-        .quick-input { flex-shrink: 0;
-        } /* 입력 요소가 찌그러지지 않게 */
+        .quick-name { font-weight: bold; color: var(--text-main); }
+        .quick-input { flex-shrink: 0; } 
 
-        /* 기타 UI 요소들 */
+        /* 기타 UI 요소들 (Overlay, Status, Tabs 등 기존 유지) */
         .global-overlay { position: fixed;
             top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 2000; display: none;
         }
@@ -466,7 +455,6 @@
         <div class="music-play-btn" onclick="toggleMusicPanel()">▶</div>
     </div>
 
-    
     <div id="lockScreen"><div id="lockCard"><h2 style="color:var(--primary-dark); margin-bottom:20px;">쫑알수첩 Pro</h2><p style="margin-bottom:10px; color:var(--text-sub);">관리자 인증이 필요합니다.</p><input type="password" id="lockInput" placeholder="Password" onkeyup="checkCaps(event)"><div id="lockMsg" class="lock-msg"></div><button class="btn btn-primary" onclick="unlockApp()" style="width:100%;">접속</button></div></div>
 
     <div class="float-btn" onclick="toggleFloatMenu()">+</div>
@@ -479,7 +467,6 @@
     <div class="container">
         <header><h1>쫑알수첩 v20.0</h1></header>
         <nav class="nav-tabs">
-            
             <div class="nav-item nav-item-home active" onclick="changeSection('home')">HOME</div>
             <div class="nav-item" onclick="changeSection('record')">기록하기</div>
             <div class="nav-item" onclick="changeSection('students')">학생관리</div>
@@ -488,66 +475,49 @@
         </nav>
 
         <div id="home" class="section active">
-            <div class="mobile-only" style="margin-bottom: 10px;
-            height: auto;">
+            <div class="mobile-only" style="margin-bottom: 10px; height: auto;">
                 <div class="card">
                      <div class="card-header">빠른 기록 (모바일)</div>
-                     <div style="background:#f9f9f9;
-                        padding:15px; border-radius:8px;">
-                        <div style="font-size:0.85rem;
-                        color:var(--text-sub); margin-bottom:10px;">[팁] 예: <b>김철수/수학/발표 잘함</b></div>
-                        <textarea id="homeQuickInputMobile" style="width:100%;
-                        height:80px; resize:none;" placeholder="입력..."></textarea>
+                     <div style="background:#f9f9f9; padding:15px; border-radius:8px;">
+                        <div style="font-size:0.85rem; color:var(--text-sub); margin-bottom:10px;">[팁] 예: <b>김철수/수학/발표 잘함</b></div>
+                        <textarea id="homeQuickInputMobile" style="width:100%; height:80px; resize:none;" placeholder="입력..."></textarea>
                         <button class="btn btn-primary" style="width:100%;" onclick="saveHomeQuickRecord('mobile')">✨ AI 자동 기록</button>
                     </div>
                 </div>
             </div>
 
             <div class="split-container">
-      
                 <div class="split-left">
                     <div class="card full-height">
                         <div class="scroll-wrapper">
                             <div class="home-image-area" id="homeImgArea" onclick="document.getElementById('homeImgInput').click()">
-           
                                 <span class="home-image-msg">이미지 드래그 또는 클릭</span>
                                 <img id="homeMainImg" style="display:none;">
                                 <input type="file" id="homeImgInput" style="display:none" accept="image/*" onchange="uploadHomeImage(this)">
-    
                             </div>
-                            <div class="card-header" style="margin-top:20px;
-                            border-bottom:0;">오늘의 할 일</div>
-                            <div id="homeToDoList" style="flex-grow:1;
-                            font-size:1rem; color:#333; font-weight:bold; line-height:1.8;">일정 없음</div>
+                            <div class="card-header" style="margin-top:20px; border-bottom:0;">오늘의 할 일</div>
+                            <div id="homeToDoList" style="flex-grow:1; font-size:1rem; color:#333; font-weight:bold; line-height:1.8;">일정 없음</div>
                         </div>
                     </div>
                 </div>
                 <div class="split-right">
-                   
                     <div class="card full-height">
                         <div class="scroll-wrapper">
                             <div class="home-stack">
                                 <div> <div class="card-header">자주 찾는 사이트</div>
-       
                                     <div class="quick-link-grid" id="quickLinkGrid"></div>
                                 </div>
                                 <div class="pc-only">
-    
                                     <div class="card-header">빠른 기록</div>
-                                    <div style="background:#f9f9f9;
-                                    padding:15px; border-radius:8px;">
-                                        <div style="font-size:0.85rem;
-                                        color:var(--text-sub); margin-bottom:10px;">[팁] 예: <b>김철수/수학/발표 잘함</b></div>
-                                        <textarea id="homeQuickInput" style="width:100%;
-                                        height:80px; resize:none;" placeholder="입력..."></textarea>
+                                    <div style="background:#f9f9f9; padding:15px; border-radius:8px;">
+                                        <div style="font-size:0.85rem; color:var(--text-sub); margin-bottom:10px;">[팁] 예: <b>김철수/수학/발표 잘함</b></div>
+                                        <textarea id="homeQuickInput" style="width:100%; height:80px; resize:none;" placeholder="입력..."></textarea>
                                         <button class="btn btn-primary" style="width:100%;" onclick="saveHomeQuickRecord('pc')">✨ AI 자동 기록</button>
                                     </div>
-               
                                 </div>
                             </div>
                         </div>
                     </div>
-           
                 </div>
             </div>
         </div>
@@ -556,161 +526,113 @@
             <div class="mobile-only full-height">
                 <div class="card full-height">
                     <div class="scroll-wrapper">
-            
                         <div class="card-header" style="display:block;">
-                            <div style="display:flex;
-                                gap:5px; margin-bottom:10px; justify-content:center;">
+                            <div style="display:flex; gap:5px; margin-bottom:10px; justify-content:center;">
                                 <button class="btn-sm active" id="mobBtnSub" onclick="setMobileMode('subject')">과목</button>
                                 <button class="btn-sm inactive" id="mobBtnBeh" onclick="setMobileMode('behavior')">행동</button>
-                          
                                 <button class="btn-sm inactive" id="mobBtnCust" onclick="setMobileMode('custom')">기타</button>
                             </div>
                             <input type="date" id="mobDate" style="margin-bottom:0;">
                         </div>
-       
-                 
                         <div>
-                            <div id="mobViewQuick" style="display:flex;
-                                flex-direction:column; padding-top:15px;">
-                                <div style="background:#f0f8ff;
-                                    padding:15px; border-radius:8px; display:flex; flex-direction:column; min-height: 200px;">
-                                    <div style="font-size:0.9rem;
-                                    color:var(--text-sub); margin-bottom:10px;">
+                            <div id="mobViewQuick" style="display:flex; flex-direction:column; padding-top:15px;">
+                                <div style="background:#f0f8ff; padding:15px; border-radius:8px; display:flex; flex-direction:column; min-height: 200px;">
+                                    <div style="font-size:0.9rem; color:var(--text-sub); margin-bottom:10px;">
                                         <span id="mobQuickTip">예: 김철수/수학/발표 잘함</span>
                                     </div>
-                    
-                                <textarea id="mobQuickInput" style="flex:1; resize:none;
-                                margin-bottom:15px;" placeholder="내용을 입력하세요..."></textarea>
-                                    <button class="btn btn-primary" style="width:100%;
-                                    height:50px;" onclick="saveMobileQuickRecord()">✨ AI 기록 저장</button>
+                                <textarea id="mobQuickInput" style="flex:1; resize:none; margin-bottom:15px;" placeholder="내용을 입력하세요..."></textarea>
+                                    <button class="btn btn-primary" style="width:100%; height:50px;" onclick="saveMobileQuickRecord()">✨ AI 기록 저장</button>
                                 </div>
                             </div>
 
-                            <div id="mobViewCustom" style="display:none;
-                                flex-direction:column; padding-top:15px;">
-                                <div style="display:flex;
-                                justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <div id="mobViewCustom" style="display:none; flex-direction:column; padding-top:15px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                                     <label style="margin:0;">항목 선택</label>
-                                    <select id="mobCustomSelect" style="width:60%;
-                                    margin:0;" onchange="renderMobileCustomList()"></select>
+                                    <select id="mobCustomSelect" style="width:60%; margin:0;" onchange="renderMobileCustomList()"></select>
                                 </div>
-                                <div style="border:1px solid #eee;
-                                border-radius:8px; padding:10px; margin-bottom:10px;">
+                                <div style="border:1px solid #eee; border-radius:8px; padding:10px; margin-bottom:10px;">
                                     <div id="mobCustomList"></div>
                                 </div>
-                             
                                 <button class="btn btn-primary" style="width:100%; height:50px; flex-shrink:0;" onclick="saveMobileCustom()">저장하기</button>
                             </div>
                         </div>
                     </div>
                 </div>
-   
             </div>
 
             <div class="pc-only full-height">
                 <div class="split-container">
                     <div class="split-left">
                         <div class="card full-height">
-             
                              <div class="scroll-wrapper">
-                                <div class="card-header"><span>기본 정보</span><div style="display:flex;
-                                gap:5px;"><button class="btn-sm active" id="btnSubject" onclick="setMode('subject')">과목</button><button class="btn-sm inactive" id="btnBehavior" onclick="setMode('behavior')">행동</button><button class="btn-sm inactive" id="btnCustom" onclick="setMode('custom')">기타</button></div></div>
+                                <div class="card-header"><span>기본 정보</span><div style="display:flex; gap:5px;"><button class="btn-sm active" id="btnSubject" onclick="setMode('subject')">과목</button><button class="btn-sm inactive" id="btnBehavior" onclick="setMode('behavior')">행동</button><button class="btn-sm inactive" id="btnCustom" onclick="setMode('custom')">기타</button></div></div>
                                 <label>날짜</label><input type="date" id="rDate">
                                 <div id="normalModeOptions">
-                     
                                      <div id="periodArea"><label>교시</label><select id="rPeriod"><option value="">(선택안함)</option><option>1교시</option><option>2교시</option><option>3교시</option><option>4교시</option><option>5교시</option><option>6교시</option></select></div>
                                     <div id="subjectArea">
                                         <label>과목 선택</label><div class="tag-container" id="subjectTags"></div>
-  
                                        <label>주제</label><input type="text" id="rTopic" placeholder="예: 시 낭송하기">
                                     </div>
-                     
                                 </div>
                                 <div id="customModeOptions" style="display:none;">
-                                    <div style="display:flex;
-                                    justify-content:space-between; align-items:center; margin-bottom:10px;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                                         <label style="margin:0;">나만의 항목</label>
                                         <button class="btn-sm" onclick="openCustomItemModal()">+ 항목 생성</button>
-            
                                     </div>
                                     <div id="customItemsList"></div>
                                 </div>
-       
                             </div>
                         </div>
                     </div>
                     <div class="split-right">
-              
                         <div class="card full-height" id="recordRightCard">
                             <div class="scroll-wrapper">
                                 <div id="normalRecordView" class="record-container mode-subject">
-                       
                                     <div class="card-header">
                                         <span>학생별 기록</span>
-                                        <div style="display:flex;
-                                        align-items:center; gap:10px;">
+                                        <div style="display:flex; align-items:center; gap:10px;">
                                             <div class="switch-container"><label class="switch"><input type="checkbox" id="aiToggle" checked><span class="slider"></span></label><span>AI</span></div>
                                             <button class="btn btn-primary" id="btnSaveAll" onclick="saveData()">저장하기</button>
- 
                                         </div>
                                     </div>
                          
-            
                                     <div class="record-grid grid-header">
                                         <div class="col-name">이름</div>
-          
                                         <div class="col-content" style="text-align:center;">내용</div>
                                         <div class="col-check-header" id="checkHeader">
-                          
                                             <span>매우<br>잘함</span>
                                             <span>잘함</span>
-                                      
                                             <span>보통</span>
                                             <span>노력<br>요함</span>
                                         </div>
-          
                                     </div>
-                                    
                                     <div id="recordList"></div>
- 
                                 </div>
                                 
-                                <div id="customRecordView" style="display:none;
-                                height:100%;">
+                                <div id="customRecordView" style="display:none; height:100%;">
                                     <div class="split-container">
                                         <div class="split-half">
-                      
                                             <div class="card-header"><span>빠른 체크</span><button class="btn-sm active" onclick="saveCustomData()">저장</button></div>
                                             <div id="customCheckList"></div>
-                            
                                         </div>
-                                        <div class="split-half" style="border-left:1px solid #eee;
-                                        padding-left:15px;">
+                                        <div class="split-half" style="border-left:1px solid #eee; padding-left:15px;">
                                             <div class="card-header">
                                                 <span style="font-size:1rem;">통계</span>
-      
-                                                <select id="statsRangeSelect" style="width:120px;
-                                                margin-bottom:0; padding:4px;" onchange="renderCustomStats()">
+                                                <select id="statsRangeSelect" style="width:120px; margin-bottom:0; padding:4px;" onchange="renderCustomStats()">
                                                     <option value="today">오늘</option>
-                                             
                                                     <option value="month">이번 달</option>
                                                     <option value="s1">1학기</option>
-                                      
                                                     <option value="s2">2학기</option>
                                                     <option value="year">1년</option>
-                                
                                                 </select>
                                             </div>
-                                        
                                          <div id="customStatsChart" class="bar-chart-container"></div>
                                         </div>
                                     </div>
-                  
                                </div>
                             </div>
                         </div>
                     </div>
-              
                 </div>
             </div>
         </div>
@@ -719,20 +641,15 @@
             <div class="split-container">
                 <div class="split-left">
                     <div class="card full-height">
-                
                         <div class="scroll-wrapper">
                             <div class="card-header">학생 명단</div><div style="margin-bottom: 15px;"><button class="btn btn-outline" style="width:100%;" onclick="openStudentManageModal()">+ 학생 명단 관리</button></div><div id="studentNavList"></div>
                         </div>
                     </div>
-       
                  </div>
                 <div class="split-right">
-                    <div class="card full-height" style="display:flex;
-                    flex-direction:column;">
-                        <div class="card-header" style="flex-shrink:0;"><span id="viewerTitle">기록 상세</span><div style="display:flex;
-                        gap:5px;"><select id="viewSubjectFilter" style="margin-bottom:0; width:100px; padding:6px;" onchange="loadHistory()"></select><button class="btn-sm active" id="viewSubBtn" onclick="viewTab('subject')">과목</button><button class="btn-sm inactive" id="viewBehBtn" onclick="viewTab('behavior')">행동</button></div></div>
-                        <div style="margin-bottom:10px;
-                        display:flex; gap:10px;"><button class="btn btn-sm btn-primary" style="flex:1" onclick="saveSelectedHistory()">일괄 저장 (수정된 항목)</button><button class="btn btn-sm btn-del" style="flex:1" onclick="deleteSelectedHistory()">선택 삭제</button></div>
+                    <div class="card full-height" style="display:flex; flex-direction:column;">
+                        <div class="card-header" style="flex-shrink:0;"><span id="viewerTitle">기록 상세</span><div style="display:flex; gap:5px;"><select id="viewSubjectFilter" style="margin-bottom:0; width:100px; padding:6px;" onchange="loadHistory()"></select><button class="btn-sm active" id="viewSubBtn" onclick="viewTab('subject')">과목</button><button class="btn-sm inactive" id="viewBehBtn" onclick="viewTab('behavior')">행동</button></div></div>
+                        <div style="margin-bottom:10px; display:flex; gap:10px;"><button class="btn btn-sm btn-primary" style="flex:1" onclick="saveSelectedHistory()">일괄 저장 (수정된 항목)</button><button class="btn btn-sm btn-del" style="flex:1" onclick="deleteSelectedHistory()">선택 삭제</button></div>
                         <div id="historyViewer" class="scroll-wrapper"></div>
                     </div>
                 </div>
@@ -744,83 +661,58 @@
             <div class="split-container pc-only">
                 <div class="split-left">
                     <div class="card full-height">
-                       
                          <div class="scroll-wrapper">
-                            <div class="card-header">NEIS 옵션</div><label>유형</label><select id="neisType" onchange="toggleNeisType()"><option value="subject">과목별 세특</option><option value="behavior">행동특성</option></select><div id="neisSubOption"><label>대상 과목</label><select id="neisSubjectSelect"></select></div><div id="neisBehOption" style="display:none;"><label>키워드</label><input type="text" id="neisKeyword" placeholder="예: 배려, 협력"></div><label style="margin-top:15px;">분량</label><div style="display:flex;
-                            gap:10px;"><input type="range" id="neisLen" min="100" max="1000" step="50" value="300" oninput="document.getElementById('lenVal').innerText=this.value"><span style="color:var(--primary); font-weight:bold;"><span id="lenVal">300</span>자</span></div><button class="btn btn-primary" id="btnGenNeis" style="margin-top:15px;" onclick="generateNeisCards()">자료 생성하기</button>
+                            <div class="card-header">NEIS 옵션</div><label>유형</label><select id="neisType" onchange="toggleNeisType()"><option value="subject">과목별 세특</option><option value="behavior">행동특성</option></select><div id="neisSubOption"><label>대상 과목</label><select id="neisSubjectSelect"></select></div><div id="neisBehOption" style="display:none;"><label>키워드</label><input type="text" id="neisKeyword" placeholder="예: 배려, 협력"></div><label style="margin-top:15px;">분량</label><div style="display:flex; gap:10px;"><input type="range" id="neisLen" min="100" max="1000" step="50" value="300" oninput="document.getElementById('lenVal').innerText=this.value"><span style="color:var(--primary); font-weight:bold;"><span id="lenVal">300</span>자</span></div><button class="btn btn-primary" id="btnGenNeis" style="margin-top:15px;" onclick="generateNeisCards()">자료 생성하기</button>
                         </div>
                     </div>
                 </div>
                 <div class="split-right"><div class="card full-height"><div class="scroll-wrapper"><div class="card-header">생성 결과</div><div id="neisResultList"></div></div></div></div>
- 
             </div>
         </div>
+        
         <div id="bookmarks" class="section">
             <div class="split-container">
-                <div class="split-left"><div class="card full-height"><div class="scroll-wrapper"><div class="card-header">북마크 추가</div><input type="hidden" id="bmEditRow" value=""><label>URL</label><input type="text" id="bmUrl" placeholder="https://..." style="margin-bottom:10px;"><label>제목</label><input type="text" id="bmTitle" placeholder="자동 완성 됨"><input type="hidden" id="bmStar"> <label>태그</label><div class="tag-container" id="bmTagArea"></div><div style="display:flex;
-                gap:5px; margin-bottom:15px;"><input type="text" id="newBmTagInput" placeholder="새 태그" style="margin:0; flex:1;"><button class="btn-sm active" onclick="addNewBmTag()">+</button></div><label>메모</label><textarea id="bmMemo" style="height:120px;" placeholder="활용 팁..."></textarea><div style="display:flex; gap:10px;
-                margin-top:10px;"><button class="btn btn-outline" style="flex:1" onclick="clearBmInput()">취소</button><button class="btn btn-primary" style="flex:1" onclick="saveBookmark()" id="btnSaveBm">저장</button></div></div></div></div>
-                <div class="split-right"><div class="card full-height"><div class="scroll-wrapper"><div class="card-header"><span>북마크 목록</span><div id="bmFilterContainer" style="display:flex;
-                gap:5px; flex-wrap:wrap; margin-left:10px;"></div></div><div id="bmList"></div></div></div></div>
+                <div class="split-left"><div class="card full-height"><div class="scroll-wrapper"><div class="card-header">북마크 추가</div><input type="hidden" id="bmEditRow" value=""><label>URL</label><input type="text" id="bmUrl" placeholder="https://..." style="margin-bottom:10px;"><label>제목</label><input type="text" id="bmTitle" placeholder="자동 완성 됨"><input type="hidden" id="bmStar"> <label>태그</label><div class="tag-container" id="bmTagArea"></div><div style="display:flex; gap:5px; margin-bottom:15px;"><input type="text" id="newBmTagInput" placeholder="새 태그" style="margin:0; flex:1;"><button class="btn-sm active" onclick="addNewBmTag()">+</button></div><label>메모</label><textarea id="bmMemo" style="height:120px;" placeholder="활용 팁..."></textarea><div style="display:flex; gap:10px; margin-top:10px;"><button class="btn btn-outline" style="flex:1" onclick="clearBmInput()">취소</button><button class="btn btn-primary" style="flex:1" onclick="saveBookmark()" id="btnSaveBm">저장</button></div></div></div></div>
+                <div class="split-right"><div class="card full-height"><div class="scroll-wrapper"><div class="card-header"><span>북마크 목록</span><div id="bmFilterContainer" style="display:flex; gap:5px; flex-wrap:wrap; margin-left:10px;"></div></div><div id="bmList"></div></div></div></div>
             </div>
         </div>
+        
         <div id="calendar" class="section">
              <div class="split-container">
-                <div class="split-left"><div class="card scrollable"><div class="card-header" style="justify-content:center;
-                gap:15px;"><button class="arrow-btn" onclick="moveMonth(-1)">◀</button><span id="calMonth"></span><button class="arrow-btn" onclick="moveMonth(1)">▶</button><button class="btn-sm" style="margin-left:5px;" onclick="goToToday()">오늘</button></div><div class="cal-grid" id="calGrid"></div></div><div class="card scrollable" style="flex:1; margin-top:10px;"><div class="card-header">오늘 일정</div><div id="todayTodoListCal" style="font-size:0.95rem;
-                line-height:1.6;">일정 없음</div></div></div>
-                <div class="split-right"><div class="card full-height"><div class="scroll-wrapper"><div class="card-header"><span id="calDetailTitle">선택 날짜 일정</span></div><div style="display:flex;
-                gap:5px; margin-bottom:15px;"><input type="text" id="newEvent" placeholder="일정 등록 (구글 캘린더)" style="margin:0;"><button class="btn-primary" onclick="addEvent()" style="border-radius:6px; width:70px;">등록</button></div><div id="dailyEvents" style="margin-bottom:20px;"></div><hr style="margin:20px 0; border:0;
-                border-top:1px dashed #eee;"><div class="card-header"><span>출석 체크</span><div style="display:flex; gap:5px;"><button class="btn-sm" onclick="openMonthAttSummary()">월별 통계</button><button class="btn-sm active" onclick="saveAttendance()">저장</button></div></div><div id="attList"></div></div></div></div>
+                <div class="split-left"><div class="card scrollable"><div class="card-header" style="justify-content:center; gap:15px;"><button class="arrow-btn" onclick="moveMonth(-1)">◀</button><span id="calMonth"></span><button class="arrow-btn" onclick="moveMonth(1)">▶</button><button class="btn-sm" style="margin-left:5px;" onclick="goToToday()">오늘</button></div><div class="cal-grid" id="calGrid"></div></div><div class="card scrollable" style="flex:1; margin-top:10px;"><div class="card-header">오늘 일정</div><div id="todayTodoListCal" style="font-size:0.95rem; line-height:1.6;">일정 없음</div></div></div>
+                <div class="split-right"><div class="card full-height"><div class="scroll-wrapper"><div class="card-header"><span id="calDetailTitle">선택 날짜 일정</span></div><div style="display:flex; gap:5px; margin-bottom:15px;"><input type="text" id="newEvent" placeholder="일정 등록 (구글 캘린더)" style="margin:0;"><button class="btn-primary" onclick="addEvent()" style="border-radius:6px; width:70px;">등록</button></div><div id="dailyEvents" style="margin-bottom:20px;"></div><hr style="margin:20px 0; border:0; border-top:1px dashed #eee;"><div class="card-header"><span>출석 체크</span><div style="display:flex; gap:5px;"><button class="btn-sm" onclick="openMonthAttSummary()">월별 통계</button><button class="btn-sm active" onclick="saveAttendance()">저장</button></div></div><div id="attList"></div></div></div></div>
              </div>
         </div>
+        
         <div id="memo" class="section">
             <div class="split-container">
-                <div class="split-left"><div class="card full-height"><div class="scroll-wrapper"><div class="card-header"><span>메모</span><div style="display:flex;
-                gap:5px;"><button class="btn-sm active" id="btnMemoModeCal" onclick="setMemoMode('cal')">달력</button><button class="btn-sm inactive" id="btnMemoModeList" onclick="setMemoMode('list')">목록</button></div></div><div id="memoSearchArea" style="margin-bottom:10px;
-                display:none;"><input type="text" id="memoSearchInput" placeholder="메모 검색..." oninput="renderMemoList()"></div>
+                <div class="split-left"><div class="card full-height"><div class="scroll-wrapper"><div class="card-header"><span>메모</span><div style="display:flex; gap:5px;"><button class="btn-sm active" id="btnMemoModeCal" onclick="setMemoMode('cal')">달력</button><button class="btn-sm inactive" id="btnMemoModeList" onclick="setMemoMode('list')">목록</button></div></div><div id="memoSearchArea" style="margin-bottom:10px; display:none;"><input type="text" id="memoSearchInput" placeholder="메모 검색..." oninput="renderMemoList()"></div>
                 <div id="memoCalView">
-                    <div class="card-header" style="justify-content:center;
-                    gap:15px; border-bottom:none;">
+                    <div class="card-header" style="justify-content:center; gap:15px; border-bottom:none;">
                         <button class="arrow-btn" onclick="moveMemoMonth(-1)">◀</button>
                         <span id="memoMonthTitle"></span>
                         <button class="arrow-btn" onclick="moveMemoMonth(1)">▶</button>
-                      
                         <button class="btn-sm" style="margin-left:5px;" onclick="goToMemoToday()">오늘</button>
                     </div>
                     <div class="cal-grid" id="memoCalGrid"></div>
-                    <div id="memoDatePreview" style="margin-top:15px;
-                    border-top:1px solid #eee; padding-top:10px; display:none;"></div>
+                    <div id="memoDatePreview" style="margin-top:15px; border-top:1px solid #eee; padding-top:10px; display:none;"></div>
                 </div>
                 <div id="memoListView" style="display:none;"></div></div></div></div>
-                <div class="split-right"><div class="card full-height"><div class="scroll-wrapper"><div class="card-header">작성 <span id="memoDateDisp" style="font-size:0.9rem;
-                color:var(--text-sub); font-weight:normal;"></span></div><input type="hidden" id="memoEditRow"><textarea id="memoContent" style="height:300px; resize:none;" placeholder="내용을 입력하세요..."></textarea><div style="display:flex; gap:15px;
-                margin-bottom:15px;"><label><input type="checkbox" id="memoPinned"> 중요</label><label><input type="checkbox" id="memoDone"> 완료</label></div><div style="text-align:right;"><button class="btn btn-danger" id="btnDelMemo" style="display:none;
-                margin-right:10px;" onclick="deleteMemo()">삭제</button><button class="btn btn-primary" onclick="saveMemo()">저장</button><button class="btn btn-outline" style="margin-left:10px;" onclick="clearMemoInput()">새 메모</button></div></div></div></div>
+                <div class="split-right"><div class="card full-height"><div class="scroll-wrapper"><div class="card-header">작성 <span id="memoDateDisp" style="font-size:0.9rem; color:var(--text-sub); font-weight:normal;"></span></div><input type="hidden" id="memoEditRow"><textarea id="memoContent" style="height:300px; resize:none;" placeholder="내용을 입력하세요..."></textarea><div style="display:flex; gap:15px; margin-bottom:15px;"><label><input type="checkbox" id="memoPinned"> 중요</label><label><input type="checkbox" id="memoDone"> 완료</label></div><div style="text-align:right;"><button class="btn btn-danger" id="btnDelMemo" style="display:none; margin-right:10px;" onclick="deleteMemo()">삭제</button><button class="btn btn-primary" onclick="saveMemo()">저장</button><button class="btn btn-outline" style="margin-left:10px;" onclick="clearMemoInput()">새 메모</button></div></div></div></div>
             </div>
         </div>
-        <div id="data" class="section pc-only-tab"><div class="mobile-block-overlay"><span>⚙️</span><p>해당 기능은 PC/태블릿에서<br>사용 가능해요!</p></div><div class="split-container pc-only"><div class="split-left"><div class="card full-height scrollable"><div class="card-header">참고 자료</div><input type="file" id="uploadInput" style="margin-bottom:10px;"><button class="btn btn-outline" id="btnUpload" style="width:100%;
-            margin-bottom:15px;" onclick="uploadFile()">업로드</button><div id="fileList"></div></div></div><div class="split-right"><div class="card full-height scrollable"><div class="card-header">설정</div><div id="publicModeSettings" style="display:none; background:#f9f9f9; padding:15px; border-radius:8px;
-            margin-bottom:20px;"><label>Gemini API Key</label><input type="password" id="settingApiKey"><button class="btn-sm active" style="width:100%;" onclick="savePublicSettings()">저장</button></div><label>AI 페르소나</label><textarea id="personaText" style="height:150px;" placeholder="예: 초등학교 교사 말투..."></textarea><div style="text-align:right;"><button class="btn btn-primary" id="btnPersona" onclick="savePersona()">저장</button></div><hr style="margin:20px 0;"><div class="card-header" style="color:var(--danger);
-            border-bottom:none;">데이터 관리</div><button class="btn btn-danger" style="width:100%" onclick="reqConfirm('데이터를 초기화하시겠습니까?', archiveData)">[새 학년 준비] 데이터 백업 및 초기화</button></div></div></div></div>
+        
+        <div id="data" class="section pc-only-tab"><div class="mobile-block-overlay"><span>⚙️</span><p>해당 기능은 PC/태블릿에서<br>사용 가능해요!</p></div><div class="split-container pc-only"><div class="split-left"><div class="card full-height scrollable"><div class="card-header">참고 자료</div><input type="file" id="uploadInput" style="margin-bottom:10px;"><button class="btn btn-outline" id="btnUpload" style="width:100%; margin-bottom:15px;" onclick="uploadFile()">업로드</button><div id="fileList"></div></div></div><div class="split-right"><div class="card full-height scrollable"><div class="card-header">설정</div><div id="publicModeSettings" style="display:none; background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:20px;"><label>Gemini API Key</label><input type="password" id="settingApiKey"><button class="btn-sm active" style="width:100%;" onclick="savePublicSettings()">저장</button></div><label>AI 페르소나</label><textarea id="personaText" style="height:150px;" placeholder="예: 초등학교 교사 말투..."></textarea><div style="text-align:right;"><button class="btn btn-primary" id="btnPersona" onclick="savePersona()">저장</button></div><hr style="margin:20px 0;"><div class="card-header" style="color:var(--danger); border-bottom:none;">데이터 관리</div><button class="btn btn-danger" style="width:100%" onclick="reqConfirm('데이터를 초기화하시겠습니까?', archiveData)">[새 학년 준비] 데이터 백업 및 초기화</button></div></div></div></div>
     </div>
 
     <div id="toast"></div>
-    <div id="confirmModal" class="modal-overlay"><div class="modal-card"><div class="modal-msg" id="confirmMsg"></div><div style="text-align:center;
-    display:flex; gap:10px;"><button class="btn btn-outline" style="flex:1" onclick="document.getElementById('confirmModal').classList.remove('open')">취소</button><button class="btn btn-primary" style="flex:1" id="btnConfirmYes">확인</button></div></div></div>
-    <div id="subjectModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="font-weight:bold;
-    margin-bottom:15px;">새 과목 추가</div><input type="text" id="newSubjectName" placeholder="과목명"><div style="text-align:right;"><button class="btn btn-outline" onclick="closeSubjectModal()">취소</button> <button id="confirmSubjectBtn" class="btn btn-primary" onclick="confirmAddSubject()">추가</button></div></div></div>
+    <div id="confirmModal" class="modal-overlay"><div class="modal-card"><div class="modal-msg" id="confirmMsg"></div><div style="text-align:center; display:flex; gap:10px;"><button class="btn btn-outline" style="flex:1" onclick="document.getElementById('confirmModal').classList.remove('open')">취소</button><button class="btn btn-primary" style="flex:1" id="btnConfirmYes">확인</button></div></div></div>
+    <div id="subjectModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="font-weight:bold; margin-bottom:15px;">새 과목 추가</div><input type="text" id="newSubjectName" placeholder="과목명"><div style="text-align:right;"><button class="btn btn-outline" onclick="closeSubjectModal()">취소</button> <button id="confirmSubjectBtn" class="btn btn-primary" onclick="confirmAddSubject()">추가</button></div></div></div>
     <div id="deleteSubjectModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="color:var(--danger)">과목 삭제</div><p>기록이 영구 삭제됩니다.</p><div style="text-align:right;"><button class="btn btn-outline" onclick="document.getElementById('deleteSubjectModal').classList.remove('open')">취소</button> <button class="btn btn-danger" onclick="confirmDeleteSubject()">삭제</button></div></div></div>
-    <div id="manageStudentModal" class="modal-overlay"><div class="modal-card" style="width:500px;"><div class="modal-title" style="font-weight:bold;
-    margin-bottom:15px;">학생 명단 관리</div><div id="manageStudentRows" style="max-height:300px; overflow-y:auto; margin-bottom:15px;"></div><button class="btn-sm active" onclick="addStudentRow()">+ 행 추가</button><div style="text-align:right;
-    margin-top:15px;"><button class="btn btn-outline" onclick="closeStudentManageModal()">취소</button> <button class="btn btn-primary" id="btnManageStSave" onclick="saveStudentManagement()">전체 저장</button></div></div></div>
-    <div id="addLinkModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="font-weight:bold;
-    margin-bottom:15px;">바로가기 추가</div><label>이모지</label><input type="text" id="qlEmoji" placeholder="🏫"><label>이름 (짧게)</label><input type="text" id="qlName" placeholder="나이스"><label>URL</label><input type="text" id="qlUrl" placeholder="https://..."><div style="text-align:right;"><button class="btn btn-outline" onclick="document.getElementById('addLinkModal').classList.remove('open')">취소</button> <button class="btn btn-primary" onclick="confirmAddLink()">추가</button></div></div></div>
-    <div id="monthAttModal" class="modal-overlay"><div class="modal-card" style="width:600px;"><div class="modal-title" style="font-weight:bold;
-    margin-bottom:15px;">월별 출석 현황</div><div class="modal-body" id="monthAttBody" style="max-height:400px; overflow-y:auto; margin-bottom:15px;"></div><div style="text-align:right;"><button class="btn btn-outline" onclick="document.getElementById('monthAttModal').classList.remove('open')">닫기</button></div></div></div>
-    <div id="customItemModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="font-weight:bold;
-    margin-bottom:15px;">항목 생성</div><label>항목 이름</label><input type="text" id="ciName" placeholder="예: 우유 당번"><label>척도 타입</label><select id="ciType"><option value="check">체크리스트 (O/X)</option><option value="switch">스위치 (ON/OFF)</option><option value="select">선택 (상/중/하)</option></select><div style="text-align:right;
-    margin-top:10px;"><button class="btn btn-outline" onclick="document.getElementById('customItemModal').classList.remove('open')">취소</button> <button class="btn btn-primary" onclick="addCustomItem()">추가</button></div></div></div>
+    <div id="manageStudentModal" class="modal-overlay"><div class="modal-card" style="width:500px;"><div class="modal-title" style="font-weight:bold; margin-bottom:15px;">학생 명단 관리</div><div id="manageStudentRows" style="max-height:300px; overflow-y:auto; margin-bottom:15px;"></div><button class="btn-sm active" onclick="addStudentRow()">+ 행 추가</button><div style="text-align:right; margin-top:15px;"><button class="btn btn-outline" onclick="closeStudentManageModal()">취소</button> <button class="btn btn-primary" id="btnManageStSave" onclick="saveStudentManagement()">전체 저장</button></div></div></div>
+    <div id="addLinkModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="font-weight:bold; margin-bottom:15px;">바로가기 추가</div><label>이모지</label><input type="text" id="qlEmoji" placeholder="🏫"><label>이름 (짧게)</label><input type="text" id="qlName" placeholder="나이스"><label>URL</label><input type="text" id="qlUrl" placeholder="https://..."><div style="text-align:right;"><button class="btn btn-outline" onclick="document.getElementById('addLinkModal').classList.remove('open')">취소</button> <button class="btn btn-primary" onclick="confirmAddLink()">추가</button></div></div></div>
+    <div id="monthAttModal" class="modal-overlay"><div class="modal-card" style="width:600px;"><div class="modal-title" style="font-weight:bold; margin-bottom:15px;">월별 출석 현황</div><div class="modal-body" id="monthAttBody" style="max-height:400px; overflow-y:auto; margin-bottom:15px;"></div><div style="text-align:right;"><button class="btn btn-outline" onclick="document.getElementById('monthAttModal').classList.remove('open')">닫기</button></div></div></div>
+    <div id="customItemModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="font-weight:bold; margin-bottom:15px;">항목 생성</div><label>항목 이름</label><input type="text" id="ciName" placeholder="예: 우유 당번"><label>척도 타입</label><select id="ciType"><option value="check">체크리스트 (O/X)</option><option value="switch">스위치 (ON/OFF)</option><option value="select">선택 (상/중/하)</option></select><div style="text-align:right; margin-top:10px;"><button class="btn btn-outline" onclick="document.getElementById('customItemModal').classList.remove('open')">취소</button> <button class="btn btn-primary" onclick="addCustomItem()">추가</button></div></div></div>
 
     <script>
         const PRO_BACKEND_URL = "https://script.google.com/macros/s/AKfycbxn2nB0ZNXwXSdfx4-XVUWTD3Z_GCb_L2_SkhLyiKu5qrZrpwGTLM9Y4BhQRbveIk4o8Q/exec"; 
@@ -828,8 +720,7 @@
         const IS_PRO_MODE = !IS_GAS_ENV && PRO_BACKEND_URL !== "";
         
         let currentMode = 'subject'; let mobileMode = 'subject'; let selectedStudentName = null; let viewTabMode = 'subject';
-        let studentList = []; let subjectList = ["국어", "수학", "사회", "과학", "영어", 
-        "체육", "음악", "미술"];
+        let studentList = []; let subjectList = ["국어", "수학", "사회", "과학", "영어", "체육", "음악", "미술"];
         let customItems = []; let currentCustomItem = null;
         let targetSubjectToDelete = null; let aiPersona = ""; let aiJobQueue = []; let totalAiJobs = 0;
         let curYear = new Date().getFullYear(); let curMonth = new Date().getMonth();
@@ -1007,8 +898,8 @@
                 document.getElementById('normalRecordView').style.display = 'flex'; 
                 document.getElementById('customRecordView').style.display = 'none';
                 document.getElementById('subjectArea').style.display=m==='subject'?'block':'none';
-                // [GRID SYSTEM UPDATE]
-                // JS는 이제 스타일을 직접 만지지 않고, 부모 클래스만 갈아 끼웁니다.
+                
+                // [GRID SYSTEM UPDATE - Fixed]
                 const container = document.getElementById('normalRecordView');
                 if (m === 'behavior') {
                     container.classList.remove('mode-subject');
@@ -1091,7 +982,8 @@
  
                  else if(itemDef.type === 'select') inputHtml = `<select class="mob-cust-val" style="margin:0;"><option>상</option><option>중</option><option>하</option></select>`;
                  
-                 row.innerHTML = `<div class="col-name st-name">${st.name}</div><div class="col-content st-content"></div>${inputHtml}`;
+                 // 모바일용 단순화 구조
+                 row.innerHTML = `<div class="st-name" style="width:80px; font-weight:bold;">${st.name}</div><div style="flex:1;"></div>${inputHtml}`;
                  container.appendChild(row);
              });
         }
@@ -1284,17 +1176,19 @@
         }
         function closeSubjectModal() { document.getElementById('subjectModal').classList.remove('open');
         }
+        
+        // [Grid Rendering Logic]
         function renderRecordList() {
              const l=document.getElementById('recordList');
              l.innerHTML='';
              studentList.forEach(st=>{
-                 // [GRID] 여기서는 클래스(CSS)가 모든 것을 제어하므로 HTML 구조는 단순화
                  const r=document.createElement('div'); 
-                 r.className='record-grid grid-row'; // Grid Class 적용
+                 r.className='record-grid grid-row'; // Grid Class
                  
-               
-                  let chk = `<div class="col-check st-check-group"><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div></div>`;
+                 // 체크박스 HTML 생성 (3번째 컬럼용)
+                 let chk = `<div class="col-check st-check-group"><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div></div>`;
                  
+                 // Grid Layout: 이름(1) | 내용(2) | 체크(3 - CSS로 숨겨짐)
                  r.innerHTML=`<div class="col-name">${st.name}</div><div class="col-content"><input type="text" class="st-input" id="input_${st.id}" placeholder="내용"></div>${chk}`;
                  l.appendChild(r);
              });
