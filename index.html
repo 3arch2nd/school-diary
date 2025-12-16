@@ -241,7 +241,23 @@
         .student-nav-item:hover { background: #eaf6fc; color: var(--primary-dark); border-color: var(--primary-light); }
         .student-nav-item.active { background: #eaf6fc; border-color: var(--primary); font-weight: bold; color: var(--primary-dark); border-width: 2px; }
 
-        .history-card { border-bottom: 1px solid #eee; padding: 15px 10px; display: flex; gap: 10px; align-items: flex-start; }
+        /* [수정됨] 기록 상세 보기의 날짜/평가 줄바꿈 및 스타일 */
+        .history-card { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; border-bottom: 1px solid var(--bg-main); padding-bottom: 10px; }
+        
+        /* 세로 정렬(Column)로 변경하여 날짜 아래에 평가가 오도록 함 */
+        .h-info { 
+            width: 90px; 
+            flex-shrink: 0; 
+            text-align: center; 
+            display: flex; 
+            flex-direction: column; /* 세로 배치 */
+            gap: 4px; 
+            justify-content: center;
+        }
+        
+        .h-date { font-size: 0.8rem; color: #888; }
+        .h-badge { font-size: 0.8rem; font-weight: bold; color: var(--primary-dark); }
+        .h-eval { font-size: 0.75rem; color: white; background: var(--att-dot); padding: 2px 6px; border-radius: 10px; display: inline-block; align-self: center;}
         .history-chk { padding-top: 2px; }
         .history-content { flex: 1; }
 
@@ -1181,62 +1197,147 @@
         function toggleCheck(el) { const p=el.parentElement; const w=el.classList.contains('checked'); p.querySelectorAll('.check-circle').forEach(c=>c.classList.remove('checked')); if(!w) el.classList.add('checked');
         }
         
+        // [수정됨] 저장 로직: 중복 방지 및 Raw 데이터 형식([주제] 내용) 지정
         async function saveData() {
-            const inputs=document.querySelectorAll('.st-input');
-            const ai=document.getElementById('aiToggle').checked;
-            let type="행동"; if(currentMode==='subject'){ const t=document.querySelector('#subjectTags .tag.selected'); if(!t){showToast("과목 선택 필요");return;} type=t.innerText.split(' ')[0];
-            }
-            let list=[];
-            inputs.forEach(i=>{
-                const txt=i.value.trim(); const row=i.closest('.student-row'); const name=row.querySelector('.st-name').innerText;
-                let chk="없음";
-                if(currentMode==='subject'){ const c=row.querySelectorAll('.check-circle'); if(c&&c.length>0) { if(c[0].classList.contains('checked')) chk="매우잘함"; else if(c[1].classList.contains('checked')) chk="잘함"; else if(c[2].classList.contains('checked')) chk="보통"; else if(c[3].classList.contains('checked')) chk="노력요함"; } }
-                if(txt || chk!=="없음") list.push({name, text:txt, check:chk});
-        
-            });
-            if(list.length===0){showToast("내용 없음");return;}
+            const inputs = document.querySelectorAll('.st-input'); 
+            const btn = document.getElementById('btnSaveAll'); 
+            const isAI = document.getElementById('aiToggle').checked;
             
-            showToast("저장 시작...");
-            for(const item of list) {
-                let fullText = item.text.trim();
-                await sendRequest('save_record', {
-                    date: document.getElementById('rDate').value,
-                    name: item.name, type: type, text: fullText, check: item.check
-                });
+            let targetType = "행동";
+            if(currentMode === 'subject') { 
+                const selTag = document.querySelector('#subjectTags .tag.selected'); 
+                if(!selTag) { showToast("과목 선택 필요"); return; } 
+                targetType = selTag.innerText.split(' ')[0].trim(); 
             }
-            inputs.forEach(i=>i.value=''); document.querySelectorAll('.check-circle').forEach(c=>c.classList.remove('checked'));
-            if(ai && list.length > 0) {
-                aiJobQueue = list.map(item => ({...item, type:type, topic: document.getElementById('rTopic').value}));
-                totalAiJobs = aiJobQueue.length;
-                processNextAiJob();
-            } else { showToast("완료"); }
+            
+            setLoading(btn, "저장 중");
+            let itemsToSave = [];
+            
+            inputs.forEach(input => {
+                const text = input.value.trim(); 
+                const row = input.closest('.student-row'); 
+                const name = row.querySelector('.st-name').innerText.split('.')[1].trim();
+                
+                let checkVal = "없음";
+                if(currentMode === 'subject') { 
+                    const checks = row.querySelectorAll('.check-circle'); 
+                    if(checks[0].classList.contains('checked')) checkVal = "매우잘함"; 
+                    else if(checks[1].classList.contains('checked')) checkVal = "잘함"; 
+                    else if(checks[2].classList.contains('checked')) checkVal = "보통"; 
+                    else if(checks[3].classList.contains('checked')) checkVal = "노력요함"; 
+                }
+                
+                if (text.length > 0 || checkVal !== "없음") itemsToSave.push({ input, name, text, checkVal });
+            });
+            
+            if (itemsToSave.length === 0) { showToast("저장할 내용 없음"); clearLoading(btn); return; }
+            
+            // 순차 저장
+            for (const item of itemsToSave) {
+                let period = document.getElementById('rPeriod').value; 
+                const topic = document.getElementById('rTopic').value.trim(); 
+                let periodPrefix = period ? `[${period}]` : "";
+                
+                // 3. AI 미적용 시 형식: [주제] 내용
+                let rawBody = item.text;
+                if(topic) rawBody = `[${topic}] ${item.text}`;
+                if(item.text.length === 0 && topic) rawBody = `[${topic}] 활동에 참여함`;
+                
+                rawBody = `${periodPrefix} ${rawBody}`.trim();
+                
+                // 1. 일단 있는 그대로 저장 (서버가 rowNum을 줌)
+                const res = await sendRequest('save_record', { 
+                    date: document.getElementById('rDate').value, 
+                    name: item.name, 
+                    type: targetType, 
+                    text: rawBody, 
+                    check: item.checkVal 
+                });
+                
+                // 1-1. 저장 성공했고, AI 켜져있으면 -> 수정 대기열(Queue)에 등록
+                // (새로 저장이 아니라, 방금 저장한 rowNum 위치를 찾아서 '수정'하는 방식이므로 중복 안 됨)
+                if (isAI && res && res.rowNum) {
+                    aiJobQueue.push({ 
+                        rowNum: res.rowNum, // 방금 저장된 줄 번호
+                        type: targetType, 
+                        topic: topic, 
+                        text: item.text, 
+                        check: item.checkVal, 
+                        name: item.name, 
+                        periodPrefix: periodPrefix 
+                    });
+                }
+            }
+            
+            clearLoading(btn); 
+            inputs.forEach(el => el.value = ''); 
+            document.querySelectorAll('.check-circle').forEach(el => el.classList.remove('checked')); 
+            
+            if(isAI && aiJobQueue.length > 0) {
+                showToast(`저장 완료. AI 변환 시작 (${aiJobQueue.length}건)`);
+                processNextAiJob(); // AI 작업 시작
+            } else {
+                showToast("저장 완료");
+            }
         }
 
+        // [수정됨] AI 처리 로직: 프롬프트 개선 (자연스러운 연결, 대괄호 제거)
         async function processNextAiJob() {
-            if(aiJobQueue.length === 0) { 
-                updateAiStatus(totalAiJobs + 1, totalAiJobs, "완료");
-                showToast("모든 기록 완료"); return; 
+            if (aiJobQueue.length === 0) { 
+                isAiQueueRunning = false; 
+                document.getElementById('status-bar').className = ''; 
+                showToast("✨ 모든 AI 변환 완료!");
+                return; 
             }
-            const job = aiJobQueue.shift();
-            updateAiStatus(totalAiJobs - aiJobQueue.length, totalAiJobs, job.name);
             
-            setTimeout(async () => {
-                const prompt = `역할: 초등학교 교사. 생기부 문장 1개 작성. 입력: [주제:${job.topic}], [내용:${job.text}], [평가:${job.check}] 조건: 1. 활동+내용+평가를 자연스럽게 연결하여 '~함' 종결. 2. 따옴표, 굵게, 특수문자 금지. 3. 칭찬 지양, 사실 위주.`;
-                try {
-                    const aiRes = await sendRequest('call_ai', { prompt });
-  
-                    if(aiRes && aiRes.text) {
-                        let prefix = job.topic ? `[${job.topic}] ` : "";
-                        await sendRequest('save_record', {
-                     
-                            date: document.getElementById('rDate').value,
-                            name: job.name, type: job.type, text: (prefix + aiRes.text).trim(), check: job.check
-                        });
-                    }
-           
-                } catch(e) {}
-                processNextAiJob();
-            }, 8000);
+            isAiQueueRunning = true; 
+            document.getElementById('status-bar').className = 'show';
+            
+            const job = aiJobQueue[0];
+            document.getElementById('status-msg').innerText = `✨ AI 다듬는 중... [${job.name}] (남은 작업: ${aiJobQueue.length})`;
+            
+            // 2. 개선된 프롬프트: 주제를 자연스럽게 녹이고, 특수문자 금지
+            const prompt = `
+                역할: 초등학교 교사. 
+                작업: 생활기록부 기재용 평어 한 문장 작성.
+                입력정보: [주제: ${job.topic || '없음'}], [활동내용: ${job.text || '없음'}], [평가: ${job.check}].
+                
+                [작성 원칙]
+                1. 주제와 활동내용, 평가를 자연스럽게 이어지는 **하나의 문장**으로 만드세요.
+                2. '[주제]' 처럼 대괄호를 절대 쓰지 말고, 문맥 속에 녹여내세요. (예: '[탐구] ~함' (X) -> '탐구 활동을 통해 ~함' (O))
+                3. **굵게(볼드)**, "따옴표", '작은따옴표' 등 특수문자를 절대 사용하지 마세요.
+                4. 문장은 반드시 '~함' 또는 '~음'으로 명사형 종결하세요. (합쇼체 금지)
+                5. 학생의 성취 수준(${job.check})을 문장 끝부분 서술어에 적절히 반영하세요. (예: 매우잘함 -> 탁월하게 수행함 / 노력요함 -> 지도가 필요함 등)
+                6. 페르소나: ${aiPersona}
+            `;
+
+            try {
+                const aiData = await sendRequest('call_ai', { prompt });
+                
+                if (aiData && aiData.text) {
+                    // 불필요한 기호 한 번 더 제거 (안전장치)
+                    let finalBody = aiData.text
+                        .replace(/['"\[\]]/g, "") // 대괄호, 따옴표 제거
+                        .replace(/\*\*/g, "")     // 볼드 제거
+                        .trim();
+                    
+                    // 교시는 앞에 붙여줌
+                    if(job.periodPrefix) finalBody = `${job.periodPrefix} ${finalBody}`;
+                    
+                    // 1에서 저장했던 위치(rowNum)를 찾아가서 '내용'만 덮어쓰기 (중복 방지)
+                    await sendRequest('update_record_row', { 
+                        type: job.type, 
+                        rowNum: job.rowNum, 
+                        text: finalBody 
+                    });
+                }
+            } catch (e) { 
+                console.error("AI Error:", e); 
+            }
+            
+            // 작업 끝났으면 목록에서 제거하고 다음 작업 실행
+            aiJobQueue.shift(); 
+            processNextAiJob();
         }
 
         // [Student Manager]
