@@ -2331,6 +2331,7 @@ function toggleFloatMenu() {
         // [실행] 페이지 로드 시 테마 적용 (window.onload 안에 넣거나 바로 실행)
         initDarkMode();
         // [추가] 구글 클래스룸 연동 로직
+    // [수정] 오류 내용을 정확히 보기 위한 디버깅 코드
     async function openClassroomModal() {
         document.getElementById('classroomModal').classList.add('open');
         const s = document.getElementById('crCourseSelect');
@@ -2338,9 +2339,18 @@ function toggleFloatMenu() {
         
         // GAS에 수업 목록 요청
         const courses = await sendRequest('get_classroom_courses'); 
+        console.log("Classroom Result:", courses); // [디버깅] 콘솔에 결과 출력
+
+        // [추가] 에러 메시지가 왔는지 확인
+        if (courses && courses.error) {
+            alert("오류 상세 내용:\n" + courses.error); // 오류 내용을 팝업으로 띄움
+            s.innerHTML = '<option>오류 발생</option>';
+            return;
+        }
+
         s.innerHTML = '<option value="">수업을 선택하세요</option>';
         
-        if(courses && courses.length > 0) {
+        if(courses && Array.isArray(courses) && courses.length > 0) {
             courses.forEach(c => {
                 const opt = document.createElement('option');
                 opt.value = c.id;
@@ -2348,7 +2358,7 @@ function toggleFloatMenu() {
                 s.appendChild(opt);
             });
         } else {
-            s.innerHTML = '<option>수업이 없거나 오류 발생</option>';
+            s.innerHTML = '<option>참여 중인 수업이 없습니다.</option>';
         }
     }
 
