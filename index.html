@@ -699,14 +699,26 @@
                         <div class="card full-height" id="recordRightCard">
                             <div class="scroll-wrapper">
                                 <div id="normalRecordView">
-                                    <div class="card-header">
-                                        <span>학생별 기록</span>
-                                        <div style="display:flex; align-items:center; gap:10px;">
-                                            <div class="switch-container"><label class="switch"><input type="checkbox" id="aiToggle" checked><span class="slider"></span></label><span>✨</span></div>
-                                            <button class="btn btn-primary" id="btnSaveAll" onclick="saveData()">저장하기</button>
-                                            <button class="btn btn-outline" onclick="openClassroomModal()" style="margin-right:5px;">가져오기</button>
+<div class="card-header">
+                                    <span style="white-space:nowrap;">학생별 기록</span>
+                                    <div style="display:flex; align-items:center; gap:5px;">
+                                        <div class="switch-container">
+                                            <label class="switch">
+                                                <input type="checkbox" id="aiToggle" checked>
+                                                <span class="slider"></span>
+                                            </label>
+                                            <span>✨</span>
                                         </div>
+                                        
+                                        <button class="btn btn-outline" onclick="openClassroomModal()" style="padding:0 10px; min-width:auto;">
+                                            🏫
+                                        </button>
+                                        
+                                        <button class="btn btn-primary" id="btnSaveAll" onclick="saveData()" style="padding:0 15px; min-width:60px;">
+                                            저장
+                                        </button>
                                     </div>
+                                </div>
                                     <div style="display:flex; padding: 12px 10px; border-bottom:1px solid #eee; font-weight:bold; color:var(--text-sub); font-size:0.9rem; align-items: center; gap: 10px;">
                                         <div style="width:80px; text-align:center;">이름</div><div style="flex-grow:1; text-align:center;">내용</div>
                                         <div id="checkHeader">
