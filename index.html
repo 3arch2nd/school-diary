@@ -188,10 +188,34 @@
             opacity: 0;
         }
         .music-panel.show { left: 20px; opacity: 1; } 
-        .mp-video { width: 40%; background: black; }
-        .mp-list { flex: 1; display: flex; flex-direction: column; padding: 8px; border-left: 1px solid #eee; gap: 0px; overflow-y: auto; }
-        .mp-item { font-size: 0.8rem; padding: 3px 0; border-bottom: 1px solid #f9f9f9; cursor: pointer; display: flex; justify-content: space-between; color: #333; line-height: 1.2; }
+        /* [수정] 유튜브 컨테이너: 내부 요소 중앙 정렬 */
+        .mp-video { width: 40%; background: black; display: flex; align-items: center; justify-content: center; }
+        /* [추가] 유튜브 iframe 비율 고정 (최신 CSS) */
+        #musicIframe { width: 100%; height: auto; aspect-ratio: 16 / 9; }
+
+        /* [수정] 플레이리스트 영역: 스크롤바 디자인 개선 */
+        .mp-list { 
+            flex: 1; display: flex; flex-direction: column; padding: 8px; border-left: 1px solid #eee; gap: 0px; overflow-y: auto;
+            /* 스크롤바 숨김 디자인 (선택사항) - 원하시면 주석 해제 */
+            /* scrollbar-width: thin; */
+        }
+        /* 스크롤바 커스텀 (Webkit) */
+        .mp-list::-webkit-scrollbar { width: 6px; }
+        .mp-list::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 3px; }
+        .mp-list::-webkit-scrollbar-track { background-color: #f9f9f9; }
+
+        /* [수정] 리스트 아이템: 드래그 관련 스타일 추가 */
+        .mp-item { 
+            font-size: 0.8rem; padding: 6px 4px; /* 패딩 약간 늘림 */
+            border-bottom: 1px solid #f9f9f9; cursor: grab; /* 커서 변경 */
+            display: flex; justify-content: space-between; color: #333; line-height: 1.2; align-items: center;
+            background: white; transition: 0.2s;
+        }
         .mp-item:hover { color: var(--primary); font-weight: bold; background: #f0f8ff;}
+        /* 드래그 중일 때 스타일 */
+        .mp-item.dragging { opacity: 0.5; background: #eaf6fc; border: 2px dashed var(--primary); }
+        /* 드래그오버 시 타겟 스타일 */
+        .mp-item.over { border-top: 2px solid var(--primary); }
         .mp-add { margin-top: auto; display: flex; gap: 5px; padding-top: 5px;}
         .mp-add input { flex: 1; margin: 0; font-size: 0.8rem; height: 30px; padding: 5px; border: 1px solid var(--border-color); background: #fcfdfd; }
         
@@ -807,7 +831,7 @@
         function reqConfirm(msg, callback) { document.getElementById('confirmMsg').innerText = msg;
             document.getElementById('confirmModal').classList.add('open'); document.getElementById('btnConfirmYes').onclick = () => { document.getElementById('confirmModal').classList.remove('open'); callback(); }; }
 
-        // [MUSIC PLAYER]
+// [MUSIC PLAYER] - 드래그 앤 드롭 기능 추가됨
         function toggleMusicPanel() { 
             const p = document.getElementById('musicPanel');
             p.classList.toggle('show');
@@ -817,21 +841,90 @@
         async function loadMusicData() {
             const data = await sendRequest('manage_music', {mode: 'get'});
             musicPlaylist = data || [];
-            if(musicPlaylist.length === 0) musicPlaylist = [{name: "Lo-fi Study", id: "jfKfPfyJRdk"}];
+            // 데이터 없을 때 기본 샘플 유지
+            if(musicPlaylist.length === 0) musicPlaylist = [{name: "Lo-fi Study", id: "jfKfPfyJRdk"}, {name: "Essential Classic", id: "R01515409c8"}];
             renderMusicList();
         }
+        
+        // [핵심 수정] 리스트 렌더링 및 드래그 이벤트 연결
         function renderMusicList() {
             const c = document.getElementById('musicList');
             c.innerHTML = '';
             musicPlaylist.forEach((m, i) => {
-                const d = document.createElement('div'); d.className = 'mp-item';
-                d.innerHTML = `<span onclick="playMusic('${m.id}', '${m.name}')">${m.name}</span> <span style="color:#e74c3c;" onclick="removeMusic(${i})">x</span>`;
+                const d = document.createElement('div'); 
+                d.className = 'mp-item';
+                d.draggable = true; // 드래그 가능하게 설정
+                d.dataset.index = i; // 인덱스 저장
+
+                // 드래그 핸들 아이콘 추가 (☰) 및 삭제 버튼 수정
+                d.innerHTML = `
+                    <div style="display:flex; align-items:center; flex:1; overflow:hidden;">
+                        <span style="cursor:grab; color:#aaa; margin-right:8px;">☰</span>
+                        <span onclick="playMusic('${m.id}', '${m.name}')" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.name}</span>
+                    </div>
+                    <span style="color:#e74c3c; cursor:pointer; padding:0 5px;" onclick="removeMusic(${i})">x</span>
+                `;
+                
+                // 드래그 앤 드롭 이벤트 리스너 연결
+                d.addEventListener('dragstart', handleDragStart);
+                d.addEventListener('dragover', handleDragOver);
+                d.addEventListener('drop', handleDrop);
+                d.addEventListener('dragenter', handleDragEnter);
+                d.addEventListener('dragleave', handleDragLeave);
+                d.addEventListener('dragend', handleDragEnd);
+
                 c.appendChild(d);
             });
             const addDiv = document.createElement('div'); addDiv.className = 'mp-add';
-            addDiv.innerHTML = `<input type="text" id="newMusicUrl" placeholder="유튜브 링크"><button class="btn-sm active" onclick="addMusic()">+</button>`;
+            addDiv.innerHTML = `<input type="text" id="newMusicUrl" placeholder="유튜브 링크(url) 붙여넣기"><button class="btn-sm active" onclick="addMusic()">+</button>`;
             c.appendChild(addDiv);
         }
+
+        // --- 드래그 앤 드롭 관련 핸들러 ---
+        let dragSrcEl = null;
+
+        function handleDragStart(e) {
+            dragSrcEl = this;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+            this.classList.add('dragging');
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) e.preventDefault(); // 드롭 허용을 위해 필수
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDragEnter(e) { this.classList.add('over'); }
+        function handleDragLeave(e) { this.classList.remove('over'); }
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            document.querySelectorAll('.mp-item').forEach(item => item.classList.remove('over'));
+        }
+
+        async function handleDrop(e) {
+            if (e.stopPropagation) e.stopPropagation();
+            
+            if (dragSrcEl !== this) {
+                // 인덱스 가져오기
+                const fromIndex = parseInt(dragSrcEl.dataset.index);
+                const toIndex = parseInt(this.dataset.index);
+
+                // 배열 순서 변경 로직
+                const itemToMove = musicPlaylist[fromIndex];
+                musicPlaylist.splice(fromIndex, 1); // 기존 위치에서 제거
+                musicPlaylist.splice(toIndex, 0, itemToMove); // 새 위치에 삽입
+                
+                // 화면 갱신 및 저장
+                renderMusicList();
+                await sendRequest('manage_music', {mode:'save', playlist: musicPlaylist});
+                showToast("순서가 변경되었습니다. 🎵");
+            }
+            return false;
+        }
+        // ------------------------------------
+
         function playMusic(id, name) { 
             document.getElementById('musicIframe').src = `https://www.youtube.com/embed/${id}?autoplay=1`;
             document.getElementById('musicCurrentTitle').innerText = "🎵 " + name;
@@ -840,17 +933,20 @@
             const url = document.getElementById('newMusicUrl').value;
             let id = ""; if (url.includes("v=")) id = url.split("v=")[1].split("&")[0]; else if (url.includes("youtu.be/")) id = url.split("youtu.be/")[1];
             if (id) {
-                const name = prompt("노래 제목:", "새 노래");
+                const name = prompt("노래 제목을 입력해주세요:", "새 노래");
+                if(name === null) return; // 취소 시 중단
                 musicPlaylist.push({name: name||"노래", id: id});
                 renderMusicList();
                 await sendRequest('manage_music', {mode:'save', playlist: musicPlaylist});
                 document.getElementById('newMusicUrl').value = "";
-            } else alert("유효한 링크 필요");
+            } else alert("올바른 유튜브 링크가 아닙니다.");
         }
         async function removeMusic(idx) {
-            musicPlaylist.splice(idx, 1);
-            renderMusicList();
-            await sendRequest('manage_music', {mode:'save', playlist: musicPlaylist});
+            reqConfirm('이 노래를 삭제하시겠습니까?', async()=>{
+                musicPlaylist.splice(idx, 1);
+                renderMusicList();
+                await sendRequest('manage_music', {mode:'save', playlist: musicPlaylist});
+            });
         }
 
         // [AI Status Bar]
