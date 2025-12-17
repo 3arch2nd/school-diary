@@ -704,6 +704,7 @@
                                         <div style="display:flex; align-items:center; gap:10px;">
                                             <div class="switch-container"><label class="switch"><input type="checkbox" id="aiToggle" checked><span class="slider"></span></label><span>✨</span></div>
                                             <button class="btn btn-primary" id="btnSaveAll" onclick="saveData()">저장하기</button>
+                                            <button class="btn btn-outline" onclick="openClassroomModal()" style="margin-right:5px;">가져오기</button>
                                         </div>
                                     </div>
                                     <div style="display:flex; padding: 12px 10px; border-bottom:1px solid #eee; font-weight:bold; color:var(--text-sub); font-size:0.9rem; align-items: center; gap: 10px;">
@@ -905,7 +906,27 @@
             </div>
         </div>
     </div>
+<div id="classroomModal" class="modal-overlay">
+    <div class="modal-card" style="width:500px;">
+        <div class="modal-title" style="font-weight:bold; margin-bottom:15px;">구글 클래스룸 가져오기</div>
+        
+        <label>1. 수업 선택</label>
+        <select id="crCourseSelect" onchange="loadCrWorks()"></select>
+        
+        <label>2. 과제 선택</label>
+        <select id="crWorkSelect"></select>
+        
+        <div style="margin-top:15px; background:var(--bg-main); padding:10px; border-radius:6px; font-size:0.85rem; color:var(--text-sub);">
+            <p>💡 점수에 따라 성취도(상/중/하)가 자동 체크됩니다.</p>
+            <p>💡 과제 제목이 '주제'로 입력됩니다.</p>
+        </div>
 
+        <div style="text-align:right; margin-top:15px;">
+            <button class="btn btn-outline" onclick="document.getElementById('classroomModal').classList.remove('open')">취소</button> 
+            <button class="btn btn-primary" id="btnCrImport" onclick="importClassroomData()">데이터 적용</button>
+        </div>
+    </div>
+</div>
     <div id="toast"></div>
     <div id="confirmModal" class="modal-overlay"><div class="modal-card"><div class="modal-msg" id="confirmMsg"></div><div style="text-align:center; display:flex; gap:10px;"><button class="btn btn-outline" style="flex:1" onclick="document.getElementById('confirmModal').classList.remove('open')">취소</button><button class="btn btn-primary" style="flex:1" id="btnConfirmYes">확인</button></div></div></div>
     <div id="subjectModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="font-weight:bold; margin-bottom:15px;">새 과목 추가</div><input type="text" id="newSubjectName" placeholder="과목명"><div style="text-align:right;"><button class="btn btn-outline" onclick="closeSubjectModal()">취소</button> <button id="confirmSubjectBtn" class="btn btn-primary" onclick="confirmAddSubject()">추가</button></div></div></div>
@@ -2309,6 +2330,102 @@ function toggleFloatMenu() {
 
         // [실행] 페이지 로드 시 테마 적용 (window.onload 안에 넣거나 바로 실행)
         initDarkMode();
+        // [추가] 구글 클래스룸 연동 로직
+    async function openClassroomModal() {
+        document.getElementById('classroomModal').classList.add('open');
+        const s = document.getElementById('crCourseSelect');
+        s.innerHTML = '<option>로딩 중...</option>';
+        
+        // GAS에 수업 목록 요청
+        const courses = await sendRequest('get_classroom_courses'); 
+        s.innerHTML = '<option value="">수업을 선택하세요</option>';
+        
+        if(courses && courses.length > 0) {
+            courses.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.innerText = c.name;
+                s.appendChild(opt);
+            });
+        } else {
+            s.innerHTML = '<option>수업이 없거나 오류 발생</option>';
+        }
+    }
+
+    async function loadCrWorks() {
+        const cid = document.getElementById('crCourseSelect').value;
+        const w = document.getElementById('crWorkSelect');
+        w.innerHTML = '<option>로딩 중...</option>';
+        if(!cid) return;
+
+        const works = await sendRequest('get_classroom_works', {id: cid});
+        w.innerHTML = '<option value="">과제를 선택하세요</option>';
+        
+        if(works && works.length > 0) {
+            works.forEach(k => {
+                const opt = document.createElement('option');
+                opt.value = k.id;
+                opt.innerText = k.title;
+                w.appendChild(opt);
+            });
+        }
+    }
+
+    async function importClassroomData() {
+        const cid = document.getElementById('crCourseSelect').value;
+        const wid = document.getElementById('crWorkSelect').value;
+        if(!cid || !wid) { showToast("수업과 과제를 선택해주세요."); return; }
+
+        const btn = document.getElementById('btnCrImport');
+        setLoading(btn, "가져오는 중...");
+
+        try {
+            const data = await sendRequest('import_classroom_data', {courseId: cid, workId: wid});
+            
+            if(data && data.submissions) {
+                // 1. 주제(Topic) 입력
+                document.getElementById('rTopic').value = data.title;
+
+                // 2. 학생별 매칭 및 데이터 입력
+                const rows = document.querySelectorAll('.student-row');
+                let matchCount = 0;
+
+                rows.forEach(row => {
+                    const stName = row.querySelector('.st-name').innerText.trim().replace(/^\d+\.\s*/, ''); // "1. 김철수" -> "김철수"
+                    const sub = data.submissions.find(s => s.name.includes(stName) || stName.includes(s.name)); // 이름 유사 매칭
+
+                    if(sub) {
+                        // 내용 입력 (이미 내용이 있으면 덧붙이기 or 덮어쓰기)
+                        const input = row.querySelector('.st-input');
+                        if(input.value === "") input.value = "과제 수행 완료"; // 기본 멘트
+
+                        // 성취도 체크
+                        if(sub.check !== "없음" && currentMode === 'subject') {
+                            const circles = row.querySelectorAll('.check-circle');
+                            circles.forEach(c => c.classList.remove('checked')); // 초기화
+                            
+                            // 인덱스 매핑: 0:매우잘함, 1:잘함, 2:보통, 3:노력요함
+                            let idx = -1;
+                            if(sub.check === "매우잘함") idx = 0;
+                            else if(sub.check === "잘함") idx = 1;
+                            else if(sub.check === "보통") idx = 2;
+                            else if(sub.check === "노력요함") idx = 3;
+
+                            if(idx !== -1 && circles[idx]) circles[idx].classList.add('checked');
+                        }
+                        matchCount++;
+                    }
+                });
+
+                showToast(`${matchCount}명의 데이터를 불러왔습니다! 🎉`);
+                document.getElementById('classroomModal').classList.remove('open');
+            }
+        } catch(e) {
+            showToast("오류가 발생했습니다.");
+            console.error(e);
+        }
+        clearLoading(btn);
+    }
     </script>
 </body>
 </html>
