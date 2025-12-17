@@ -1618,6 +1618,22 @@
         async function deleteMemo() { reqConfirm('삭제하시겠습니까?', async()=>{ await sendRequest('delete_memo',{row:parseInt(document.getElementById('memoEditRow').value)}); loadMemos(); });
         }
 
+        // [누락된 UI 헬퍼 함수들 추가]
+        function setLoading(el, text) { 
+            if(!el) return; 
+            el.dataset.orgText = el.innerText; // 원래 버튼 글자 저장
+            el.innerText = text; 
+            el.classList.add('loading-anim'); // CSS에 정의된 로딩 애니메이션 적용
+            el.disabled = true; // 버튼 비활성화
+        }
+
+        function clearLoading(el) { 
+            if(!el) return; 
+            el.innerText = el.dataset.orgText || "완료"; // 원래 글자로 복구
+            el.classList.remove('loading-anim'); 
+            el.disabled = false; // 버튼 활성화
+        }
+        
         // Utils & Files
         function showToast(m) { const t=document.getElementById("toast");t.innerText=m;t.className="show";setTimeout(()=>{t.className=t.className.replace("show","")},3000);
         }
