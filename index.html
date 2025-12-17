@@ -384,6 +384,70 @@
             }
             
         }
+        /* [추가] 다크 모드 버튼 스타일 (자물쇠 버튼과 유사) */
+        .dark-float-btn {
+            position: fixed; top: 25px; right: 25px; /* 시작 위치는 +버튼과 동일 */
+            width: 40px; height: 40px; border-radius: 50%; 
+            background: #34495e; color: white; /* 기본 색상: 다크 그레이 */
+            display: flex; justify-content: center; align-items: center; 
+            cursor: pointer; z-index: 2090; font-size: 1.2rem;
+            opacity: 0; pointer-events: none; 
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        /* 메뉴 열렸을 때 위치 (PC 기준: 자물쇠보다 더 왼쪽) */
+        .dark-float-btn.show { right: 135px; opacity: 1; pointer-events: auto; }
+
+        /* [추가] 다크 모드 테마 변수 재정의 */
+        body.dark-mode {
+            --bg-main: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #e0e0e0;
+            --text-sub: #a0a0a0;
+            --border-color: #333333;
+            --primary-light: #2c3e50; /* 어두운 배경에 맞게 조정 */
+        }
+        
+        /* [추가] 다크 모드일 때 강제 색상 반전이 필요한 요소들 */
+        body.dark-mode .student-row, 
+        body.dark-mode .quick-row, 
+        body.dark-mode .mp-item,
+        body.dark-mode input, 
+        body.dark-mode select, 
+        body.dark-mode textarea,
+        body.dark-mode .music-panel,
+        body.dark-mode .student-nav-item,
+        body.dark-mode .bm-filter-tag {
+            background-color: var(--card-bg) !important;
+            color: var(--text-main) !important;
+            border-color: var(--border-color) !important;
+        }
+        body.dark-mode .nav-item.active {
+            background-color: #333 !important;
+            color: var(--primary) !important;
+        }
+        body.dark-mode .tag {
+            background-color: #333;
+            color: #ddd;
+        }
+        body.dark-mode .tag.selected {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* [모바일] 다크 모드 버튼 위치 조정 */
+        @media (max-width: 768px) {
+            .dark-float-btn {
+                top: auto !important;
+                bottom: 35px !important;
+                right: 30px !important;
+            }
+            /* 모바일에서 메뉴 열렸을 때 (자물쇠 왼쪽 옆) */
+            .dark-float-btn.show {
+                right: 145px !important; /* 자물쇠(90px) + 55px 간격 */
+                opacity: 1 !important;
+                pointer-events: auto !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -403,6 +467,7 @@
     <div id="lockScreen"><div id="lockCard"><h2 style="color:var(--primary-dark); margin-bottom:20px;">쫑알수첩 Pro</h2><p style="margin-bottom:10px; color:var(--text-sub);">관리자 인증이 필요합니다.</p><input type="password" id="lockInput" placeholder="Password" onkeyup="checkCaps(event)"><div id="lockMsg" class="lock-msg"></div><button class="btn btn-primary" onclick="unlockApp()" style="width:100%;">접속</button></div></div>
 
     <div class="lock-float-btn" id="lockFloatBtn" onclick="relockApp()">🔒</div>
+    <div class="dark-float-btn" id="darkModeBtn" onclick="toggleDarkMode()">🌙</div>
     <div class="float-btn" onclick="toggleFloatMenu()">+</div>
     <div class="float-menu" id="floatMenu">
         <div class="float-menu-item" onclick="changeSection('bookmarks')">북마크</div>
@@ -806,22 +871,27 @@
         }
 
         // Global Overlay Logic
-        function closeAllOverlays() {
+function closeAllOverlays() {
             const m = document.getElementById('floatMenu');
             const l = document.getElementById('lockFloatBtn');
+            const d = document.getElementById('darkModeBtn'); // [추가]
             const p = document.getElementById('musicPanel');
             
             m.classList.remove('show');
             l.classList.remove('show');
+            d.classList.remove('show'); // [추가]
             p.classList.remove('show');
             
             document.getElementById('globalOverlay').classList.remove('show');
         }
-        function toggleFloatMenu() { 
+function toggleFloatMenu() { 
             const m = document.getElementById('floatMenu');
             const l = document.getElementById('lockFloatBtn');
+            const d = document.getElementById('darkModeBtn'); // [추가]
+            
             m.classList.toggle('show'); 
             l.classList.toggle('show');
+            d.classList.toggle('show'); // [추가] 다크 버튼도 같이 나옴
             
             if(m.classList.contains('show')) document.getElementById('globalOverlay').classList.add('show');
             else document.getElementById('globalOverlay').classList.remove('show');
@@ -2116,6 +2186,30 @@
                 document.getElementById('modelListModal').classList.add('open');
             }
         }
+        // [추가] 다크 모드 제어 로직
+        function initDarkMode() {
+            const savedTheme = localStorage.getItem('appTheme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('darkModeBtn').innerText = '☀️';
+            } else {
+                document.getElementById('darkModeBtn').innerText = '🌙';
+            }
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            
+            // 아이콘 변경
+            document.getElementById('darkModeBtn').innerText = isDark ? '☀️' : '🌙';
+            
+            // 로컬 스토리지에 저장
+            localStorage.setItem('appTheme', isDark ? 'dark' : 'light');
+        }
+
+        // [실행] 페이지 로드 시 테마 적용 (window.onload 안에 넣거나 바로 실행)
+        initDarkMode();
     </script>
 </body>
 </html>
