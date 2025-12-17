@@ -741,7 +741,9 @@
             if(isUnlocked) { 
                 document.getElementById('lockScreen').style.display='none';
                 loadAllData(); 
-            } 
+            } else {
+                document.getElementById('lockScreen').style.display='flex';
+            }
         }
 
         function unlockApp() { 
@@ -769,7 +771,9 @@
         }
 
         async function loadAllData() { 
-            loadStudents();
+            // [복구] loadStudents 함수가 정의되어 있어야 호출 가능
+            await loadStudents(); 
+            
             renderSubjectTags(); 
             renderBmTags(); 
             loadFiles(); 
@@ -779,7 +783,6 @@
             await loadCustomItems();
             renderCustomItems(); 
             
-            // [중요] 병렬 로드 후 화면 갱신 보장
             await Promise.all([loadGoogleEvents(), loadAttendanceForDots()]);
             
             renderHomeToDo(); 
@@ -787,6 +790,78 @@
             showDailyView(new Date().getDate());
             
             if(customItems.length > 0) refreshCustomView();
+        }
+
+        // ==========================================
+        // [누락되었던 핵심 함수들 복구]
+        // ==========================================
+        
+        // 1. 학생 명단 관리
+        async function loadStudents() { 
+            studentList = await sendRequest('get_students') || [];
+            renderRecordList(); 
+            renderStudentNav(); 
+        }
+
+        function renderStudentNav() { 
+            const l = document.getElementById('studentNavList'); 
+            l.innerHTML=''; 
+            studentList.forEach(s => {
+                const d = document.createElement('div');
+                d.className='student-nav-item';
+                d.innerHTML=`<span>${s.id}. <b>${s.name}</b></span><span>></span>`;
+                d.onclick = () => { selectedStudentName = s.name; loadHistory(); };
+                l.appendChild(d);
+            });
+        }
+        
+        function openStudentManageModal() { 
+            const c = document.getElementById('manageStudentRows'); 
+            c.innerHTML=''; 
+            if(studentList.length > 0) studentList.forEach(s => addStudentRow(s.id, s.name)); 
+            else for(i=0; i<3; i++) addStudentRow(); 
+            document.getElementById('manageStudentModal').classList.add('open');
+        }
+
+        function closeStudentManageModal() { 
+            document.getElementById('manageStudentModal').classList.remove('open');
+        }
+
+        function addStudentRow(id='', name='') { 
+            let maxId = 0;
+            const existingIds = document.querySelectorAll('.st-add-id');
+            if (existingIds.length > 0) {
+                existingIds.forEach(el => {
+                    const val = parseInt(el.value) || 0;
+                    if(val > maxId) maxId = val;
+                });
+            } else if (studentList.length > 0) {
+                maxId = Math.max(...studentList.map(s => s.id));
+            }
+            const newId = id !== '' ? id : (maxId + 1);
+            
+            const d = document.createElement('div'); 
+            d.style.display='flex'; d.style.gap='5px'; d.style.marginBottom='5px';
+            d.innerHTML=`<input type="number" class="st-add-id" value="${newId}" style="width:60px;margin:0"><input type="text" class="st-add-name" value="${name}" style="flex:1;margin:0"><button class="btn-sm btn-del" onclick="this.parentElement.remove()">-</button>`; 
+            document.getElementById('manageStudentRows').appendChild(d);
+        }
+
+        async function saveStudentManagement() { 
+            const ids = document.querySelectorAll('.st-add-id'); 
+            const nms = document.querySelectorAll('.st-add-name'); 
+            let l = []; 
+            for(let i=0; i<ids.length; i++) if(ids[i].value && nms[i].value) l.push({id:parseInt(ids[i].value), name:nms[i].value.trim()});
+            await sendRequest('sync_student_list', {students:l}); 
+            closeStudentManageModal(); 
+            loadStudents(); 
+        }
+
+        // 2. 음악 패널 토글
+        function toggleMusicPanel() { 
+            const p = document.getElementById('musicPanel');
+            p.classList.toggle('show');
+            if(p.classList.contains('show')) document.getElementById('globalOverlay').classList.add('show');
+            else document.getElementById('globalOverlay').classList.remove('show');
         }
 
         // ==========================================
@@ -838,18 +913,15 @@
         }
 
         // ==========================================
-        // 3. [데이터 로드 & 캘린더 (수정됨)]
+        // 3. [데이터 로드 & 캘린더]
         // ==========================================
         async function loadGoogleEvents() { 
             calendarEvents = await sendRequest('get_events') || [];
-            
-            // 데이터 로드 완료 후 화면 갱신 호출
             renderHomeToDo();
             updateTodayScheduleInCal();
             renderCalendar();
         }
 
-        // 홈 화면 할 일 목록 (PC/Mobile)
         function renderHomeToDo() { 
             const todayStr = formatDateYMD(new Date()); 
             const todaysEvents = calendarEvents.filter(e => e.date === todayStr);
@@ -864,19 +936,14 @@
             if(elPC) elPC.innerHTML = html;
         }
 
-        // [수정] 달력 탭 하단 '오늘 일정' (안전장치 추가)
         function updateTodayScheduleInCal() { 
             const todayStr = formatDateYMD(new Date());
             const todaysEvents = calendarEvents.filter(e => e.date === todayStr);
             const html = todaysEvents.length > 0 
                 ? todaysEvents.map(e => `• ${e.title}`).join('<br>') 
                 : "일정 없음";
-                
-            const elCal = document.getElementById('todayTodoListCal');
-            // 요소가 없으면 에러 내지 말고 조용히 리턴 (핵심!)
-            if(!elCal) return;
-            
-            elCal.innerHTML = html;
+            const el = document.getElementById('todayTodoListCal');
+            if(el) el.innerHTML = html;
         }
 
         function renderCalendar() { 
@@ -899,7 +966,6 @@
                 const d = document.createElement('div'); d.className='cal-day';
                 if(dStr === selectedDate) d.classList.add('selected');
                 
-                // 오늘 날짜 표시
                 const today = new Date();
                 if (today.getFullYear() === curYear && today.getMonth() === curMonth && today.getDate() === i) {
                     d.classList.add('today');
@@ -1122,6 +1188,7 @@
                 loadCustomItems().then(renderCustomItems);
             }
         }
+        
         async function refreshCustomView() {
             const chartArea = document.getElementById('customStatsChart'); 
             if(chartArea) chartArea.innerHTML = '<div style="text-align:center; padding:20px;">로딩<span class="loading-anim"></span></div>';
@@ -1256,7 +1323,8 @@
 
         // [Student & Subject Logic]
         function renderSubjectTags() { 
-            const c=document.getElementById('subjectTags'); c.innerHTML=''; 
+            const c=document.getElementById('subjectTags');
+            c.innerHTML=''; 
             subjectList.forEach(s=>{ 
                 const t=document.createElement('div'); t.className='tag'; t.innerHTML=`${s} <span class="x-btn">x</span>`; 
                 t.querySelector('.x-btn').onclick = (e) => openDelSub(s, e);
@@ -1410,6 +1478,18 @@
         function updateSubjectFilterOptions() { const s=document.getElementById('viewSubjectFilter'); const current = s.value; s.innerHTML=''; subjectList.forEach(sub=>{const o=document.createElement('option');o.value=sub;o.innerText=sub;s.appendChild(o)}); if(current) s.value = current; subjectFilterPreserved = s.value; s.onchange = () => { subjectFilterPreserved = s.value; loadHistory(); }; }
         function updateNeisSubjectOptions() { const s=document.getElementById('neisSubjectSelect'); s.innerHTML=''; subjectList.forEach(sub=>{const o=document.createElement('option');o.value=sub;o.innerText=sub;s.appendChild(o)}); }
         async function deleteSelectedHistory() { const c=document.querySelectorAll('.hist-chk:checked'); if(c.length===0)return; reqConfirm(`${c.length}건 삭제하시겠습니까?`, async()=>{ const r=Array.from(c).map(e=>parseInt(e.value)); const t=viewTabMode==='subject'?document.getElementById('viewSubjectFilter').value:'행동'; await sendRequest('delete_record_bulk',{type:t,rows:r}); loadHistory(); }); }
+        
+        // [복구] 상태바 및 로딩 헬퍼 함수
+        function setLoading(el, text) { 
+            if(!el) return; 
+            el.dataset.orgText = el.innerText; el.innerText = text; 
+            el.classList.add('loading-anim'); el.disabled = true; 
+        }
+        function clearLoading(el) { 
+            if(!el) return; 
+            el.innerText = el.dataset.orgText || "완료"; 
+            el.classList.remove('loading-anim'); el.disabled = false; 
+        }
     </script>
 </body>
 </html>
