@@ -4,7 +4,7 @@
     <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>쫑알수첩 Pro (Final v21.11)</title>
+    <title>쫑알수첩 Pro (Final v21.10)</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -132,9 +132,7 @@
         
         .bar-chart-container { display: flex; flex-direction: column; height: 100%; overflow: hidden; padding-bottom: 10px; }
         .chart-bars-area { flex: 1; display: flex; align-items: flex-end; gap: 2px; padding-top: 20px; border-bottom: 1px solid #ccc; position: relative; }
-        
-        /* [수정] min-height 제거: 0일 때 막대 높이 없애기 위함 */
-        .stat-bar { flex: 1; background: #e0e0e0; border-radius: 3px 3px 0 0; transition: all 0.2s; position: relative; cursor: pointer; }
+        .stat-bar { flex: 1; background: #e0e0e0; border-radius: 3px 3px 0 0; transition: all 0.2s; position: relative; min-height: 20%; cursor: pointer; }
         .stat-bar:hover { background: var(--primary); transform: scaleY(1.05); transform-origin: bottom; z-index: 100; }
         
         .stat-bar .tooltip { 
@@ -243,11 +241,20 @@
         .student-nav-item:hover { background: #eaf6fc; color: var(--primary-dark); border-color: var(--primary-light); }
         .student-nav-item.active { background: #eaf6fc; border-color: var(--primary); font-weight: bold; color: var(--primary-dark); border-width: 2px; }
 
+        /* [수정됨] 기록 상세 보기의 날짜/평가 줄바꿈 및 스타일 */
         .history-card { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; border-bottom: 1px solid var(--bg-main); padding-bottom: 10px; }
+        
+        /* 세로 정렬(Column)로 변경하여 날짜 아래에 평가가 오도록 함 */
         .h-info { 
-            width: 90px; flex-shrink: 0; text-align: center; 
-            display: flex; flex-direction: column; gap: 4px; justify-content: center;
+            width: 90px; 
+            flex-shrink: 0; 
+            text-align: center; 
+            display: flex; 
+            flex-direction: column; /* 세로 배치 */
+            gap: 4px; 
+            justify-content: center;
         }
+        
         .h-date { font-size: 0.8rem; color: #888; }
         .h-badge { font-size: 0.8rem; font-weight: bold; color: var(--primary-dark); }
         .h-eval { font-size: 0.75rem; color: white; background: var(--att-dot); padding: 2px 6px; border-radius: 10px; display: inline-block; align-self: center;}
@@ -285,17 +292,13 @@
             
             /* [수정 3] 모바일 레이아웃 최적화 */
             .pc-only-section { display: none !important; } /* 자주 찾는 사이트 섹션 전체 숨김 */
-            .home-stack .card:last-child { min-height: 300px; flex: 1; } /* 빠른 기록 영역 확장 */
-            #homeToDoList { font-size: 1.1rem; line-height: 2; flex: 1; } /* 오늘의 할 일 키우기 */
+            .home-stack .card:last-child { min-height: 300px; } /* 빠른 기록 영역 확보 */
+            #homeToDoList { font-size: 1.1rem; line-height: 2; } /* 오늘의 할 일 키우기 */
             .home-image-area { display: none !important; }
 
             .float-btn { top: auto; bottom: 30px; }
             .float-menu { top: auto; bottom: 90px; }
             .music-capsule { display: none !important; }
-
-            /* [수정 2] 잠금 버튼 아래로 이동 */
-            .lock-float-btn { top: auto; bottom: 30px; right: 25px; }
-            .lock-float-btn.show { right: 80px; bottom: 30px; top: auto; }
             
             /* 하단 여백 확보 */
             .container { padding-bottom: 100px; }
@@ -339,21 +342,18 @@
         </nav>
 
         <div id="home" class="section active">
-            <div class="mobile-only full-height" style="margin-bottom: 10px; height: auto;">
-                 <div class="card full-height" style="display:flex; flex-direction:column;">
-                    <div class="card-header" style="margin-top:0; border-bottom:1px solid #eee;">오늘의 할 일</div>
-                    <div id="homeToDoListMobile" style="flex:1; font-size:1.1rem; color:#333; font-weight:bold; line-height:2; overflow-y:auto;">일정 없음</div>
-                    
-                    <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-top:20px;">
-                        <div style="font-size:0.85rem; color:var(--text-sub); margin-bottom:5px; font-weight:bold;">⚡ 빠른 기록</div>
-                        <div style="font-size:0.8rem; color:var(--text-sub); margin-bottom:10px;">예: 김철수/수학/발표 잘함</div>
-                        <textarea id="homeQuickInputMobile" style="width:100%; height:60px; resize:none;" placeholder="입력..."></textarea>
-                        <button class="btn btn-primary" style="width:100%;" onclick="saveHomeQuickRecord('mobile')">자동 기록</button>
+            <div class="mobile-only" style="margin-bottom: 10px; height: auto;">
+                <div class="card">
+                     <div class="card-header">빠른 기록 (모바일)</div>
+                     <div style="background:#f9f9f9; padding:15px; border-radius:8px;">
+                        <div style="font-size:0.85rem; color:var(--text-sub); margin-bottom:10px;">[팁] 예: <b>김철수/수학/발표 잘함</b></div>
+                        <textarea id="homeQuickInputMobile" style="width:100%; height:80px; resize:none;" placeholder="입력..."></textarea>
+                        <button class="btn btn-primary" style="width:100%;" onclick="saveHomeQuickRecord('mobile')">✨ 자동 기록</button>
                     </div>
                 </div>
             </div>
 
-            <div class="split-container pc-only">
+            <div class="split-container">
                 <div class="split-left">
                     <div class="card full-height">
                         <div class="scroll-wrapper">
@@ -363,7 +363,7 @@
                                 <input type="file" id="homeImgInput" style="display:none" accept="image/*" onchange="uploadHomeImage(this)">
                             </div>
                             <div class="card-header" style="margin-top:20px; border-bottom:0;">오늘의 할 일</div>
-                            <div id="homeToDoListPC" style="flex-grow:1; font-size:1rem; color:#333; font-weight:bold; line-height:1.8;">일정 없음</div>
+                            <div id="homeToDoList" style="flex-grow:1; font-size:1rem; color:#333; font-weight:bold; line-height:1.8;">일정 없음</div>
                         </div>
                     </div>
                 </div>
@@ -400,7 +400,7 @@
                                 <button class="btn-sm inactive" id="mobBtnBeh" onclick="setMobileMode('behavior')">행동</button>
                                 <button class="btn-sm inactive" id="mobBtnCust" onclick="setMobileMode('custom')">기타</button>
                             </div>
-                            <input type="date" id="mobDate" style="margin-bottom:0;" onchange="renderMobileCustomList()">
+                            <input type="date" id="mobDate" style="margin-bottom:0;">
                         </div>
                         <div>
                             <div id="mobViewQuick" style="display:flex; flex-direction:column; padding-top:15px;">
@@ -531,7 +531,7 @@
                             <div style="margin-bottom:15px; background:#fffbe6; padding:10px; border-radius:6px;">
                                 <label style="display:flex; align-items:center; cursor:pointer; margin:0;">
                                     <input type="checkbox" id="useRefFiles" style="width:20px; height:20px; margin-right:10px;"> 
-                                    <span>📚 업로드 자료 반영</span>
+                                    <span>업로드 자료 반영</span>
                                 </label>
                                 <div style="font-size:0.8rem; color:#888; margin-top:5px; margin-left:30px;">(최근 업로드한 파일 3개를 참고합니다)</div>
                             </div>
@@ -576,8 +576,7 @@
                                     학생별 키워드를 입력한 후 생성하세요.
                                 </div>
                             </div>
-
-                        </div>
+                            </div>
                     </div>
                 </div>
 
@@ -617,7 +616,7 @@
                             <div class="cal-grid" id="calGrid"></div>
                             <div style="border-top:1px dashed #eee; margin-top:10px; padding-top:15px;">
                                 <div class="card-header">오늘 일정</div>
-                                <div id="todayTodoListPC" style="font-size:0.95rem; line-height:1.6;">일정 없음</div>
+                                <div id="todayTodoListCal" style="font-size:0.95rem; line-height:1.6;">일정 없음</div>
                             </div>
                         </div>
                     </div>
@@ -699,24 +698,15 @@
             "💡 Caps Lock 켜짐" : "비밀번호 입력 (한/영 확인)"; if(e.keyCode===13) unlockApp();
         }
         function checkLock() { 
-            // [수정됨] 1. 모바일 자동 로그인 (localStorage 확인)
-            let isUnlocked = false;
-            try { 
-                isUnlocked = sessionStorage.getItem('isUnlocked') === 'true' || localStorage.getItem('isAutoUnlocked') === 'true'; 
-            } catch(e) {}
-            
-            if(isUnlocked) { 
-                document.getElementById('lockScreen').style.display='none';
-                loadAllData(); 
-            } 
+            let unlocked = false;
+            try { unlocked = sessionStorage.getItem('isUnlocked') === 'true'; } catch(e) {}
+            if(unlocked) { document.getElementById('lockScreen').style.display='none';
+            loadAllData(); } 
         }
         function unlockApp() { 
             const pw = document.getElementById('lockInput').value;
             if(pw === 'ekdms320') { 
-                try { 
-                    sessionStorage.setItem('isUnlocked', 'true');
-                    // 한번 성공하면 로컬 스토리지에도 저장 (자동 로그인)
-                    localStorage.setItem('isAutoUnlocked', 'true');
+                try { sessionStorage.setItem('isUnlocked', 'true');
                 } catch(e) {}
                 document.getElementById('lockScreen').style.display='none'; 
                 loadAllData();
@@ -726,10 +716,7 @@
             } 
         }
         function relockApp() {
-            try { 
-                sessionStorage.setItem('isUnlocked', 'false'); 
-                localStorage.setItem('isAutoUnlocked', 'false'); // 자동 로그인 해제
-            } catch(e) {}
+            try { sessionStorage.setItem('isUnlocked', 'false'); } catch(e) {}
             location.reload();
         }
         async function loadAllData() { 
@@ -737,11 +724,6 @@
             renderSubjectTags(); renderBmTags(); loadFiles(); loadHomeData(); loadMusicData(); loadCustomItems();
             await Promise.all([loadGoogleEvents(), loadAttendanceForDots()]);
             renderHomeToDo(); renderCalendar(); showDailyView(new Date().getDate());
-            
-            // [수정됨] 4. 모바일 기타항목 초기 로딩 시 데이터 반영을 위해
-            if(customItems.length > 0) {
-                 // 데이터를 다 불러온 뒤 렌더링하도록 순서 보장 필요 (이미 loadCustomItems 내부에서 호출됨)
-            }
         }
 
         // Global Overlay Logic
@@ -933,19 +915,8 @@
             // 같은 파일 다시 선택 가능하게 초기화
             inp.value = ''; 
         }
-
-        function renderHomeToDo() { 
-            const t = formatDateYMD(new Date()); 
-            const l = calendarEvents.filter(e => e.date === t);
-            const html = l.length > 0 ? l.map(e => `• ${e.title}`).join('<br>') : "일정 없음";
-
-            // [수정] 모바일과 PC 각각 업데이트
-            const elMobile = document.getElementById('homeToDoListMobile');
-            if(elMobile) elMobile.innerHTML = html;
-
-            const elPC = document.getElementById('homeToDoListPC');
-            if(elPC) elPC.innerHTML = html;
-        }
+        function renderHomeToDo() { const t=formatDateYMD(new Date()); const l=calendarEvents.filter(e=>e.date===t);
+            document.getElementById('homeToDoList').innerHTML = l.length>0 ? l.map(e=>`• ${e.title}`).join('<br>') : "일정 없음"; }
         
         // Quick Record
         async function saveHomeQuickRecord(source) { 
@@ -1004,18 +975,13 @@
                 document.getElementById('mobViewCustom').style.display = 'flex';
                 const s = document.getElementById('mobCustomSelect');
                 s.innerHTML = '';
-                // [수정됨] 4. 데이터 로드 후 렌더링 (순서 보장)
                 loadCustomItems().then(() => {
                     customItems.forEach((item, idx) => {
                        const opt = document.createElement('option'); opt.value = idx; opt.innerText = item.name;
                        s.appendChild(opt);
-                    });
-                    
-                    // 만약 이미 데이터가 있다면(init에서 로드됨), 바로 리스트 렌더링
-                    // 여기서 refreshCustomView()를 호출해서 customRecordCache를 최신화해야 함
-                    if(customItems.length > 0) {
-                        refreshCustomView().then(renderMobileCustomList); 
-                    }
+                 
+                   });
+                    if(customItems.length > 0) renderMobileCustomList();
                 });
             } else {
                 document.getElementById('mobViewQuick').style.display = 'flex';
@@ -1050,7 +1016,6 @@
             } catch(e) { showToast("실패"); }
         }
 
-        // [수정됨] 4. 모바일 커스텀 리스트 렌더링 (체크 상태 반영)
         function renderMobileCustomList() {
              const idx = document.getElementById('mobCustomSelect').value;
              const container = document.getElementById('mobCustomList');
@@ -1058,33 +1023,13 @@
              if(idx === null || idx === undefined) return;
              
              const itemDef = customItems[idx];
-             // 모바일 날짜 기준 데이터 조회
-             const targetDate = document.getElementById('mobDate').value;
-
              studentList.forEach(st => {
                  const row = document.createElement('div'); row.className = 'student-row';
-                 
-                 // [핵심] 기존 저장값 조회
-                 const record = customRecordCache.find(r => r.date === targetDate && r.item === itemDef.name && r.name === st.name);
-                 let savedVal = record ? record.value : "";
-
                  let inputHtml = '';
-                 if(itemDef.type === 'check') {
-                     const chk = savedVal === 'O' ? 'checked' : '';
-                     inputHtml = `<input type="checkbox" class="mob-cust-val" style="width:20px; height:20px; margin:0;" ${chk}>`;
-                 }
-                 else if(itemDef.type === 'switch') {
-                     const chk = savedVal === 'ON' ? 'checked' : '';
-                     inputHtml = `<label class="switch"><input type="checkbox" class="mob-cust-val" ${chk}><span class="slider"></span></label>`;
-                 }
-                 else if(itemDef.type === 'select') {
-                     inputHtml = `<select class="mob-cust-val" style="margin:0;">
-                         <option value="">-</option>
-                         <option ${savedVal==='상'?'selected':''}>상</option>
-                         <option ${savedVal==='중'?'selected':''}>중</option>
-                         <option ${savedVal==='하'?'selected':''}>하</option>
-                     </select>`;
-                 }
+                 if(itemDef.type === 'check') inputHtml = `<input type="checkbox" class="mob-cust-val" style="width:20px; height:20px; margin:0;">`;
+                 else if(itemDef.type === 'switch') inputHtml = `<label class="switch"><input type="checkbox" class="mob-cust-val"><span class="slider"></span></label>`;
+ 
+                 else if(itemDef.type === 'select') inputHtml = `<select class="mob-cust-val" style="margin:0;"><option>상</option><option>중</option><option>하</option></select>`;
                  
                  row.innerHTML = `<div class="st-name" style="width:80px; font-weight:bold;">${st.name}</div><div style="flex:1;"></div>${inputHtml}`;
                  container.appendChild(row);
@@ -1111,8 +1056,9 @@
              if(data.length > 0) {
                  await sendRequest('custom_record', {mode:'save', data: data});
                  showToast("저장 완료");
-                 // 저장 후 캐시 갱신 (바로 반영되도록)
-                 refreshCustomView(); 
+                 document.querySelectorAll('.mob-cust-val').forEach(e => {
+                     if(e.type === 'checkbox') e.checked = false;
+                 });
              } else { showToast("선택된 내용 없음"); }
         }
 
@@ -1144,22 +1090,16 @@
         }
         
         async function refreshCustomView() {
-            // [수정] 모바일에서도 호출되므로 currentCustomItem 체크 제거 또는 조건부 실행
-            // PC 모드일 때만 차트 로딩 표시
+            if (currentCustomItem === null) return;
             const chartArea = document.getElementById('customStatsChart'); 
-            if(chartArea) chartArea.innerHTML = '<div style="text-align:center; padding:20px;">로딩<span class="loading-anim"></span></div>';
-            
-            const pcList = document.getElementById('customCheckList');
-            if(pcList) pcList.innerHTML = '<div style="text-align:center; padding:20px;">불러오는 중<span class="loading-anim"></span></div>';
+            chartArea.innerHTML = '<div style="text-align:center; padding:20px;">로딩<span class="loading-anim"></span></div>';
+            document.getElementById('customCheckList').innerHTML = '<div style="text-align:center; padding:20px;">불러오는 중<span class="loading-anim"></span></div>';
             
             const allData = await sendRequest('custom_record', {mode:'get'});
             customRecordCache = allData || [];
             
-            // PC 화면 갱신
-            if(currentCustomItem !== null) {
-                renderCustomCheckList(); 
-                renderCustomStats(); 
-            }
+            renderCustomCheckList(); 
+            renderCustomStats(); 
         }
 
         function renderCustomCheckList() {
@@ -1269,13 +1209,11 @@
             studentStats.forEach((st, i) => {
                 const bar = document.createElement('div');
                 bar.className = 'stat-bar';
-                
-                let heightPct = 0; // Default 0
+                let heightPct = 20;
                 if (st.count > 0) {
-                    // 10% base + 90% relative
-                    heightPct = 10 + ((st.count / maxVal) * 90); 
+                    const relative = (st.count / maxVal) * 60; 
+                    heightPct = 20 + relative; 
                 }
-                
                 bar.style.height = `${heightPct}%`;
                 
                 // [툴팁 정렬 로직]
@@ -1334,10 +1272,9 @@
         function toggleCheck(el) { const p=el.parentElement; const w=el.classList.contains('checked'); p.querySelectorAll('.check-circle').forEach(c=>c.classList.remove('checked')); if(!w) el.classList.add('checked');
         }
         
-        // [수정됨] 저장 로직: 중복 방지 및 Raw 데이터 형식([주제] 내용) 지정
+        // [수정됨] 저장 로직 (에러 해결 + 백그라운드 상태바 안내)
         async function saveData() {
             const inputs = document.querySelectorAll('.st-input'); 
-            const btn = document.getElementById('btnSaveAll'); 
             const isAI = document.getElementById('aiToggle').checked;
             
             let targetType = "행동";
@@ -1347,11 +1284,9 @@
                 targetType = selTag.innerText.split(' ')[0].trim(); 
             }
             
-            // setLoading(btn, "저장 중"); // 버튼 잠금 대신 상태바 사용
-            showStatusBar("💾 저장 준비 중...");
-
             let itemsToSave = [];
             
+            // 데이터 수집
             inputs.forEach(input => {
                 const text = input.value.trim(); 
                 const row = input.closest('.student-row'); 
@@ -1373,29 +1308,29 @@
                 if (text.length > 0 || checkVal !== "없음") itemsToSave.push({ input, name, text, checkVal });
             });
             
-            if (itemsToSave.length === 0) { showToast("저장할 내용 없음"); hideStatusBar(); return; }
+            if (itemsToSave.length === 0) { showToast("저장할 내용이 없습니다."); return; }
             
-            // UI 초기화 (사용자 경험 향상)
+            // [UI] 버튼 락(setLoading) 대신 상태바 노출
+            showStatusBar(`💾 데이터 저장 시작... (총 ${itemsToSave.length}건)`);
+            
+            // 입력창 초기화 (사용자는 바로 다른 작업 가능하게)
             inputs.forEach(el => el.value = ''); 
             document.querySelectorAll('.check-circle').forEach(el => el.classList.remove('checked')); 
 
-            // 순차 저장
+            // 순차 저장 시작
             let savedCount = 0;
             for (const item of itemsToSave) {
                 let period = document.getElementById('rPeriod').value; 
                 const topic = document.getElementById('rTopic').value.trim(); 
                 let periodPrefix = period ? `[${period}]` : "";
                 
-                // 3. AI 미적용 시 형식: [주제] 내용
                 let rawBody = item.text;
                 if(topic) rawBody = `[${topic}] ${item.text}`;
                 if(item.text.length === 0 && topic) rawBody = `[${topic}] 활동에 참여함`;
                 
                 rawBody = `${periodPrefix} ${rawBody}`.trim();
                 
-                updateStatusText(`💾 저장 중... [${item.name}] (${savedCount + 1}/${itemsToSave.length})`);
-
-                // 1. 일단 있는 그대로 저장 (서버가 rowNum을 줌)
+                // 서버 전송
                 const res = await sendRequest('save_record', { 
                     date: document.getElementById('rDate').value, 
                     name: item.name, 
@@ -1405,12 +1340,13 @@
                 });
                 
                 savedCount++;
+                // 상태바 업데이트
+                updateStatusText(`💾 저장 중... [${item.name}] (${savedCount}/${itemsToSave.length})`);
 
-                // 1-1. 저장 성공했고, AI 켜져있으면 -> 수정 대기열(Queue)에 등록
-                // (새로 저장이 아니라, 방금 저장한 rowNum 위치를 찾아서 '수정'하는 방식이므로 중복 안 됨)
+                // AI 큐에 추가
                 if (isAI && res && res.rowNum) {
                     aiJobQueue.push({ 
-                        rowNum: res.rowNum, // 방금 저장된 줄 번호
+                        rowNum: res.rowNum, 
                         type: targetType, 
                         topic: topic, 
                         text: item.text, 
@@ -1421,31 +1357,31 @@
                 }
             }
             
-            // clearLoading(btn); 
-            
+            // 저장 루프 끝
             if(isAI && aiJobQueue.length > 0) {
-                showToast(`저장 완료. AI 변환 시작 (${aiJobQueue.length}건)`);
+                showToast("1차 저장 완료. AI 변환 시작...");
                 processNextAiJob(); // AI 작업 시작
             } else {
-                hideStatusBar();
-                showToast("저장 완료");
+                hideStatusBar(); // 상태바 숨김
+                showToast("모든 저장 완료! ✅");
             }
         }
 
-        // [수정됨] AI 처리 로직: 프롬프트 개선 (자연스러운 연결, 대괄호 제거)
+        // [수정됨] AI 처리 로직 (상태바 연동)
         async function processNextAiJob() {
             if (aiJobQueue.length === 0) { 
                 isAiQueueRunning = false; 
-                hideStatusBar();
+                hideStatusBar(); // 작업 끝나면 숨김
                 showToast("✨ 모든 AI 변환 완료!");
                 return; 
             }
             
             isAiQueueRunning = true; 
             const job = aiJobQueue[0];
+            
+            // [UI] 상태바에 뉴스 헤드라인처럼 표시
             showStatusBar(`✨ AI 다듬는 중... [${job.name}] (대기: ${aiJobQueue.length}건)`);
             
-            // 2. 개선된 프롬프트: 주제를 자연스럽게 녹이고, 특수문자 금지
             const prompt = `
                 역할: 초등학교 교사. 
                 작업: 생활기록부 기재용 평어 한 문장 작성.
@@ -1456,7 +1392,7 @@
                 2. '[주제]' 처럼 대괄호를 절대 쓰지 말고, 문맥 속에 녹여내세요. (예: '[탐구] ~함' (X) -> '탐구 활동을 통해 ~함' (O))
                 3. **굵게(볼드)**, "따옴표", '작은따옴표' 등 특수문자를 절대 사용하지 마세요.
                 4. 문장은 반드시 '~함' 또는 '~음'으로 명사형 종결하세요. (합쇼체 금지)
-                5. 학생의 성취 수준(${job.check})을 문장 끝부분 서술어에 적절히 반영하세요. (예: 매우잘함 -> 탁월하게 수행함 / 노력요함 -> 지도가 필요함 등)
+                5. 학생의 성취 수준(${job.check})을 문장 끝부분 서술어에 적절히 반영하세요.
                 6. 페르소나: ${aiPersona}
             `;
 
@@ -1464,16 +1400,9 @@
                 const aiData = await sendRequest('call_ai', { prompt });
                 
                 if (aiData && aiData.text) {
-                    // 불필요한 기호 한 번 더 제거 (안전장치)
-                    let finalBody = aiData.text
-                        .replace(/['"\[\]]/g, "") // 대괄호, 따옴표 제거
-                        .replace(/\*\*/g, "")     // 볼드 제거
-                        .trim();
-                    
-                    // 교시는 앞에 붙여줌
+                    let finalBody = aiData.text.replace(/['"\[\]]/g, "").replace(/\*\*/g, "").trim();
                     if(job.periodPrefix) finalBody = `${job.periodPrefix} ${finalBody}`;
                     
-                    // 1에서 저장했던 위치(rowNum)를 찾아가서 '내용'만 덮어쓰기 (중복 방지)
                     await sendRequest('update_record_row', { 
                         type: job.type, 
                         rowNum: job.rowNum, 
@@ -1484,11 +1413,10 @@
                 console.error("AI Error:", e); 
             }
             
-            // 작업 끝났으면 목록에서 제거하고 다음 작업 실행
             aiJobQueue.shift(); 
             processNextAiJob();
         }
-
+        
         // [Student Manager]
         async function loadStudents() { studentList=await sendRequest('get_students')||[];
             renderRecordList(); renderStudentNav(); }
@@ -1692,6 +1620,42 @@
         async function deleteMemo() { reqConfirm('삭제하시겠습니까?', async()=>{ await sendRequest('delete_memo',{row:parseInt(document.getElementById('memoEditRow').value)}); loadMemos(); });
         }
 
+        // [누락된 UI 헬퍼 함수들 추가]
+        function setLoading(el, text) { 
+            if(!el) return; 
+            el.dataset.orgText = el.innerText; // 원래 버튼 글자 저장
+            el.innerText = text; 
+            el.classList.add('loading-anim'); // CSS에 정의된 로딩 애니메이션 적용
+            el.disabled = true; // 버튼 비활성화
+        }
+
+        function clearLoading(el) { 
+            if(!el) return; 
+            el.innerText = el.dataset.orgText || "완료"; // 원래 글자로 복구
+            el.classList.remove('loading-anim'); 
+            el.disabled = false; // 버튼 활성화
+        }
+
+// [상태바 제어 헬퍼 함수]
+        function showStatusBar(msg) {
+            const bar = document.getElementById('aiStatusBar');
+            const txt = document.getElementById('aiStatusText');
+            if(bar && txt) {
+                txt.innerText = msg;
+                bar.classList.add('show'); // CSS로 스르륵 올라오게 처리됨
+            }
+        }
+
+        function updateStatusText(msg) {
+            const txt = document.getElementById('aiStatusText');
+            if(txt) txt.innerText = msg;
+        }
+
+        function hideStatusBar() {
+            const bar = document.getElementById('aiStatusBar');
+            if(bar) bar.classList.remove('show'); // 스르륵 내려감
+        }
+        
         // Utils & Files
         function showToast(m) { const t=document.getElementById("toast");t.innerText=m;t.className="show";setTimeout(()=>{t.className=t.className.replace("show","")},3000);
         }
@@ -1762,7 +1726,7 @@
             showToast("페르소나 저장 완료!"); 
             clearLoading(btn); 
         }
-// [UI] 유형 선택에 따라 버튼과 옵션 표시 변경
+// [수정됨] 유형 선택 시 화면 전환 함수 (버튼 그룹 제어 추가)
         function toggleNeisType() {
             const type = document.getElementById('neisType').value;
             
@@ -1770,7 +1734,7 @@
             const subOpt = document.getElementById('neisSubOption');
             if(subOpt) subOpt.style.display = (type === 'subject') ? 'block' : 'none';
             
-            // 2. 버튼 그룹 교체 (핵심: 이 부분이 빠져서 버튼이 안 바뀌었던 것!)
+            // 2. 버튼 그룹 교체 (이 부분이 핵심!)
             const btnSub = document.getElementById('btnGroupSubject');
             const btnBeh = document.getElementById('btnGroupBehavior');
 
@@ -1915,7 +1879,6 @@
                 setTimeout(()=> { btn.innerText = org; btn.style.background=""; btn.style.color=""; }, 1500);
             });
         }
-        function toggleNeisType() { const t=document.getElementById('neisType').value; document.getElementById('neisSubOption').style.display=t==='subject'?'block':'none'; document.getElementById('neisBehOption').style.display=t==='behavior'?'block':'none'; }
 
         // [NEW] 사용 가능한 AI 모델 조회 함수
         async function checkAvailableModels() {
