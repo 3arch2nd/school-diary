@@ -397,14 +397,50 @@
         /* 메뉴 열렸을 때 위치 (PC 기준: 자물쇠보다 더 왼쪽) */
         .dark-float-btn.show { right: 135px; opacity: 1; pointer-events: auto; }
 
-        /* [추가] 다크 모드 테마 변수 재정의 */
+/* [수정] 다크 모드 테마 변수 재정의 (블루블랙 배경, 차분한 톤) */
         body.dark-mode {
-            --bg-main: #121212;
-            --card-bg: #1e1e1e;
-            --text-main: #e0e0e0;
-            --text-sub: #a0a0a0;
-            --border-color: #333333;
-            --primary-light: #2c3e50; /* 어두운 배경에 맞게 조정 */
+            /* 배경색: 완전 블랙 대신 깊은 밤하늘 같은 블루블랙 */
+            --bg-main: #1a1f2c; 
+            /* 카드 배경: 배경보다 약간 더 밝은 톤 */
+            --card-bg: #242a38; 
+            /* 텍스트: 순백색 대신 부드러운 회색빛 */
+            --text-main: #dce2f0; 
+            --text-sub: #9ba4b5; 
+            /* 테두리: 은은하게 */
+            --border-color: #353f52; 
+            /* 강조색(Primary): 채도를 살짝 낮춰서 눈부심 방지 */
+            --primary-light: #3d5a80; 
+            --primary: #6096ba; /* 기존보다 조금 더 차분한 파랑 */
+            --primary-dark: #8bb6d9; /* 다크모드에선 오히려 밝은색이 강조됨 */
+        }
+
+        /* [추가] 다크 모드에서 튀는 흰색 요소들 강제 진압 */
+        body.dark-mode input, 
+        body.dark-mode select, 
+        body.dark-mode textarea,
+        body.dark-mode .quick-link-item, /* 자주 찾는 사이트 버튼 */
+        body.dark-mode .music-play-btn,  /* 음악 재생 버튼 */
+        body.dark-mode .tag-add,         /* 태그 추가 버튼 */
+        body.dark-mode .btn-outline {
+            background-color: #2f3646 !important; /* 입력창/버튼 배경 */
+            color: var(--text-main) !important;
+            border-color: var(--border-color) !important;
+        }
+
+        /* [추가] 다크 모드에서 하늘색 버튼(자동 기록 등) 톤 다운 */
+        body.dark-mode .btn-primary {
+            background-color: var(--primary) !important; /* 재정의한 primary 색상 사용 */
+            color: #1a1f2c !important; /* 글씨는 어둡게 */
+            font-weight: bold;
+        }
+
+        /* [추가] 플레이어 등 흰색 아이콘/글씨가 안 보일 때 */
+        body.dark-mode .music-info,
+        body.dark-mode .ql-name {
+            color: var(--text-main) !important;
+        }
+        body.dark-mode .music-play-btn {
+            color: var(--primary) !important; /* 재생 버튼 아이콘 색상 */
         }
         
         /* [추가] 다크 모드일 때 강제 색상 반전이 필요한 요소들 */
