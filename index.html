@@ -400,7 +400,7 @@
                                 <button class="btn-sm inactive" id="mobBtnBeh" onclick="setMobileMode('behavior')">행동</button>
                                 <button class="btn-sm inactive" id="mobBtnCust" onclick="setMobileMode('custom')">기타</button>
                             </div>
-                            <input type="date" id="mobDate" style="margin-bottom:0;">
+                            <input type="date" id="mobDate" style="margin-bottom:0;" onchange="if(mobileMode==='custom') renderMobileCustomList()">
                         </div>
                         <div>
                             <div id="mobViewQuick" style="display:flex; flex-direction:column; padding-top:15px;">
@@ -1016,25 +1016,61 @@
             } catch(e) { showToast("실패"); }
         }
 
-        function renderMobileCustomList() {
-             const idx = document.getElementById('mobCustomSelect').value;
-             const container = document.getElementById('mobCustomList');
-             container.innerHTML = '';
-             if(idx === null || idx === undefined) return;
-             
-             const itemDef = customItems[idx];
-             studentList.forEach(st => {
-                 const row = document.createElement('div'); row.className = 'student-row';
-                 let inputHtml = '';
-                 if(itemDef.type === 'check') inputHtml = `<input type="checkbox" class="mob-cust-val" style="width:20px; height:20px; margin:0;">`;
-                 else if(itemDef.type === 'switch') inputHtml = `<label class="switch"><input type="checkbox" class="mob-cust-val"><span class="slider"></span></label>`;
- 
-                 else if(itemDef.type === 'select') inputHtml = `<select class="mob-cust-val" style="margin:0;"><option>상</option><option>중</option><option>하</option></select>`;
-                 
-                 row.innerHTML = `<div class="st-name" style="width:80px; font-weight:bold;">${st.name}</div><div style="flex:1;"></div>${inputHtml}`;
-                 container.appendChild(row);
-             });
+        // [수정] 모바일 커스텀 리스트 렌더링 (데이터 불러오기 기능 추가)
+    async function renderMobileCustomList() {
+        const idx = document.getElementById('mobCustomSelect').value;
+        const container = document.getElementById('mobCustomList');
+        
+        // 선택된 항목이 없으면 중단
+        if (idx === null || idx === undefined || idx === "") {
+            container.innerHTML = '';
+            return;
         }
+
+        // 로딩 표시
+        container.innerHTML = '<div style="text-align:center; padding:15px; color:#888;">데이터 불러오는 중... <span class="loading-anim"></span></div>';
+
+        // 1. 최신 데이터 가져오기
+        const allData = await sendRequest('custom_record', {mode: 'get'});
+        customRecordCache = allData || [];
+
+        // UI 초기화
+        container.innerHTML = '';
+        const itemDef = customItems[idx];
+        const date = document.getElementById('mobDate').value;
+
+        studentList.forEach(st => {
+            const row = document.createElement('div');
+            row.className = 'student-row';
+
+            // 2. 현재 날짜/항목/학생에 맞는 기록 찾기
+            const record = customRecordCache.find(r => r.date === date && r.item === itemDef.name && r.name === st.name);
+            const savedVal = record ? record.value : "";
+
+            let inputHtml = '';
+            
+            // 3. 타입별로 기존 값(savedVal) 반영하여 태그 생성
+            if (itemDef.type === 'check') {
+                const isChecked = savedVal === 'O' ? 'checked' : '';
+                inputHtml = `<input type="checkbox" class="mob-cust-val" style="width:20px; height:20px; margin:0;" ${isChecked}>`;
+            } 
+            else if (itemDef.type === 'switch') {
+                const isChecked = savedVal === 'ON' ? 'checked' : '';
+                inputHtml = `<label class="switch"><input type="checkbox" class="mob-cust-val" ${isChecked}><span class="slider"></span></label>`;
+            } 
+            else if (itemDef.type === 'select') {
+                inputHtml = `<select class="mob-cust-val" style="margin:0;">
+                    <option value="">-</option>
+                    <option ${savedVal === '상' ? 'selected' : ''}>상</option>
+                    <option ${savedVal === '중' ? 'selected' : ''}>중</option>
+                    <option ${savedVal === '하' ? 'selected' : ''}>하</option>
+                </select>`;
+            }
+
+            row.innerHTML = `<div class="st-name" style="width:80px; font-weight:bold;">${st.name}</div><div style="flex:1;"></div>${inputHtml}`;
+            container.appendChild(row);
+        });
+    }
 
         async function saveMobileCustom() {
              const idx = document.getElementById('mobCustomSelect').value;
