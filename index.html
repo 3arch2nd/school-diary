@@ -132,7 +132,7 @@
         
         .bar-chart-container { display: flex; flex-direction: column; height: 100%; overflow: hidden; padding-bottom: 10px; }
         .chart-bars-area { flex: 1; display: flex; align-items: flex-end; gap: 2px; padding-top: 20px; border-bottom: 1px solid #ccc; position: relative; }
-        .stat-bar { flex: 1; background: #e0e0e0; border-radius: 3px 3px 0 0; transition: all 0.2s; position: relative; min-height: 20%; cursor: pointer; }
+        .stat-bar { flex: 1; background: #e0e0e0; border-radius: 3px 3px 0 0; transition: all 0.2s; position: relative; min-height: 4px; cursor: pointer; }
         .stat-bar:hover { background: var(--primary); transform: scaleY(1.05); transform-origin: bottom; z-index: 100; }
         
         .stat-bar .tooltip { 
@@ -1233,6 +1233,7 @@
             } else { showToast("선택된 내용 없음"); }
         }
 
+// [수정] 통계 그래프 렌더링 (0회는 바닥에, 1회 이상은 확실히 구분)
         async function renderCustomStats() {
             if(currentCustomItem === null) return;
             const chartArea = document.getElementById('customStatsChart'); 
@@ -1245,8 +1246,7 @@
             let startDate = new Date(today);
             let endDate = new Date(today);
             
-            if (range === 'today') {
-            } else if (range === 'month') {
+            if (range === 'month') {
                 startDate.setDate(1); endDate.setMonth(endDate.getMonth() + 1); endDate.setDate(0);
             } else if (range === 's1') {
                 startDate = new Date(today.getFullYear(), 2, 1); endDate = new Date(today.getFullYear(), 7, 31); 
@@ -1264,10 +1264,12 @@
                 if (range === 'today') return d.date === formatDateYMD(today);
                 return d.date >= startStr && d.date <= endStr;
             });
+
             const studentStats = studentList.map(st => {
                 const count = filteredData.filter(d => d.name === st.name).length;
                 return { id: st.id, name: st.name, count: count };
             });
+
             const maxVal = Math.max(...studentStats.map(s => s.count)) || 1; 
             const total = studentStats.length;
             const oneThird = Math.ceil(total / 3);
@@ -1278,14 +1280,25 @@
             studentStats.forEach((st, i) => {
                 const bar = document.createElement('div');
                 bar.className = 'stat-bar';
-                let heightPct = 20;
-                if (st.count > 0) {
-                    const relative = (st.count / maxVal) * 60; 
-                    heightPct = 20 + relative; 
+                
+                // [핵심 변경 로직] 높이 계산
+                let heightPct = 0;
+                
+                if (st.count === 0) {
+                    // 0회면 그냥 바닥에 붙임 (CSS min-height: 4px가 작동함)
+                    heightPct = 0; 
+                } else {
+                    // 1회 이상이면 기본 15% 높이 확보 + 비율대로 증가 (최대 약 85%)
+                    // 이렇게 하면 0과 1의 차이가 확연해짐
+                    const relative = (st.count / maxVal) * 70; 
+                    heightPct = 15 + relative; 
                 }
+
                 bar.style.height = `${heightPct}%`;
                 
-                // [툴팁 정렬 로직]
+                // 0회일 때는 배경색을 좀 더 흐리게 처리 (선택 사항)
+                if(st.count === 0) bar.style.background = "#f0f0f0";
+
                 let alignClass = "";
                 if (i < oneThird) alignClass = "left-align"; 
                 else if (i >= total - oneThird) alignClass = "right-align";
