@@ -1272,10 +1272,9 @@
         function toggleCheck(el) { const p=el.parentElement; const w=el.classList.contains('checked'); p.querySelectorAll('.check-circle').forEach(c=>c.classList.remove('checked')); if(!w) el.classList.add('checked');
         }
         
-        // [수정됨] 저장 로직: 중복 방지 및 Raw 데이터 형식([주제] 내용) 지정
+        // [수정됨] 저장 로직 (에러 해결 + 백그라운드 상태바 안내)
         async function saveData() {
             const inputs = document.querySelectorAll('.st-input'); 
-            const btn = document.getElementById('btnSaveAll'); 
             const isAI = document.getElementById('aiToggle').checked;
             
             let targetType = "행동";
@@ -1285,13 +1284,17 @@
                 targetType = selTag.innerText.split(' ')[0].trim(); 
             }
             
-            setLoading(btn, "저장 중");
             let itemsToSave = [];
             
+            // 데이터 수집
             inputs.forEach(input => {
                 const text = input.value.trim(); 
                 const row = input.closest('.student-row'); 
-                const name = row.querySelector('.st-name').innerText.split('.')[1].trim();
+                
+                // [🚨 에러 수정 부분] 이름 가져오기 안전장치
+                const rawName = row.querySelector('.st-name').innerText;
+                // 점(.)이 있으면 분리해서 뒤에꺼 쓰고, 없으면 그냥 씀
+                const name = rawName.includes('.') ? rawName.split('.')[1].trim() : rawName.trim();
                 
                 let checkVal = "없음";
                 if(currentMode === 'subject') { 
@@ -1305,22 +1308,29 @@
                 if (text.length > 0 || checkVal !== "없음") itemsToSave.push({ input, name, text, checkVal });
             });
             
-            if (itemsToSave.length === 0) { showToast("저장할 내용 없음"); clearLoading(btn); return; }
+            if (itemsToSave.length === 0) { showToast("저장할 내용이 없습니다."); return; }
             
-            // 순차 저장
+            // [UI] 버튼 락(setLoading) 대신 상태바 노출
+            showStatusBar(`💾 데이터 저장 시작... (총 ${itemsToSave.length}건)`);
+            
+            // 입력창 초기화 (사용자는 바로 다른 작업 가능하게)
+            inputs.forEach(el => el.value = ''); 
+            document.querySelectorAll('.check-circle').forEach(el => el.classList.remove('checked')); 
+
+            // 순차 저장 시작
+            let savedCount = 0;
             for (const item of itemsToSave) {
                 let period = document.getElementById('rPeriod').value; 
                 const topic = document.getElementById('rTopic').value.trim(); 
                 let periodPrefix = period ? `[${period}]` : "";
                 
-                // 3. AI 미적용 시 형식: [주제] 내용
                 let rawBody = item.text;
                 if(topic) rawBody = `[${topic}] ${item.text}`;
                 if(item.text.length === 0 && topic) rawBody = `[${topic}] 활동에 참여함`;
                 
                 rawBody = `${periodPrefix} ${rawBody}`.trim();
                 
-                // 1. 일단 있는 그대로 저장 (서버가 rowNum을 줌)
+                // 서버 전송
                 const res = await sendRequest('save_record', { 
                     date: document.getElementById('rDate').value, 
                     name: item.name, 
@@ -1329,11 +1339,14 @@
                     check: item.checkVal 
                 });
                 
-                // 1-1. 저장 성공했고, AI 켜져있으면 -> 수정 대기열(Queue)에 등록
-                // (새로 저장이 아니라, 방금 저장한 rowNum 위치를 찾아서 '수정'하는 방식이므로 중복 안 됨)
+                savedCount++;
+                // 상태바 업데이트
+                updateStatusText(`💾 저장 중... [${item.name}] (${savedCount}/${itemsToSave.length})`);
+
+                // AI 큐에 추가
                 if (isAI && res && res.rowNum) {
                     aiJobQueue.push({ 
-                        rowNum: res.rowNum, // 방금 저장된 줄 번호
+                        rowNum: res.rowNum, 
                         type: targetType, 
                         topic: topic, 
                         text: item.text, 
@@ -1344,34 +1357,31 @@
                 }
             }
             
-            clearLoading(btn); 
-            inputs.forEach(el => el.value = ''); 
-            document.querySelectorAll('.check-circle').forEach(el => el.classList.remove('checked')); 
-            
+            // 저장 루프 끝
             if(isAI && aiJobQueue.length > 0) {
-                showToast(`저장 완료. AI 변환 시작 (${aiJobQueue.length}건)`);
+                showToast("1차 저장 완료. AI 변환 시작...");
                 processNextAiJob(); // AI 작업 시작
             } else {
-                showToast("저장 완료");
+                hideStatusBar(); // 상태바 숨김
+                showToast("모든 저장 완료! ✅");
             }
         }
 
-        // [수정됨] AI 처리 로직: 프롬프트 개선 (자연스러운 연결, 대괄호 제거)
+        // [수정됨] AI 처리 로직 (상태바 연동)
         async function processNextAiJob() {
             if (aiJobQueue.length === 0) { 
                 isAiQueueRunning = false; 
-                document.getElementById('status-bar').className = ''; 
+                hideStatusBar(); // 작업 끝나면 숨김
                 showToast("✨ 모든 AI 변환 완료!");
                 return; 
             }
             
             isAiQueueRunning = true; 
-            document.getElementById('status-bar').className = 'show';
-            
             const job = aiJobQueue[0];
-            document.getElementById('status-msg').innerText = `✨ AI 다듬는 중... [${job.name}] (남은 작업: ${aiJobQueue.length})`;
             
-            // 2. 개선된 프롬프트: 주제를 자연스럽게 녹이고, 특수문자 금지
+            // [UI] 상태바에 뉴스 헤드라인처럼 표시
+            showStatusBar(`✨ AI 다듬는 중... [${job.name}] (대기: ${aiJobQueue.length}건)`);
+            
             const prompt = `
                 역할: 초등학교 교사. 
                 작업: 생활기록부 기재용 평어 한 문장 작성.
@@ -1382,7 +1392,7 @@
                 2. '[주제]' 처럼 대괄호를 절대 쓰지 말고, 문맥 속에 녹여내세요. (예: '[탐구] ~함' (X) -> '탐구 활동을 통해 ~함' (O))
                 3. **굵게(볼드)**, "따옴표", '작은따옴표' 등 특수문자를 절대 사용하지 마세요.
                 4. 문장은 반드시 '~함' 또는 '~음'으로 명사형 종결하세요. (합쇼체 금지)
-                5. 학생의 성취 수준(${job.check})을 문장 끝부분 서술어에 적절히 반영하세요. (예: 매우잘함 -> 탁월하게 수행함 / 노력요함 -> 지도가 필요함 등)
+                5. 학생의 성취 수준(${job.check})을 문장 끝부분 서술어에 적절히 반영하세요.
                 6. 페르소나: ${aiPersona}
             `;
 
@@ -1390,16 +1400,9 @@
                 const aiData = await sendRequest('call_ai', { prompt });
                 
                 if (aiData && aiData.text) {
-                    // 불필요한 기호 한 번 더 제거 (안전장치)
-                    let finalBody = aiData.text
-                        .replace(/['"\[\]]/g, "") // 대괄호, 따옴표 제거
-                        .replace(/\*\*/g, "")     // 볼드 제거
-                        .trim();
-                    
-                    // 교시는 앞에 붙여줌
+                    let finalBody = aiData.text.replace(/['"\[\]]/g, "").replace(/\*\*/g, "").trim();
                     if(job.periodPrefix) finalBody = `${job.periodPrefix} ${finalBody}`;
                     
-                    // 1에서 저장했던 위치(rowNum)를 찾아가서 '내용'만 덮어쓰기 (중복 방지)
                     await sendRequest('update_record_row', { 
                         type: job.type, 
                         rowNum: job.rowNum, 
@@ -1410,11 +1413,10 @@
                 console.error("AI Error:", e); 
             }
             
-            // 작업 끝났으면 목록에서 제거하고 다음 작업 실행
             aiJobQueue.shift(); 
             processNextAiJob();
         }
-
+        
         // [Student Manager]
         async function loadStudents() { studentList=await sendRequest('get_students')||[];
             renderRecordList(); renderStudentNav(); }
@@ -1632,6 +1634,26 @@
             el.innerText = el.dataset.orgText || "완료"; // 원래 글자로 복구
             el.classList.remove('loading-anim'); 
             el.disabled = false; // 버튼 활성화
+        }
+
+// [상태바 제어 헬퍼 함수]
+        function showStatusBar(msg) {
+            const bar = document.getElementById('aiStatusBar');
+            const txt = document.getElementById('aiStatusText');
+            if(bar && txt) {
+                txt.innerText = msg;
+                bar.classList.add('show'); // CSS로 스르륵 올라오게 처리됨
+            }
+        }
+
+        function updateStatusText(msg) {
+            const txt = document.getElementById('aiStatusText');
+            if(txt) txt.innerText = msg;
+        }
+
+        function hideStatusBar() {
+            const bar = document.getElementById('aiStatusBar');
+            if(bar) bar.classList.remove('show'); // 스르륵 내려감
         }
         
         // Utils & Files
