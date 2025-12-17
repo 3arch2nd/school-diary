@@ -673,692 +673,15 @@
     <div id="monthAttModal" class="modal-overlay"><div class="modal-card" style="width:600px;"><div class="modal-title" style="font-weight:bold; margin-bottom:15px;">월별 출석 현황</div><div class="modal-body" id="monthAttBody" style="max-height:400px; overflow-y:auto; margin-bottom:15px;"></div><div style="text-align:right;"><button class="btn btn-outline" onclick="document.getElementById('monthAttModal').classList.remove('open')">닫기</button></div></div></div>
     <div id="customItemModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="font-weight:bold; margin-bottom:15px;">항목 생성</div><label>항목 이름</label><input type="text" id="ciName" placeholder="예: 우유 당번"><label>척도 타입</label><select id="ciType"><option value="check">체크리스트 (O/X)</option><option value="switch">스위치 (ON/OFF)</option><option value="select">선택 (상/중/하)</option></select><div style="text-align:right; margin-top:10px;"><button class="btn btn-outline" onclick="document.getElementById('customItemModal').classList.remove('open')">취소</button> <button class="btn btn-primary" onclick="addCustomItem()">추가</button></div></div></div>
 
-    <!DOCTYPE html>
-<html lang="ko">
-<head>
-    <base target="_top">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>쫑알수첩 Pro (Final v21.11)</title>
-    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-main: #f2f8fc;
-            --card-bg: #FFFFFF;
-            --primary-light: #9fcde8; --primary: #6ab0cf; --primary-dark: #35667a;
-            --text-main: #2c3e50; --text-sub: #7f8c8d; --border-color: #e3eff5;
-            --success: #27ae60; --danger: #e74c3c;
-            --att-dot: #ff8fab;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Gowun Dodum', sans-serif;
-            -webkit-tap-highlight-color: transparent; }
-        
-        body { background-color: var(--bg-main);
-            color: var(--text-main); font-size: 16px; line-height: 1.5; height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column;
-        }
-        .container { width: 100%; max-width: 1400px; margin: 0 auto; padding: 20px;
-            height: 100%; flex: 1; display: flex; flex-direction: column; overflow: hidden;
-        }
-        header { text-align: center; margin-bottom: 15px; flex-shrink: 0;
-        }
-        
-        h1 { color: var(--primary-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: -0.5px; margin: 0; }
-        .version-tag { color: #bdc3c7; font-size: 1rem; font-weight: normal; margin-left: 5px; vertical-align: middle; }
-
-        input[type="number"]::-webkit-outer-spin-button,
-        input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type="number"] { -moz-appearance: textfield; }
-
-        hr { border: 0; border-top: 1px solid var(--border-color); margin: 20px 0; }
-
-        @media (min-width: 769px) {
-            .btn, .nav-item, .float-btn, .music-play-btn, .custom-item-row, .student-nav-item, .quick-link-item, .lock-float-btn, .float-menu-item {
-                transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background-color 0.2s;
-            }
-            .btn:hover, .btn-sm:hover:not(.inactive), .float-btn:hover, .music-play-btn:hover, .lock-float-btn:hover {
-                transform: scale(1.03); 
-                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            }
-            .nav-item:hover {
-                background-color: #eaf6fc;
-                transform: scale(1.02);
-            }
-            .quick-link-item:hover {
-                transform: scale(1.03) !important;
-                border-color: var(--primary);
-                box-shadow: 0 4px 10px rgba(0,0,0,0.08) !important;
-            }
-            .float-menu-item:hover {
-                transform: scale(1.03);
-                background-color: #eaf6fc;
-                color: var(--primary);
-            }
-        }
-
-        .loading-anim::after {
-            content: ''; animation: dots 1.5s steps(4, end) infinite;
-        }
-        @keyframes dots {
-            0%, 20% { content: ''; } 40% { content: '.'; } 60% { content: '..'; } 80%, 100% { content: '...'; }
-        }
-
-        .scroll-wrapper { flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding-right: 5px; }
-        .pc-only.full-height, .mobile-only.full-height { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; height: 100%; }
-        .home-stack { display: flex; flex-direction: column; justify-content: flex-start; gap: 15px; }
-        .pc-only { display: block; }
-        .mobile-only { display: none !important; }
-
-        .student-row { display: flex; align-items: center; gap: 10px; padding: 12px 10px; border-bottom: 1px solid var(--bg-main); background: white; min-height: 50px; }
-        .st-name { width: 80px; font-weight: bold; color: var(--primary-dark); flex-shrink: 0; text-align: center; }
-        .st-input { flex-grow: 1; margin-bottom: 0 !important; height: 40px; }
-        .st-check-group { display: flex; gap: 2px; width: 160px; flex-shrink: 0; justify-content: space-between; }
-        .check-circle { width: 24px; height: 24px; border: 2px solid var(--border-color); border-radius: 50%; cursor: pointer; position: relative; background: var(--bg-main); }
-        .check-circle.checked { border-color: var(--primary); background: var(--primary); }
-        .check-circle.checked::after { content: 'v'; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; font-weight:bold; }
-        
-        #checkHeader { width: 160px; display: flex; justify-content: space-between; font-size: 0.75rem; }
-        #checkHeader span { width: 36px; text-align: center; letter-spacing: -1px; line-height: 1.1; }
-
-        #customCheckList { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
-        .quick-row { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 12px 10px; border-bottom: 1px solid #f0f0f0; background: white; min-height: 50px; }
-        .quick-name { font-weight: bold; color: var(--text-main); }
-        .quick-input { flex-shrink: 0; } 
-
-        .global-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 2000; display: none; }
-        .global-overlay.show { display: block; }
-        
-        #aiStatusBar { position: fixed; bottom: 0; left: 0; width: 100%; height: 30px; background: #333; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; z-index: 2500; transform: translateY(100%); transition: transform 0.3s ease-in-out; }
-        #aiStatusBar.show { transform: translateY(0); }
-        .ai-loading-icon { display: inline-block; width: 10px; height: 10px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 10px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        #lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-main); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: auto; }
-        #lockCard { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; width: 320px; position: relative; z-index: 100000; }
-        #lockInput { font-size: 1.2rem; text-align: center; margin-bottom: 5px; letter-spacing: 2px; position: relative; z-index: 100001; background: white; }
-        .lock-msg { font-size: 0.8rem; color: var(--danger); min-height: 20px; margin-bottom: 10px;}
-
-        .nav-tabs { display: flex; flex-shrink: 0; background: var(--card-bg); border-radius: 8px; margin-bottom: 15px; padding: 4px; border: 1px solid var(--border-color); }
-        .nav-item { flex: 1; text-align: center; padding: 12px; cursor: pointer; color: var(--text-sub); border-radius: 6px; font-weight: bold; transition: 0.2s; }
-        .nav-item.active { color: var(--primary-dark); background-color: #eaf6fc; }
-        .nav-item-home { flex: 0.5; min-width: 60px; color: var(--primary-dark); }
-
-        .section { display: none; flex: 1; overflow: hidden; height: 100%; flex-direction: column; } 
-        .section.active { display: flex; animation: fadeIn 0.2s; } 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .split-container { display: flex; gap: 20px; height: 100%; overflow: hidden; flex: 1; min-height: 0; }
-        .split-left { width: 360px; flex-shrink: 0; display: flex; flex-direction: column; gap: 15px; height: 100%; overflow: hidden; }
-        .split-right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 15px; height: 100%; overflow: hidden; }
-        .split-half { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
-
-        .card { background: var(--card-bg); border-radius: 8px; padding: 20px; border: 1px solid var(--border-color); box-shadow: 0 1px 2px rgba(0,0,0,0.03); display: flex; flex-direction: column; }
-        .card.full-height { height: 100%; min-height: 0; flex: 1; }
-        .card-header { font-size: 1.1rem; color: var(--primary-dark); font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; flex-shrink: 0; border-bottom: 2px solid var(--bg-main); display: flex; justify-content: space-between; align-items: center; width: 100%; }
-
-        .tag-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
-        .tag { position: relative; padding: 8px 30px 8px 16px; background: var(--bg-main); border-radius: 20px; font-size: 0.95rem; cursor: pointer; border: 1px solid var(--border-color); transition: 0.2s; user-select: none; }
-        .tag.selected { background: var(--primary); color: white; border-color: var(--primary); }
-        .tag-add { padding: 8px 16px; border: 1px dashed var(--primary); background: white; color: var(--primary); text-align:center;}
-        .tag .x-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; line-height: 16px; text-align: center; border-radius: 50%; font-size: 0.8rem; background: rgba(0,0,0,0.1); color: inherit; display: none; }
-        .tag:hover .x-btn { display: block; }
-
-        .custom-item-row { padding: 10px; border: 1px solid #eee; border-radius: 6px; margin-bottom: 5px; cursor: pointer; display: flex; justify-content: space-between; }
-        .custom-item-row.active { border-color: var(--primary); background: #f9fcff; }
-        
-        .bar-chart-container { display: flex; flex-direction: column; height: 100%; overflow: hidden; padding-bottom: 10px; }
-        .chart-bars-area { flex: 1; display: flex; align-items: flex-end; gap: 2px; padding-top: 20px; border-bottom: 1px solid #ccc; position: relative; }
-        
-        /* [수정] min-height 제거: 0일 때 막대 높이 없애기 위함 */
-        .stat-bar { flex: 1; background: #e0e0e0; border-radius: 3px 3px 0 0; transition: all 0.2s; position: relative; cursor: pointer; }
-        .stat-bar:hover { background: var(--primary); transform: scaleY(1.05); transform-origin: bottom; z-index: 100; }
-        
-        .stat-bar .tooltip { 
-            position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); 
-            background: rgba(0,0,0,0.8); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; white-space: nowrap; pointer-events: none; 
-            opacity: 0; transition: 0.2s; z-index: 101; 
-        }
-        .stat-bar:hover .tooltip { opacity: 1; bottom: 105%; }
-        .stat-bar .tooltip.left-align { left: 0; transform: translateX(0); }
-        .stat-bar .tooltip.right-align { left: auto; right: 0; transform: translateX(0); }
-
-        .switch-container { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text-sub); margin-right: 10px;}
-        .switch { position: relative; display: inline-block; width: 36px; height: 20px; margin-bottom: 0; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); transition: .3s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--primary); }
-        input:checked + .slider:before { transform: translateX(16px); }
-
-        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; background: #fcfdfd; }
-        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); background: white; }
-        .btn { display: inline-flex; justify-content: center; align-items: center; height: 42px; min-width: 80px; padding: 0 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 1rem; font-weight: bold; transition: 0.2s; white-space: nowrap; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-outline { background: white; border: 1px solid var(--border-color); color: var(--text-main); }
-        .btn-danger { background: var(--danger); color: white; }
-        .btn-sm { height: 34px; min-width: 60px; padding: 0 12px; font-size: 0.9rem; border-radius: 6px; border: 1px solid; cursor: pointer; transition: 0.2s; }
-        .btn-sm.active { background: var(--primary); color: white; border-color: var(--primary); }
-        .btn-sm.inactive { background: white; color: var(--text-sub); border-color: var(--border-color); }
-        .btn-icon { font-size: 0.8rem; background: none; border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-left: 5px; }
-
-        .float-btn { position: fixed; top: 20px; right: 20px; width: 50px; height: 50px; background: var(--primary); color: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 2100; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; transition: 0.3s; }
-        
-        .float-menu { 
-            position: fixed; top: 80px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 2100;
-            opacity: 0; transform: translateY(-20px) scale(0.9); pointer-events: none; 
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .float-menu.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
-        .float-menu-item { background: white; padding: 10px 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; font-weight: bold; color: var(--text-main); text-align: right; border: 1px solid var(--border-color); transition: 0.2s; }
-        
-        .lock-float-btn {
-            position: fixed; top: 25px; right: 25px; width: 40px; height: 40px; border-radius: 50%; background: #e74c3c; color: white;
-            display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 2090;
-            opacity: 0; pointer-events: none; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .lock-float-btn.show { right: 80px; opacity: 1; pointer-events: auto; }
-
-        .music-panel { 
-            position: fixed; top: 80px; left: -420px; width: 400px; height: 220px;
-            background: white; color: #333; border-radius: 12px; box-shadow: 2px 2px 15px rgba(0,0,0,0.2); 
-            z-index: 2200; display: flex; overflow: hidden; border: 1px solid #eee;
-            transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease; 
-            opacity: 0;
-        }
-        .music-panel.show { left: 20px; opacity: 1; } 
-        .mp-video { width: 40%; background: black; }
-        .mp-list { flex: 1; display: flex; flex-direction: column; padding: 8px; border-left: 1px solid #eee; gap: 0px; overflow-y: auto; }
-        .mp-item { font-size: 0.8rem; padding: 3px 0; border-bottom: 1px solid #f9f9f9; cursor: pointer; display: flex; justify-content: space-between; color: #333; line-height: 1.2; }
-        .mp-item:hover { color: var(--primary); font-weight: bold; background: #f0f8ff;}
-        .mp-add { margin-top: auto; display: flex; gap: 5px; padding-top: 5px;}
-        .mp-add input { flex: 1; margin: 0; font-size: 0.8rem; height: 30px; padding: 5px; border: 1px solid var(--border-color); background: #fcfdfd; }
-        
-        .music-capsule { position: fixed; top: 20px; left: 20px; width: 220px; height: 50px; background: var(--primary-light); color: var(--primary-dark); border-radius: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 2300; display: flex; align-items: center; padding: 0 5px 0 15px; transition: 0.3s; overflow: hidden; border: 2px solid white; cursor: pointer;}
-        .music-info { flex: 1; overflow: hidden; white-space: nowrap; font-size: 0.9rem; font-weight: bold; margin-right: 10px; }
-        .music-play-btn { width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-
-        .home-image-area { width: 100%; aspect-ratio: 4 / 3; background: #fafafa; border: 2px dashed #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; position: relative; }
-        .home-image-area img { width: 100%; height: 100%; object-fit: cover; }
-        .home-image-msg { color: #aaa; font-weight: bold; pointer-events: none; }
-        .quick-link-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }
-        .quick-link-item { background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100px; }
-        .ql-emoji { font-size: 2rem; margin-bottom: 5px; }
-        .ql-name { font-size: 0.85rem; color: var(--text-main); font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
-
-        #bmList { display: grid; gap: 15px; padding-right: 5px; }
-        @media (min-width: 1200px) { #bmList { grid-template-columns: repeat(3, 1fr); } }
-        @media (min-width: 800px) and (max-width: 1199px) { #bmList { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 799px) { #bmList { grid-template-columns: 1fr; } }
-        .bm-card { background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between; position: relative; }
-        .bm-star { position: absolute; top: 10px; right: 10px; font-size: 1.2rem; cursor: pointer; color: #ddd; transition: 0.2s; }
-        .bm-star.active { color: #f1c40f; }
-        .bm-link { font-weight: bold; color: var(--primary-dark); text-decoration: none; font-size: 1.05rem; display: block; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .bm-filter-tag { padding: 5px 12px; background: #fff; border: 1px solid #ddd; border-radius: 15px; font-size: 0.85rem; cursor: pointer; color: #666; transition: 0.2s; }
-        .bm-filter-tag.active { background: var(--primary); color: white; border-color: var(--primary); }
-
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; margin-bottom: 10px; }
-        .cal-day { padding: 4px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; height: 50px; display: flex; flex-direction: column; align-items: center; position: relative; }
-        .cal-day:hover { background: #eaf6fc; }
-        .cal-day.today { background: #fffbe6; border: 1px solid #ffd591; }
-        .cal-day.selected { border: 2px solid var(--primary-dark); }
-        .cal-dots-container { display: flex; gap: 2px; margin-top: 4px; justify-content: center; }
-        .cal-dot { width: 6px; height: 6px; border-radius: 50%; }
-        .cal-dot.event { background: var(--primary); }
-        .cal-dot.att { background: var(--att-dot); }
-        
-        .memo-mini-item { padding: 10px 8px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 0.9rem; color: var(--text-main); display: block; width: 100%; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; height: 40px; line-height: 20px; }
-        .memo-mini-item:hover { color: var(--primary); }
-        .memo-mini-item.done-memo { text-decoration: line-through; opacity: 0.6; color: #aaa; }
-        .memo-list-item { background: white; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; padding: 12px; display: flex; align-items: center; gap: 10px; }
-        .memo-list-date { font-size: 0.85rem; color: var(--text-sub); white-space: nowrap; flex-shrink: 0; }
-        .memo-list-content { font-size: 0.95rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-grow: 1; font-weight: bold;}
-        .memo-list-item.done-memo .memo-list-content { text-decoration: line-through; opacity: 0.6; }
-        .memo-pinned-icon { color: #f1c40f; font-size: 1.2rem; margin-right: 5px; }
-
-        .student-nav-item { background: white; border: 1px solid var(--border-color); padding: 12px 15px; border-radius: 8px; cursor: pointer; margin-bottom: 8px; transition: 0.2s; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center; }
-        .student-nav-item:hover { background: #eaf6fc; color: var(--primary-dark); border-color: var(--primary-light); }
-        .student-nav-item.active { background: #eaf6fc; border-color: var(--primary); font-weight: bold; color: var(--primary-dark); border-width: 2px; }
-
-        .history-card { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; border-bottom: 1px solid var(--bg-main); padding-bottom: 10px; }
-        .h-info { 
-            width: 90px; flex-shrink: 0; text-align: center; 
-            display: flex; flex-direction: column; gap: 4px; justify-content: center;
-        }
-        .h-date { font-size: 0.8rem; color: #888; }
-        .h-badge { font-size: 0.8rem; font-weight: bold; color: var(--primary-dark); }
-        .h-eval { font-size: 0.75rem; color: white; background: var(--att-dot); padding: 2px 6px; border-radius: 10px; display: inline-block; align-self: center;}
-        .history-chk { padding-top: 2px; }
-        .history-content { flex: 1; }
-
-        .att-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #eee; }
-        .att-name { width: 50px; font-weight: bold; font-size: 0.9rem; flex-shrink: 0; }
-        .att-sel { font-size: 0.9rem; padding: 4px; width: 70px; margin-bottom: 0 !important; flex-shrink: 0; }
-        .att-memo { font-size: 0.9rem; padding: 4px; flex-grow: 1; margin-bottom: 0 !important; }
-
-        .mobile-block-overlay { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; color: var(--text-sub); }
-        .mobile-block-overlay span { font-size: 3rem; margin-bottom: 20px; }
-
-        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 30px; padding: 12px 20px; position: fixed; z-index: 3000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 0.95rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
-        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
-        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
-        
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 2000; display: none; align-items: center; justify-content: center; }
-        .modal-overlay.open { display: flex; }
-        .modal-card { background: white; padding: 25px; border-radius: 12px; width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--border-color); }
-        .modal-msg { margin-bottom: 20px; text-align: center; color: var(--text-main); font-weight: bold; }
-
-        @media (max-width: 768px) {
-            .container { padding: 10px; }
-            .nav-item { font-size: 0.9rem; padding: 10px 5px; }
-            .pc-only { display: none !important; }
-            .mobile-only { display: block !important; }
-            .split-container { flex-direction: column; overflow-y: auto; }
-            .split-left, .split-right { width: 100%; height: auto; overflow: visible; flex: 1; min-height: 0; }
-            .card { min-height: 0; }
-            .pc-only-tab .split-container { display: none; }
-            .pc-only-tab .mobile-block-overlay { display: flex; }
-            
-            /* [수정 3] 모바일 레이아웃 최적화 */
-            .pc-only-section { display: none !important; } /* 자주 찾는 사이트 섹션 전체 숨김 */
-            .home-stack .card:last-child { min-height: 300px; flex: 1; } /* 빠른 기록 영역 확장 */
-            #homeToDoList { font-size: 1.1rem; line-height: 2; flex: 1; } /* 오늘의 할 일 키우기 */
-            .home-image-area { display: none !important; }
-
-            .float-btn { top: auto; bottom: 30px; }
-            .float-menu { top: auto; bottom: 90px; }
-            .music-capsule { display: none !important; }
-
-            /* [수정 2] 잠금 버튼 아래로 이동 */
-            .lock-float-btn { top: auto; bottom: 30px; right: 25px; }
-            .lock-float-btn.show { right: 80px; bottom: 30px; top: auto; }
-            
-            /* 하단 여백 확보 */
-            .container { padding-bottom: 100px; }
-            
-            .mobile-only.full-height { display: flex !important; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; height: 100%; }
-        }
-    </style>
-</head>
-<body>
-    <div id="aiStatusBar"><span class="ai-loading-icon"></span><span id="aiStatusText">✨ 대기 중...</span></div>
-    <div class="global-overlay" id="globalOverlay" onclick="closeAllOverlays()"></div>
-
-    <div class="music-panel" id="musicPanel">
-        <div class="mp-video"><iframe id="musicIframe" width="100%" height="100%" src="" frameborder="0" allow="autoplay; encrypted-media"></iframe></div>
-        <div class="mp-list" id="musicList"></div>
-    </div>
-
-    <div class="music-capsule" id="musicBtn" onclick="toggleMusicPanel()">
-        <div class="music-info" id="musicCurrentTitle">🎵 음악을 선택하세요</div>
-        <div class="music-play-btn">▶</div>
-    </div>
-
-    <div id="lockScreen"><div id="lockCard"><h2 style="color:var(--primary-dark); margin-bottom:20px;">쫑알수첩 Pro</h2><p style="margin-bottom:10px; color:var(--text-sub);">관리자 인증이 필요합니다.</p><input type="password" id="lockInput" placeholder="Password" onkeyup="checkCaps(event)"><div id="lockMsg" class="lock-msg"></div><button class="btn btn-primary" onclick="unlockApp()" style="width:100%;">접속</button></div></div>
-
-    <div class="lock-float-btn" id="lockFloatBtn" onclick="relockApp()">🔒</div>
-    <div class="float-btn" onclick="toggleFloatMenu()">+</div>
-    <div class="float-menu" id="floatMenu">
-        <div class="float-menu-item" onclick="changeSection('bookmarks')">북마크</div>
-        <div class="float-menu-item" onclick="changeSection('calendar')">달력</div>
-        <div class="float-menu-item" onclick="changeSection('memo')">메모</div>
-    </div>
-
-    <div class="container">
-        <header><h1>쫑알수첩<span class="version-tag">v21.9</span></h1></header>
-        <nav class="nav-tabs">
-            <div class="nav-item nav-item-home active" onclick="changeSection('home')">HOME</div>
-            <div class="nav-item" onclick="changeSection('record')">기록하기</div>
-            <div class="nav-item" onclick="changeSection('students')">학생관리</div>
-            <div class="nav-item" onclick="changeSection('neis')">NEIS</div>
-            <div class="nav-item" onclick="changeSection('data')">설정</div>
-        </nav>
-
-        <div id="home" class="section active">
-            <div class="mobile-only full-height" style="margin-bottom: 10px; height: auto;">
-                 <div class="card full-height" style="display:flex; flex-direction:column;">
-                    <div class="card-header" style="margin-top:0; border-bottom:1px solid #eee;">오늘의 할 일</div>
-                    <div id="homeToDoListMobile" style="flex:1; font-size:1.1rem; color:#333; font-weight:bold; line-height:2; overflow-y:auto;">일정 없음</div>
-                    
-                    <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-top:20px;">
-                        <div style="font-size:0.85rem; color:var(--text-sub); margin-bottom:5px; font-weight:bold;">⚡ 빠른 기록</div>
-                        <div style="font-size:0.8rem; color:var(--text-sub); margin-bottom:10px;">예: 김철수/수학/발표 잘함</div>
-                        <textarea id="homeQuickInputMobile" style="width:100%; height:60px; resize:none;" placeholder="입력..."></textarea>
-                        <button class="btn btn-primary" style="width:100%;" onclick="saveHomeQuickRecord('mobile')">자동 기록</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="split-container pc-only">
-                <div class="split-left">
-                    <div class="card full-height">
-                        <div class="scroll-wrapper">
-                            <div class="home-image-area" id="homeImgArea" onclick="document.getElementById('homeImgInput').click()">
-                                <span class="home-image-msg">이미지 드래그 또는 클릭</span>
-                                <img id="homeMainImg" style="display:none;">
-                                <input type="file" id="homeImgInput" style="display:none" accept="image/*" onchange="uploadHomeImage(this)">
-                            </div>
-                            <div class="card-header" style="margin-top:20px; border-bottom:0;">오늘의 할 일</div>
-                            <div id="homeToDoListPC" style="flex-grow:1; font-size:1rem; color:#333; font-weight:bold; line-height:1.8;">일정 없음</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="split-right">
-                    <div class="card full-height">
-                        <div class="scroll-wrapper">
-                            <div class="home-stack">
-                                <div class="pc-only-section"> 
-                                    <div class="card-header">자주 찾는 사이트</div>
-                                    <div class="quick-link-grid" id="quickLinkGrid"></div>
-                                </div>
-                                <div class="pc-only">
-                                    <div class="card-header">빠른 기록</div>
-                                    <div style="background:#f9f9f9; padding:15px; border-radius:8px;">
-                                        <div style="font-size:0.85rem; color:var(--text-sub); margin-bottom:10px;">[팁] 예: <b>김철수/수학/발표 잘함</b></div>
-                                        <textarea id="homeQuickInput" style="width:100%; height:80px; resize:none;" placeholder="입력..."></textarea>
-                                        <button class="btn btn-primary" style="width:100%;" onclick="saveHomeQuickRecord('pc')">✨ 자동 기록</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="record" class="section">
-            <div class="mobile-only full-height">
-                <div class="card full-height">
-                    <div class="scroll-wrapper">
-                        <div class="card-header" style="display:block;">
-                            <div style="display:flex; gap:5px; margin-bottom:10px; justify-content:center;">
-                                <button class="btn-sm active" id="mobBtnSub" onclick="setMobileMode('subject')">과목</button>
-                                <button class="btn-sm inactive" id="mobBtnBeh" onclick="setMobileMode('behavior')">행동</button>
-                                <button class="btn-sm inactive" id="mobBtnCust" onclick="setMobileMode('custom')">기타</button>
-                            </div>
-                            <input type="date" id="mobDate" style="margin-bottom:0;" onchange="renderMobileCustomList()">
-                        </div>
-                        <div>
-                            <div id="mobViewQuick" style="display:flex; flex-direction:column; padding-top:15px;">
-                                <div style="background:#f0f8ff; padding:15px; border-radius:8px; display:flex; flex-direction:column; min-height: 200px;">
-                                    <div style="font-size:0.9rem; color:var(--text-sub); margin-bottom:10px;">
-                                        <span id="mobQuickTip">예: 김철수/수학/발표 잘함</span>
-                                    </div>
-                                <textarea id="mobQuickInput" style="flex:1; resize:none; margin-bottom:15px;" placeholder="내용을 입력하세요..."></textarea>
-                                    <button class="btn btn-primary" style="width:100%; height:50px;" onclick="saveMobileQuickRecord()">✨ 기록 저장</button>
-                                </div>
-                            </div>
-
-                            <div id="mobViewCustom" style="display:none; flex-direction:column; padding-top:15px;">
-                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                                    <label style="margin:0;">항목 선택</label>
-                                    <select id="mobCustomSelect" style="width:60%; margin:0;" onchange="renderMobileCustomList()"></select>
-                                </div>
-                                <div style="border:1px solid #eee; border-radius:8px; padding:10px; margin-bottom:10px;">
-                                    <div id="mobCustomList"></div>
-                                </div>
-                                <button class="btn btn-primary" style="width:100%; height:50px; flex-shrink:0;" onclick="saveMobileCustom()">저장하기</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="pc-only full-height">
-                <div class="split-container">
-                    <div class="split-left">
-                        <div class="card full-height">
-                             <div class="scroll-wrapper">
-                                <div class="card-header"><span>기본 정보</span><div style="display:flex; gap:5px;"><button class="btn-sm active" id="btnSubject" onclick="setMode('subject')">과목</button><button class="btn-sm inactive" id="btnBehavior" onclick="setMode('behavior')">행동</button><button class="btn-sm inactive" id="btnCustom" onclick="setMode('custom')">기타</button></div></div>
-                                <label>날짜</label><input type="date" id="rDate" onchange="refreshCustomView()">
-                                <div id="normalModeOptions">
-                                     <div id="periodArea"><label>교시</label><select id="rPeriod"><option value="">(선택안함)</option><option>1교시</option><option>2교시</option><option>3교시</option><option>4교시</option><option>5교시</option><option>6교시</option></select></div>
-                                    <div id="subjectArea">
-                                        <label>과목 선택</label><div class="tag-container" id="subjectTags"></div>
-                                       <label>주제</label><input type="text" id="rTopic" placeholder="예: 시 낭송하기">
-                                    </div>
-                                </div>
-                                <div id="customModeOptions" style="display:none;">
-                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                                        <label style="margin:0;">나만의 항목</label>
-                                        <button class="btn-sm" onclick="openCustomItemModal()">+ 항목 생성</button>
-                                    </div>
-                                    <div id="customItemsList"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="split-right">
-                        <div class="card full-height" id="recordRightCard">
-                            <div class="scroll-wrapper">
-                                <div id="normalRecordView">
-                                    <div class="card-header">
-                                        <span>학생별 기록</span>
-                                        <div style="display:flex; align-items:center; gap:10px;">
-                                            <div class="switch-container"><label class="switch"><input type="checkbox" id="aiToggle" checked><span class="slider"></span></label><span>✨</span></div>
-                                            <button class="btn btn-primary" id="btnSaveAll" onclick="saveData()">저장하기</button>
-                                        </div>
-                                    </div>
-                                    <div style="display:flex; padding: 12px 10px; border-bottom:1px solid #eee; font-weight:bold; color:var(--text-sub); font-size:0.9rem; align-items: center; gap: 10px;">
-                                        <div style="width:80px; text-align:center;">이름</div><div style="flex-grow:1; text-align:center;">내용</div>
-                                        <div id="checkHeader">
-                                            <span>매우<br>잘함</span><span>잘함</span><span>보통</span><span>노력<br>요함</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <div id="recordList"></div>
-                                </div>
-                                
-                                <div id="customRecordView" style="display:none; height:100%;">
-                                    <div class="split-container">
-                                        <div class="split-half">
-                                            <div class="card-header"><span>빠른 체크</span><button class="btn-sm active" onclick="saveCustomData()">저장</button></div>
-                                            <div id="customCheckList"></div>
-                                        </div>
-                                        <div class="split-half" style="border-left:1px solid #eee; padding-left:15px;">
-                                            <div class="card-header">
-                                                <span style="font-size:1rem;">통계</span>
-                                                <select id="statsRangeSelect" style="width:120px; margin-bottom:0; padding:4px;" onchange="renderCustomStats()">
-                                                    <option value="today">오늘</option>
-                                                    <option value="month">이번 달</option>
-                                                    <option value="s1">1학기</option>
-                                                    <option value="s2">2학기</option>
-                                                    <option value="year">1년</option>
-                                                </select>
-                                            </div>
-                                         <div id="customStatsChart" class="bar-chart-container"></div>
-                                        </div>
-                                    </div>
-                               </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="students" class="section">
-            <div class="split-container">
-                <div class="split-left">
-                    <div class="card full-height">
-                        <div class="scroll-wrapper">
-                            <div class="card-header">학생 명단</div><div style="margin-bottom: 15px;"><button class="btn btn-outline" style="width:100%;" onclick="openStudentManageModal()">+ 학생 명단 관리</button></div><div id="studentNavList"></div>
-                        </div>
-                    </div>
-                 </div>
-                <div class="split-right">
-                    <div class="card full-height" style="display:flex; flex-direction:column;">
-                        <div class="card-header" style="flex-shrink:0;"><span id="viewerTitle">기록 상세</span><div style="display:flex; gap:5px;"><select id="viewSubjectFilter" style="margin-bottom:0; width:100px; padding:6px;" onchange="loadHistory()"></select><button class="btn-sm active" id="viewSubBtn" onclick="viewTab('subject')">과목</button><button class="btn-sm inactive" id="viewBehBtn" onclick="viewTab('behavior')">행동</button></div></div>
-                        <div style="margin-bottom:10px; display:flex; gap:10px;"><button class="btn btn-sm btn-primary" style="flex:1" onclick="saveSelectedHistory()">일괄 저장 (수정된 항목)</button><button class="btn btn-sm btn-del" style="flex:1" onclick="deleteSelectedHistory()">선택 삭제</button></div>
-                        <div id="historyViewer" class="scroll-wrapper"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-   
-       <div id="neis" class="section pc-only-tab">
-            <div class="mobile-block-overlay"><span>⚙️</span><p>해당 기능은 PC/태블릿에서<br>사용 가능해요!</p></div>
-            <div class="split-container pc-only">
-                <div class="split-left">
-                    <div class="card full-height">
-                        <div class="scroll-wrapper">
-                            <div class="card-header">NEIS 옵션</div>
-                            
-                            <div style="margin-bottom:15px; background:#fffbe6; padding:10px; border-radius:6px;">
-                                <label style="display:flex; align-items:center; cursor:pointer; margin:0;">
-                                    <input type="checkbox" id="useRefFiles" style="width:20px; height:20px; margin-right:10px;"> 
-                                    <span>📚 업로드 자료 반영</span>
-                                </label>
-                                <div style="font-size:0.8rem; color:#888; margin-top:5px; margin-left:30px;">(최근 업로드한 파일 3개를 참고합니다)</div>
-                            </div>
-
-                            <label>유형</label>
-                            <select id="neisType" onchange="toggleNeisType()">
-                                <option value="subject">과목별 세특</option>
-                                <option value="behavior">행동특성</option>
-                            </select>
-                            
-                            <div id="neisSubOption">
-                                <label>대상 과목</label>
-                                <select id="neisSubjectSelect"></select>
-                            </div>
-                            
-                            <label style="margin-top:15px;">분량 목표</label>
-                            <div style="display:flex; gap:10px; align-items:center;">
-                                <input type="range" id="neisLen" min="100" max="1000" step="50" value="300" 
-                                    oninput="document.getElementById('lenVal').innerText=this.value" style="margin:0; flex:1;">
-                                <span style="color:var(--primary); font-weight:bold; width:50px; text-align:right;">
-                                    <span id="lenVal">300</span>자
-                                </span>
-                            </div>
-
-                            <hr style="margin: 20px 0;">
-
-                            <div id="btnGroupSubject">
-                                <button class="btn btn-primary" style="width:100%;" onclick="startSubjectGeneration()">
-                                    ✨ 과목 세특 일괄 생성
-                                </button>
-                                <div style="font-size:0.85rem; color:#888; text-align:center; margin-top:5px;">
-                                    기존 기록을 바탕으로 바로 작성합니다.
-                                </div>
-                            </div>
-
-                            <div id="btnGroupBehavior" style="display:none;">
-                                <div style="display:flex; gap:10px;">
-                                    <button class="btn btn-outline" style="flex:1;" onclick="prepareBehaviorUI()">1. 키워드 세팅</button>
-                                    <button class="btn btn-primary" style="flex:1;" onclick="startBehaviorGeneration()">2. AI 생성</button>
-                                </div>
-                                <div style="font-size:0.85rem; color:#888; text-align:center; margin-top:5px;">
-                                    학생별 키워드를 입력한 후 생성하세요.
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-
-                <div class="split-right">
-                    <div class="card full-height">
-                        <div class="scroll-wrapper">
-                            <div class="card-header">생성 결과</div>
-                            <div id="neisResultList">
-                                <div style="text-align:center; padding:50px; color:#aaa;">
-                                    좌측 옵션을 선택해주세요.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div id="bookmarks" class="section">
-            <div class="split-container">
-                <div class="split-left"><div class="card full-height"><div class="scroll-wrapper"><div class="card-header">북마크 추가</div><input type="hidden" id="bmEditRow" value=""><label>URL</label><input type="text" id="bmUrl" placeholder="https://..." style="margin-bottom:10px;"><label>제목</label><input type="text" id="bmTitle" placeholder="자동 완성 됨"><input type="hidden" id="bmStar"> <label>태그</label><div class="tag-container" id="bmTagArea"></div><div style="display:flex; gap:5px; margin-bottom:15px;"><input type="text" id="newBmTagInput" placeholder="새 태그" style="margin:0; flex:1;"><button class="btn-sm active" onclick="addNewBmTag()">+</button></div><label>메모</label><textarea id="bmMemo" style="height:120px;" placeholder="활용 팁..."></textarea><div style="display:flex; gap:10px; margin-top:10px;"><button class="btn btn-outline" style="flex:1" onclick="clearBmInput()">취소</button><button class="btn btn-primary" style="flex:1" onclick="saveBookmark()" id="btnSaveBm">저장</button></div></div></div></div>
-                <div class="split-right"><div class="card full-height"><div class="scroll-wrapper"><div class="card-header"><span>북마크 목록</span><div id="bmFilterContainer" style="display:flex; gap:5px; flex-wrap:wrap; margin-left:10px;"></div></div><div id="bmList"></div></div></div></div>
-            </div>
-        </div>
-        
-        <div id="calendar" class="section">
-             <div class="split-container">
-                <div class="split-left">
-                    <div class="card full-height">
-                        <div class="scroll-wrapper">
-                            <div class="card-header" style="justify-content:center; gap:15px; border-bottom:none;">
-                                <button class="arrow-btn" onclick="moveMonth(-1)">◀</button>
-                                <span id="calMonth"></span>
-                                <button class="arrow-btn" onclick="moveMonth(1)">▶</button>
-                                <button class="btn-sm" style="margin-left:5px;" onclick="goToToday()">오늘</button>
-                            </div>
-                            <div class="cal-grid" id="calGrid"></div>
-                            <div style="border-top:1px dashed #eee; margin-top:10px; padding-top:15px;">
-                                <div class="card-header">오늘 일정</div>
-                                <div id="todayTodoListPC" style="font-size:0.95rem; line-height:1.6;">일정 없음</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="split-right"><div class="card full-height"><div class="scroll-wrapper"><div class="card-header"><span id="calDetailTitle">선택 날짜 일정</span></div><div style="display:flex; gap:5px; margin-bottom:15px;"><input type="text" id="newEvent" placeholder="일정 등록 (구글 캘린더)" style="margin:0;"><button class="btn-primary" onclick="addEvent()" style="border-radius:6px; width:70px;">등록</button></div><div id="dailyEvents" style="margin-bottom:20px;"></div><hr style="margin:20px 0; border:0; border-top:1px dashed #eee;"><div class="card-header"><span>출석 체크</span><div style="display:flex; gap:5px;"><button class="btn-sm" onclick="openMonthAttSummary()">월별 통계</button><button class="btn-sm active" onclick="saveAttendance()">저장</button></div></div><div id="attList"></div></div></div></div>
-             </div>
-        </div>
-        
-        <div id="memo" class="section">
-            <div class="split-container">
-                <div class="split-left"><div class="card full-height"><div class="scroll-wrapper"><div class="card-header"><span>메모</span><div style="display:flex; gap:5px;"><button class="btn-sm active" id="btnMemoModeCal" onclick="setMemoMode('cal')">달력</button><button class="btn-sm inactive" id="btnMemoModeList" onclick="setMemoMode('list')">목록</button></div></div><div id="memoSearchArea" style="margin-bottom:10px; display:none;"><input type="text" id="memoSearchInput" placeholder="메모 검색..." oninput="renderMemoList()"></div>
-                <div id="memoCalView">
-                    <div class="card-header" style="justify-content:center; gap:15px; border-bottom:none;">
-                        <button class="arrow-btn" onclick="moveMemoMonth(-1)">◀</button>
-                        <span id="memoMonthTitle"></span>
-                        <button class="arrow-btn" onclick="moveMemoMonth(1)">▶</button>
-                        <button class="btn-sm" style="margin-left:5px;" onclick="goToMemoToday()">오늘</button>
-                    </div>
-                    <div class="cal-grid" id="memoCalGrid"></div>
-                    <div id="memoDatePreview" style="margin-top:15px; border-top:1px solid #eee; padding-top:10px; display:none;"></div>
-                </div>
-                <div id="memoListView" style="display:none;"></div></div></div></div>
-                <div class="split-right"><div class="card full-height"><div class="scroll-wrapper"><div class="card-header">작성 <span id="memoDateDisp" style="font-size:0.9rem; color:var(--text-sub); font-weight:normal;"></span></div><input type="hidden" id="memoEditRow"><textarea id="memoContent" style="height:300px; resize:none;" placeholder="내용을 입력하세요..."></textarea><div style="display:flex; gap:15px; margin-bottom:15px;"><label><input type="checkbox" id="memoPinned"> 중요</label><label><input type="checkbox" id="memoDone"> 완료</label></div><div style="text-align:right;"><button class="btn btn-danger" id="btnDelMemo" style="display:none; margin-right:10px;" onclick="deleteMemo()">삭제</button><button class="btn btn-primary" onclick="saveMemo()">저장</button><button class="btn btn-outline" style="margin-left:10px;" onclick="clearMemoInput()">새 메모</button></div></div></div></div>
-            </div>
-        </div>
-        
-        <div id="data" class="section pc-only-tab"><div class="mobile-block-overlay"><span>⚙️</span><p>해당 기능은 PC/태블릿에서<br>사용 가능해요!</p></div><div class="split-container pc-only"><div class="split-left"><div class="card full-height scrollable"><div class="card-header">참고 자료</div><input type="file" id="uploadInput" style="margin-bottom:10px;"><button class="btn btn-outline" id="btnUpload" style="width:100%; margin-bottom:15px;" onclick="uploadFile()">업로드</button><div id="fileList"></div></div></div><div class="split-right"><div class="card full-height scrollable"><div class="card-header">설정</div><div id="publicModeSettings" style="display:none; background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:20px;"><label>Gemini API Key</label><input type="password" id="settingApiKey"><button class="btn-sm active" style="width:100%;" onclick="savePublicSettings()">저장</button></div><label>AI 페르소나</label><textarea id="personaText" style="height:150px;" placeholder="예: 초등학교 교사 말투..."></textarea><div style="text-align:right;"><button class="btn btn-primary" id="btnPersona" onclick="savePersona()">저장</button></div>
-        
-        <hr style="margin: 20px 0;">
-        <div class="card-header" style="color:var(--danger); border-bottom:none;">데이터 및 API 관리</div>
-        <div style="display:flex; gap:10px;">
-            <button class="btn btn-outline" style="flex:1;" onclick="checkAvailableModels()">사용 가능 모델 검색</button>
-            <button class="btn btn-danger" style="flex:1;" onclick="reqConfirm('데이터를 초기화하시겠습니까?', archiveData)">[새 학년] 초기화</button>
-        </div></div></div></div>
-    </div>
-
-    <div id="modelListModal" class="modal-overlay">
-        <div class="modal-card">
-            <div class="modal-msg" style="margin-bottom:10px;">사용 가능 AI 모델 목록</div>
-            <textarea id="modelListText" style="width:100%; height:300px; font-size:0.85rem; resize:none; border:1px solid #ddd; padding:10px;" readonly></textarea>
-            <div style="text-align:right; margin-top:10px;">
-                <button class="btn btn-outline" onclick="document.getElementById('modelListModal').classList.remove('open')">닫기</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="toast"></div>
-    <div id="confirmModal" class="modal-overlay"><div class="modal-card"><div class="modal-msg" id="confirmMsg"></div><div style="text-align:center; display:flex; gap:10px;"><button class="btn btn-outline" style="flex:1" onclick="document.getElementById('confirmModal').classList.remove('open')">취소</button><button class="btn btn-primary" style="flex:1" id="btnConfirmYes">확인</button></div></div></div>
-    <div id="subjectModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="font-weight:bold; margin-bottom:15px;">새 과목 추가</div><input type="text" id="newSubjectName" placeholder="과목명"><div style="text-align:right;"><button class="btn btn-outline" onclick="closeSubjectModal()">취소</button> <button id="confirmSubjectBtn" class="btn btn-primary" onclick="confirmAddSubject()">추가</button></div></div></div>
-    <div id="deleteSubjectModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="color:var(--danger)">과목 삭제</div><p>기록이 영구 삭제됩니다.</p><div style="text-align:right;"><button class="btn btn-outline" onclick="document.getElementById('deleteSubjectModal').classList.remove('open')">취소</button> <button class="btn btn-danger" onclick="confirmDeleteSubject()">삭제</button></div></div></div>
-    <div id="manageStudentModal" class="modal-overlay"><div class="modal-card" style="width:500px;"><div class="modal-title" style="font-weight:bold; margin-bottom:15px;">학생 명단 관리</div><div id="manageStudentRows" style="max-height:300px; overflow-y:auto; margin-bottom:15px;"></div><button class="btn-sm active" onclick="addStudentRow()">+ 행 추가</button><div style="text-align:right; margin-top:15px;"><button class="btn btn-outline" onclick="closeStudentManageModal()">취소</button> <button class="btn btn-primary" id="btnManageStSave" onclick="saveStudentManagement()">전체 저장</button></div></div></div>
-    <div id="addLinkModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="font-weight:bold; margin-bottom:15px;">바로가기 추가</div><label>이모지</label><input type="text" id="qlEmoji" placeholder="🏫"><label>이름 (짧게)</label><input type="text" id="qlName" placeholder="나이스"><label>URL</label><input type="text" id="qlUrl" placeholder="https://..."><div style="text-align:right;"><button class="btn btn-outline" onclick="document.getElementById('addLinkModal').classList.remove('open')">취소</button> <button class="btn btn-primary" onclick="confirmAddLink()">추가</button></div></div></div>
-    <div id="monthAttModal" class="modal-overlay"><div class="modal-card" style="width:600px;"><div class="modal-title" style="font-weight:bold; margin-bottom:15px;">월별 출석 현황</div><div class="modal-body" id="monthAttBody" style="max-height:400px; overflow-y:auto; margin-bottom:15px;"></div><div style="text-align:right;"><button class="btn btn-outline" onclick="document.getElementById('monthAttModal').classList.remove('open')">닫기</button></div></div></div>
-    <div id="customItemModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="font-weight:bold; margin-bottom:15px;">항목 생성</div><label>항목 이름</label><input type="text" id="ciName" placeholder="예: 우유 당번"><label>척도 타입</label><select id="ciType"><option value="check">체크리스트 (O/X)</option><option value="switch">스위치 (ON/OFF)</option><option value="select">선택 (상/중/하)</option></select><div style="text-align:right; margin-top:10px;"><button class="btn btn-outline" onclick="document.getElementById('customItemModal').classList.remove('open')">취소</button> <button class="btn btn-primary" onclick="addCustomItem()">추가</button></div></div></div>
-
     <script>
-        // ⚙️ 설정값
         const PRO_BACKEND_URL = "https://script.google.com/macros/s/AKfycbxn2nB0ZNXwXSdfx4-XVUWTD3Z_GCb_L2_SkhLyiKu5qrZrpwGTLM9Y4BhQRbveIk4o8Q/exec"; 
         const IS_GAS_ENV = window.location.hostname.includes('script.google.com');
         const IS_PRO_MODE = !IS_GAS_ENV && PRO_BACKEND_URL !== "";
         
-        // 전역 변수
         let currentMode = 'subject'; let mobileMode = 'subject'; let selectedStudentName = null; let viewTabMode = 'subject';
         let studentList = []; let subjectList = ["국어", "수학", "사회", "과학", "영어", "체육", "음악", "미술"];
         let customItems = []; let currentCustomItem = null;
-        let targetSubjectToDelete = null; let aiPersona = ""; let aiJobQueue = []; let isAiQueueRunning = false;
+        let targetSubjectToDelete = null; let aiPersona = ""; let aiJobQueue = []; let totalAiJobs = 0;
         let curYear = new Date().getFullYear(); let curMonth = new Date().getMonth();
         let selectedDate = formatDateYMD(new Date());
         let bmList = []; let currentBmFilter = null; let bmTags = ["수업", "업무", "자료", "영상"];
@@ -1370,88 +693,38 @@
         let attendanceCache = [];
         let customRecordCache = []; 
 
-        // ==========================================
-        // 1. [초기화 & 인증 (복구됨)]
-        // ==========================================
-        window.onload = () => { 
-            // 1. 잠금 상태 확인
-            checkLock(); 
-            
-            // 2. 날짜 초기화
-            document.getElementById('rDate').valueAsDate = new Date();
-            document.getElementById('mobDate').valueAsDate = new Date(); 
-            
-            // 3. 환경 설정 로드
-            initEnvironment(); 
-            
-            // 4. [복구] 잠금 화면 입력 감지 (Caps Lock, 한영)
-            const lockInput = document.getElementById('lockInput');
-            if(lockInput) {
-                lockInput.addEventListener('keyup', (e) => {
-                    checkAuthStatus(e);
-                    if (e.key === 'Enter') unlockApp();
-                });
-            }
-        };
-
-        // [복구] Caps Lock 및 한글 입력 감지
-        function checkAuthStatus(e) {
-            const msg = document.getElementById('lockMsg');
-            const val = document.getElementById('lockInput').value;
-            const caps = e.getModifierState && e.getModifierState("CapsLock");
-            
-            // 한글 감지 정규식
-            const isKorean = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(val);
-
-            if (caps) {
-                msg.innerText = "💡 Caps Lock이 켜져있습니다.";
-                msg.style.color = "var(--danger)";
-            } else if (isKorean) {
-                msg.innerText = "💡 한글이 입력되고 있습니다 (영문 전환 필요)";
-                msg.style.color = "var(--primary)";
-            } else {
-                msg.innerText = "비밀번호를 입력하세요.";
-                msg.style.color = "var(--text-sub)";
-            }
+        window.onload = () => { checkLock(); document.getElementById('rDate').valueAsDate = new Date();
+            document.getElementById('mobDate').valueAsDate = new Date(); initEnvironment(); };
+        function checkCaps(e) { const caps = e.getModifierState && e.getModifierState("CapsLock"); document.getElementById('lockMsg').innerText = caps ?
+            "💡 Caps Lock 켜짐" : "비밀번호 입력 (한/영 확인)"; if(e.keyCode===13) unlockApp();
         }
-
-        // [수정] 잠금 확인 (자동 로그인 포함)
         function checkLock() { 
+            // [수정됨] 1. 모바일 자동 로그인 (localStorage 확인)
             let isUnlocked = false;
             try { 
-                // 세션(탭 닫기 전) 또는 로컬(기기 저장) 스토리지 확인
                 isUnlocked = sessionStorage.getItem('isUnlocked') === 'true' || localStorage.getItem('isAutoUnlocked') === 'true'; 
             } catch(e) {}
             
             if(isUnlocked) { 
                 document.getElementById('lockScreen').style.display='none';
-                loadAllData(); // 데이터 로드 시작
-            } else {
-                document.getElementById('lockScreen').style.display='flex';
-            }
+                loadAllData(); 
+            } 
         }
-
-        // [수정] 잠금 해제 (비밀번호 검증)
         function unlockApp() { 
             const pw = document.getElementById('lockInput').value;
-            
-            // 비밀번호 하드코딩 확인
             if(pw === 'ekdms320') { 
                 try { 
                     sessionStorage.setItem('isUnlocked', 'true');
-                    localStorage.setItem('isAutoUnlocked', 'true'); // 자동 로그인 설정
+                    // 한번 성공하면 로컬 스토리지에도 저장 (자동 로그인)
+                    localStorage.setItem('isAutoUnlocked', 'true');
                 } catch(e) {}
-                
                 document.getElementById('lockScreen').style.display='none'; 
                 loadAllData();
             } else { 
-                alert('비밀번호가 올바르지 않습니다.');
+                alert('비밀번호 오류');
                 document.getElementById('lockInput').value=''; 
-                document.getElementById('lockInput').focus();
             } 
         }
-
-        // [수정] 잠금 (로그아웃)
         function relockApp() {
             try { 
                 sessionStorage.setItem('isUnlocked', 'false'); 
@@ -1459,38 +732,28 @@
             } catch(e) {}
             location.reload();
         }
-
-        // 전체 데이터 로드 (순서 중요)
         async function loadAllData() { 
             loadStudents();
-            renderSubjectTags(); 
-            renderBmTags(); 
-            loadFiles(); 
-            loadHomeData(); 
-            loadMusicData(); 
-            
-            // 커스텀 아이템 먼저 로드 후 리스트 렌더링
-            await loadCustomItems();
-            renderCustomItems(); 
-            
-            // 일정과 출석 로드
+            renderSubjectTags(); renderBmTags(); loadFiles(); loadHomeData(); loadMusicData(); loadCustomItems();
             await Promise.all([loadGoogleEvents(), loadAttendanceForDots()]);
+            renderHomeToDo(); renderCalendar(); showDailyView(new Date().getDate());
             
-            // 화면 갱신
-            renderHomeToDo(); 
-            renderCalendar(); 
-            showDailyView(new Date().getDate());
-            
-            if(customItems.length > 0) refreshCustomView();
+            // [수정됨] 4. 모바일 기타항목 초기 로딩 시 데이터 반영을 위해
+            if(customItems.length > 0) {
+                 // 데이터를 다 불러온 뒤 렌더링하도록 순서 보장 필요 (이미 loadCustomItems 내부에서 호출됨)
+            }
         }
 
-        // ==========================================
-        // 2. [UI & 레이아웃 로직]
-        // ==========================================
+        // Global Overlay Logic
         function closeAllOverlays() {
-            document.getElementById('floatMenu').classList.remove('show');
-            document.getElementById('lockFloatBtn').classList.remove('show');
-            document.getElementById('musicPanel').classList.remove('show');
+            const m = document.getElementById('floatMenu');
+            const l = document.getElementById('lockFloatBtn');
+            const p = document.getElementById('musicPanel');
+            
+            m.classList.remove('show');
+            l.classList.remove('show');
+            p.classList.remove('show');
+            
             document.getElementById('globalOverlay').classList.remove('show');
         }
         function toggleFloatMenu() { 
@@ -1507,66 +770,203 @@
             document.getElementById(id).classList.add('active');
             closeAllOverlays();
             
+            // 탭 스타일 활성화
             document.querySelectorAll('.nav-tabs .nav-item').forEach(e => e.classList.remove('active'));
             const nav = document.querySelector(`.nav-tabs .nav-item[onclick="changeSection('${id}')"]`);
             if(nav) nav.classList.add('active');
 
-            // NEIS 탭 진입 시 과목 세특으로 초기화
+            // [추가된 부분] NEIS 탭 진입 시 '과목별 세특'으로 초기화
             if(id === 'neis') {
                 const typeSelect = document.getElementById('neisType');
-                if(typeSelect) { typeSelect.value = 'subject'; toggleNeisType(); }
+                if(typeSelect) {
+                    typeSelect.value = 'subject'; // 드롭다운을 '과목'으로 변경
+                    toggleNeisType();             // 화면(버튼) 갱신 함수 호출
+                }
             }
 
+            // 기존 로직들
             if(id === 'bookmarks') loadBookmarks(); 
-            else if(id === 'calendar') { renderCalendar(); showDailyView(new Date(selectedDate).getDate()); } 
+            else if(id === 'calendar') { renderCalendar(); showDailyView(new Date().getDate()); } 
             else if(id === 'memo') loadMemos();
         }
-        function reqConfirm(msg, callback) { 
-            document.getElementById('confirmMsg').innerText = msg;
-            document.getElementById('confirmModal').classList.add('open'); 
-            document.getElementById('btnConfirmYes').onclick = () => { 
-                document.getElementById('confirmModal').classList.remove('open'); 
-                callback(); 
-            }; 
+        function reqConfirm(msg, callback) { document.getElementById('confirmMsg').innerText = msg;
+            document.getElementById('confirmModal').classList.add('open'); document.getElementById('btnConfirmYes').onclick = () => { document.getElementById('confirmModal').classList.remove('open'); callback(); }; }
+
+        // [MUSIC PLAYER]
+        function toggleMusicPanel() { 
+            const p = document.getElementById('musicPanel');
+            p.classList.toggle('show');
+            if(p.classList.contains('show')) document.getElementById('globalOverlay').classList.add('show');
+            else document.getElementById('globalOverlay').classList.remove('show');
+        }
+        async function loadMusicData() {
+            const data = await sendRequest('manage_music', {mode: 'get'});
+            musicPlaylist = data || [];
+            if(musicPlaylist.length === 0) musicPlaylist = [{name: "Lo-fi Study", id: "jfKfPfyJRdk"}];
+            renderMusicList();
+        }
+        function renderMusicList() {
+            const c = document.getElementById('musicList');
+            c.innerHTML = '';
+            musicPlaylist.forEach((m, i) => {
+                const d = document.createElement('div'); d.className = 'mp-item';
+                d.innerHTML = `<span onclick="playMusic('${m.id}', '${m.name}')">${m.name}</span> <span style="color:#e74c3c;" onclick="removeMusic(${i})">x</span>`;
+                c.appendChild(d);
+            });
+            const addDiv = document.createElement('div'); addDiv.className = 'mp-add';
+            addDiv.innerHTML = `<input type="text" id="newMusicUrl" placeholder="유튜브 링크"><button class="btn-sm active" onclick="addMusic()">+</button>`;
+            c.appendChild(addDiv);
+        }
+        function playMusic(id, name) { 
+            document.getElementById('musicIframe').src = `https://www.youtube.com/embed/${id}?autoplay=1`;
+            document.getElementById('musicCurrentTitle').innerText = "🎵 " + name;
+        }
+        async function addMusic() {
+            const url = document.getElementById('newMusicUrl').value;
+            let id = ""; if (url.includes("v=")) id = url.split("v=")[1].split("&")[0]; else if (url.includes("youtu.be/")) id = url.split("youtu.be/")[1];
+            if (id) {
+                const name = prompt("노래 제목:", "새 노래");
+                musicPlaylist.push({name: name||"노래", id: id});
+                renderMusicList();
+                await sendRequest('manage_music', {mode:'save', playlist: musicPlaylist});
+                document.getElementById('newMusicUrl').value = "";
+            } else alert("유효한 링크 필요");
+        }
+        async function removeMusic(idx) {
+            musicPlaylist.splice(idx, 1);
+            renderMusicList();
+            await sendRequest('manage_music', {mode:'save', playlist: musicPlaylist});
         }
 
-        // ==========================================
-        // 3. [데이터 로드 & 캘린더]
-        // ==========================================
-        async function loadGoogleEvents() { 
-            calendarEvents = await sendRequest('get_events') || [];
-            renderHomeToDo();           // 홈 화면 갱신
-            updateTodayScheduleInCal(); // 달력 탭 갱신
-            renderCalendar();           // 점 찍기
+        // [AI Status Bar]
+        function updateAiStatus(current, total, name) {
+            const bar = document.getElementById('aiStatusBar');
+            const txt = document.getElementById('aiStatusText');
+            if(current > total) bar.classList.remove('show');
+            else { bar.classList.add('show');
+            txt.innerText = `[✨ 작업 중] ${current}/${total} : ${name} 처리 중...`;
+            }
         }
 
-        // [수정] 홈 화면 할 일 (PC/Mobile ID 분리 대응)
-        function renderHomeToDo() { 
-            const todayStr = formatDateYMD(new Date()); 
-            const todaysEvents = calendarEvents.filter(e => e.date === todayStr);
+        // [HOME Logic]
+        // [수정됨] 홈 데이터 로드 함수 (URL 변환 로직 추가)
+        async function loadHomeData() { 
+            const d = await sendRequest('get_home_data');
+            if (d) { 
+                if (d.image) { 
+                    // 구글 드라이브 URL 보정 (view -> thumbnail/export 링크로 변환)
+                    let finalUrl = d.image;
+                    if(finalUrl.includes('drive.google.com') && finalUrl.includes('/view')) {
+                         // /file/d/ID/view 형식을 ID만 추출해서 변환
+                         const idMatch = finalUrl.match(/\/d\/(.+?)\//);
+                         if(idMatch && idMatch[1]) {
+                             // lh3 링크가 가장 안정적으로 이미지를 보여줍니다.
+                             finalUrl = `https://lh3.googleusercontent.com/d/${idMatch[1]}`;
+                         }
+                    }
+
+                    document.getElementById('homeMainImg').src = finalUrl; 
+                    document.getElementById('homeMainImg').style.display = 'block'; 
+                    document.querySelector('.home-image-msg').style.display = 'none'; 
+                } 
+                homeQuickLinks = d.links || []; 
+                renderQuickLinks(); 
+            } 
+        }
+        function renderQuickLinks() { const g=document.getElementById('quickLinkGrid');
+            g.innerHTML=''; homeQuickLinks.slice(0,5).forEach((l,i)=>{ const d=document.createElement('div'); d.className='quick-link-item'; d.innerHTML=`<div class="ql-emoji">${l.emoji}</div><div class="ql-name">${l.name}</div>`; d.onclick=()=>window.open(l.url,'_blank'); d.oncontextmenu=(e)=>{e.preventDefault();reqConfirm('삭제하시겠습니까?',()=>{homeQuickLinks.splice(i,1);saveHomeLinks();})}; g.appendChild(d); }); if(homeQuickLinks.length<5){ const a=document.createElement('div'); a.className='quick-link-item'; a.innerHTML='<div style="font-size:2rem; color:var(--primary)">+</div><div class="ql-name">추가</div>';
+            a.onclick=()=>document.getElementById('addLinkModal').classList.add('open'); g.appendChild(a); } }
+        function confirmAddLink() { const u=document.getElementById('qlUrl').value; if(!u) return;
+            homeQuickLinks.push({emoji:document.getElementById('qlEmoji').value||'🔗', name:document.getElementById('qlName').value||'링크', url:u}); saveHomeLinks(); document.getElementById('addLinkModal').classList.remove('open'); document.getElementById('qlUrl').value=''; }
+        async function saveHomeLinks() { renderQuickLinks();
+            await sendRequest('save_home_config', {key:"QuickLinks", value:JSON.stringify(homeQuickLinks)}); }
+// [수정됨] 홈 이미지 업로드 함수 (즉시 프리뷰 + 서버 저장)
+        async function uploadHomeImage(inp) {
+            // 1. 파일 선택 확인
+            if (inp.files.length === 0) return;
             
-            const html = todaysEvents.length > 0 
-                ? todaysEvents.map(e => `• ${e.title}`).join('<br>') 
-                : "일정 없음";
+            const f = inp.files[0];
+            const r = new FileReader();
 
+            // 2. 파일을 다 읽으면 실행될 로직 (보내주신 잘 되는 코드 스타일 적용)
+            r.onload = async function(e) {
+                // [프리뷰] 읽은 즉시 화면에 뿌림 (서버 응답 기다리지 않음 -> 속도 빠름)
+                const base64Data = e.target.result;
+                const imgTag = document.getElementById('homeMainImg');
+                
+                imgTag.src = base64Data;
+                imgTag.style.display = 'block';
+                document.querySelector('.home-image-msg').style.display = 'none';
+
+                // [서버 전송] 백그라운드에서 조용히 업로드
+                showToast("☁️ 서버에 이미지 저장 중...");
+                
+                try {
+                    // "data:image/png;base64," 같은 헤더 제거
+                    const rawData = base64Data.split(',')[1];
+
+                    const res = await sendRequest('upload_file', {
+                        name: "home_img_" + Date.now(), // 파일명 유니크하게
+                        mimeType: f.type,
+                        data: rawData
+                    });
+
+                    if (res && res.url) {
+                        // 서버가 준 '직접 링크(uc?export=view)'를 설정에 저장
+                        // 이렇게 해야 나중에 다른 기기에서 접속해도 보임
+                        await sendRequest('save_home_config', {
+                            key: "MainImage",
+                            value: res.url
+                        });
+                        showToast("✅ 이미지 저장 완료!");
+                        console.log("Server URL:", res.url); // 확인용 로그
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showToast("❌ 서버 저장 실패 (화면엔 유지됨)");
+                }
+            };
+            
+            // 파일 읽기 시작
+            r.readAsDataURL(f);
+            
+            // 같은 파일 다시 선택 가능하게 초기화
+            inp.value = ''; 
+        }
+
+        function renderHomeToDo() { 
+            const t = formatDateYMD(new Date()); 
+            const l = calendarEvents.filter(e => e.date === t);
+            const html = l.length > 0 ? l.map(e => `• ${e.title}`).join('<br>') : "일정 없음";
+
+            // [수정] 모바일과 PC 각각 업데이트
             const elMobile = document.getElementById('homeToDoListMobile');
             if(elMobile) elMobile.innerHTML = html;
 
             const elPC = document.getElementById('homeToDoListPC');
             if(elPC) elPC.innerHTML = html;
         }
-
-        function updateTodayScheduleInCal() { 
-            const todayStr = formatDateYMD(new Date());
-            const todaysEvents = calendarEvents.filter(e => e.date === todayStr);
-            const html = todaysEvents.length > 0 ? todaysEvents.map(e => `• ${e.title}`).join('<br>') : "일정 없음";
-            const el = document.getElementById('todayTodoListCal');
-            if(el) el.innerHTML = html;
+        
+        // Quick Record
+        async function saveHomeQuickRecord(source) { 
+            let inputId = 'homeQuickInput';
+            if(source === 'mobile') inputId = 'homeQuickInputMobile';
+            
+            const t=document.getElementById(inputId).value.trim(); 
+            if(!t) return; showToast("✨ 처리 중");
+            try{ 
+                const a=await sendRequest('call_ai',{prompt:`입력:"${t}". 규칙: 이름/과목/내용 분리. JSON출력:{"name":"이름","type":"과목","text":"내용"}`});
+                const j=JSON.parse(a.text.replace(/```json/g,"").replace(/```/g,"")); 
+                await sendRequest('save_record',{date:formatDateYMD(new Date()), name:j.name, type:j.type, text:j.text, check:"없음"}); 
+                document.getElementById(inputId).value=""; 
+                showToast("저장 완료");
+            } catch(e){showToast("실패");} 
         }
 
-        // ==========================================
-        // 4. [기록(Record) 및 저장 로직]
-        // ==========================================
+        const da=document.getElementById('homeImgArea');
+        da.addEventListener('dragover',e=>{e.preventDefault();da.style.background='#eee';}); da.addEventListener('drop',e=>{e.preventDefault();da.style.background='#fafafa'; if(e.dataTransfer.files.length>0){document.getElementById('homeImgInput').files=e.dataTransfer.files; uploadHomeImage(document.getElementById('homeImgInput'));}});
+        
+        // [Record Logic - Normal & Custom]
         function setMode(m) { 
             currentMode=m;
             document.getElementById('btnSubject').className=m==='subject'?'btn-sm active':'btn-sm inactive'; 
@@ -1587,29 +987,36 @@
                 
                 document.getElementById('subjectArea').style.display=m==='subject'?'block':'none';
                 document.getElementById('checkHeader').style.visibility=m==='subject'?'visible':'hidden'; 
+                
                 renderRecordList();
             }
         }
         
+        // [Mobile Record Mode Logic]
         function setMobileMode(m) {
             mobileMode = m;
             document.getElementById('mobBtnSub').className = m === 'subject' ? 'btn-sm active' : 'btn-sm inactive';
-            document.getElementById('mobBtnBeh').className = m === 'behavior' ? 'btn-sm active' : 'btn-sm inactive';
+            document.getElementById('mobBtnBeh').className = m === 'behavior' ?
+            'btn-sm active' : 'btn-sm inactive';
             document.getElementById('mobBtnCust').className = m === 'custom' ? 'btn-sm active' : 'btn-sm inactive';
             if(m === 'custom') {
                 document.getElementById('mobViewQuick').style.display = 'none';
                 document.getElementById('mobViewCustom').style.display = 'flex';
-                
-                // 모바일 커스텀 드롭다운 갱신
                 const s = document.getElementById('mobCustomSelect');
                 s.innerHTML = '';
-                customItems.forEach((item, idx) => {
-                    const opt = document.createElement('option'); opt.value = idx; opt.innerText = item.name;
-                    s.appendChild(opt);
+                // [수정됨] 4. 데이터 로드 후 렌더링 (순서 보장)
+                loadCustomItems().then(() => {
+                    customItems.forEach((item, idx) => {
+                       const opt = document.createElement('option'); opt.value = idx; opt.innerText = item.name;
+                       s.appendChild(opt);
+                    });
+                    
+                    // 만약 이미 데이터가 있다면(init에서 로드됨), 바로 리스트 렌더링
+                    // 여기서 refreshCustomView()를 호출해서 customRecordCache를 최신화해야 함
+                    if(customItems.length > 0) {
+                        refreshCustomView().then(renderMobileCustomList); 
+                    }
                 });
-                if(customItems.length > 0) { 
-                    refreshCustomView().then(renderMobileCustomList); 
-                }
             } else {
                 document.getElementById('mobViewQuick').style.display = 'flex';
                 document.getElementById('mobViewCustom').style.display = 'none';
@@ -1619,102 +1026,99 @@
             }
         }
 
-        async function saveData() {
-            const inputs = document.querySelectorAll('.st-input'); 
-            const isAI = document.getElementById('aiToggle').checked;
-            
-            let targetType = "행동";
-            if(currentMode === 'subject') { 
-                const selTag = document.querySelector('#subjectTags .tag.selected'); 
-                if(!selTag) { showToast("과목 선택 필요"); return; } 
-                targetType = selTag.innerText.split(' ')[0].trim(); 
-            }
-            
-            showStatusBar("💾 저장 준비 중...");
-            let itemsToSave = [];
-            
-            inputs.forEach(input => {
-                const text = input.value.trim(); 
-                const row = input.closest('.student-row'); 
-                const rawName = row.querySelector('.st-name').innerText;
-                const name = rawName.includes('.') ? rawName.split('.')[1].trim() : rawName.trim();
-                
-                let checkVal = "없음";
-                if(currentMode === 'subject') { 
-                    const checks = row.querySelectorAll('.check-circle'); 
-                    if(checks[0].classList.contains('checked')) checkVal = "매우잘함"; 
-                    else if(checks[1].classList.contains('checked')) checkVal = "잘함"; 
-                    else if(checks[2].classList.contains('checked')) checkVal = "보통"; 
-                    else if(checks[3].classList.contains('checked')) checkVal = "노력요함"; 
-                }
-                if (text.length > 0 || checkVal !== "없음") itemsToSave.push({ input, name, text, checkVal });
-            });
-            
-            if (itemsToSave.length === 0) { showToast("저장할 내용 없음"); hideStatusBar(); return; }
-            
-            inputs.forEach(el => el.value = ''); 
-            document.querySelectorAll('.check-circle').forEach(el => el.classList.remove('checked')); 
-
-            let savedCount = 0;
-            for (const item of itemsToSave) {
-                let period = document.getElementById('rPeriod').value; 
-                const topic = document.getElementById('rTopic').value.trim(); 
-                let periodPrefix = period ? `[${period}]` : "";
-                
-                let rawBody = item.text;
-                if(topic) rawBody = `[${topic}] ${item.text}`;
-                if(item.text.length === 0 && topic) rawBody = `[${topic}] 활동에 참여함`;
-                rawBody = `${periodPrefix} ${rawBody}`.trim();
-                
-                updateStatusText(`💾 저장 중... [${item.name}] (${savedCount + 1}/${itemsToSave.length})`);
-                const res = await sendRequest('save_record', { 
-                    date: document.getElementById('rDate').value, name: item.name, type: targetType, text: rawBody, check: item.checkVal 
-                });
-                savedCount++;
-                if (isAI && res && res.rowNum) {
-                    aiJobQueue.push({ 
-                        rowNum: res.rowNum, type: targetType, topic: topic, text: item.text, check: item.checkVal, name: item.name, periodPrefix: periodPrefix 
-                    });
-                }
-            }
-            
-            if(isAI && aiJobQueue.length > 0) {
-                showToast(`저장 완료. AI 변환 시작 (${aiJobQueue.length}건)`);
-                processNextAiJob(); 
-            } else {
-                hideStatusBar();
-                showToast("저장 완료");
-            }
-        }
-
-        async function processNextAiJob() {
-            if (aiJobQueue.length === 0) { 
-                isAiQueueRunning = false; 
-                hideStatusBar();
-                showToast("✨ 모든 AI 변환 완료!");
-                return; 
-            }
-            isAiQueueRunning = true; 
-            const job = aiJobQueue[0];
-            showStatusBar(`✨ AI 다듬는 중... [${job.name}] (대기: ${aiJobQueue.length}건)`);
-            const prompt = `역할: 초등학교 교사. 작업: 생활기록부 기재용 평어 한 문장 작성. 입력정보: [주제: ${job.topic || '없음'}], [활동내용: ${job.text || '없음'}], [평가: ${job.check}].
-                [작성 원칙] 1. 주제와 활동내용, 평가를 자연스럽게 이어지는 **하나의 문장**으로 만드세요. 2. '[주제]' 처럼 대괄호를 절대 쓰지 말고, 문맥 속에 녹여내세요. 3. **굵게(볼드)**, "따옴표" 금지. 4. 문장은 반드시 '~함' 또는 '~음'으로 명사형 종결. 5. 성취 수준(${job.check}) 반영. 6. 페르소나: ${aiPersona}`;
+        async function saveMobileQuickRecord() {
+            const t = document.getElementById('mobQuickInput').value.trim();
+            if(!t) return;
+            showToast("✨ 처리 중");
             try {
-                const aiData = await sendRequest('call_ai', { prompt });
-                if (aiData && aiData.text) {
-                    let finalBody = aiData.text.replace(/['"\[\]]/g, "").replace(/\*\*/g, "").trim();
-                    if(job.periodPrefix) finalBody = `${job.periodPrefix} ${finalBody}`;
-                    await sendRequest('update_record_row', { type: job.type, rowNum: job.rowNum, text: finalBody });
+                let prompt = "";
+                if(mobileMode === 'subject') {
+                    prompt = `입력:"${t}".
+                    규칙: 이름/과목/내용 분리. JSON출력:{"name":"이름","type":"과목","text":"내용"}`;
+                } else {
+                    prompt = `입력:"${t}".
+                    규칙: 이름/내용 분리. 과목은 '행동'으로 고정. JSON출력:{"name":"이름","type":"행동","text":"내용"}`;
                 }
-            } catch (e) { console.error("AI Error:", e); }
-            aiJobQueue.shift(); 
-            processNextAiJob();
+                const a = await sendRequest('call_ai', {prompt});
+                const j = JSON.parse(a.text.replace(/```json/g,"").replace(/```/g,""));
+                await sendRequest('save_record', {
+                    date: document.getElementById('mobDate').value, 
+                    name: j.name, type: j.type, text: j.text, check: "없음"
+                });
+                document.getElementById('mobQuickInput').value = "";
+                showToast("저장 완료");
+            } catch(e) { showToast("실패"); }
         }
 
-        // ==========================================
-        // 5. [기타 항목 (Custom) & 통계]
-        // ==========================================
-        async function loadCustomItems() { customItems = await sendRequest('manage_custom_items', {mode:'get'}) || []; }
+        // [수정됨] 4. 모바일 커스텀 리스트 렌더링 (체크 상태 반영)
+        function renderMobileCustomList() {
+             const idx = document.getElementById('mobCustomSelect').value;
+             const container = document.getElementById('mobCustomList');
+             container.innerHTML = '';
+             if(idx === null || idx === undefined) return;
+             
+             const itemDef = customItems[idx];
+             // 모바일 날짜 기준 데이터 조회
+             const targetDate = document.getElementById('mobDate').value;
+
+             studentList.forEach(st => {
+                 const row = document.createElement('div'); row.className = 'student-row';
+                 
+                 // [핵심] 기존 저장값 조회
+                 const record = customRecordCache.find(r => r.date === targetDate && r.item === itemDef.name && r.name === st.name);
+                 let savedVal = record ? record.value : "";
+
+                 let inputHtml = '';
+                 if(itemDef.type === 'check') {
+                     const chk = savedVal === 'O' ? 'checked' : '';
+                     inputHtml = `<input type="checkbox" class="mob-cust-val" style="width:20px; height:20px; margin:0;" ${chk}>`;
+                 }
+                 else if(itemDef.type === 'switch') {
+                     const chk = savedVal === 'ON' ? 'checked' : '';
+                     inputHtml = `<label class="switch"><input type="checkbox" class="mob-cust-val" ${chk}><span class="slider"></span></label>`;
+                 }
+                 else if(itemDef.type === 'select') {
+                     inputHtml = `<select class="mob-cust-val" style="margin:0;">
+                         <option value="">-</option>
+                         <option ${savedVal==='상'?'selected':''}>상</option>
+                         <option ${savedVal==='중'?'selected':''}>중</option>
+                         <option ${savedVal==='하'?'selected':''}>하</option>
+                     </select>`;
+                 }
+                 
+                 row.innerHTML = `<div class="st-name" style="width:80px; font-weight:bold;">${st.name}</div><div style="flex:1;"></div>${inputHtml}`;
+                 container.appendChild(row);
+             });
+        }
+
+        async function saveMobileCustom() {
+             const idx = document.getElementById('mobCustomSelect').value;
+             if(idx === null) return;
+             const itemDef = customItems[idx];
+             const rows = document.querySelectorAll('#mobCustomList .student-row');
+             const data = [];
+             const date = document.getElementById('mobDate').value;
+             
+             rows.forEach(row => {
+                 const name = row.querySelector('.st-name').innerText;
+                 const el = row.querySelector('.mob-cust-val');
+                 let val = "";
+                 if(itemDef.type === 'select') val = el.value;
+            
+                 else val = el.checked ? (itemDef.type==='check'?'O':'ON') : '';
+                 if(val) data.push({date: date, item: itemDef.name, name: name, value: val});
+             });
+             if(data.length > 0) {
+                 await sendRequest('custom_record', {mode:'save', data: data});
+                 showToast("저장 완료");
+                 // 저장 후 캐시 갱신 (바로 반영되도록)
+                 refreshCustomView(); 
+             } else { showToast("선택된 내용 없음"); }
+        }
+
+        // [CUSTOM MODE LOGIC]
+        async function loadCustomItems() { customItems = await sendRequest('manage_custom_items', {mode:'get'}) ||
+            []; }
         function renderCustomItems() {
             const list = document.getElementById('customItemsList');
             list.innerHTML = '';
@@ -1723,9 +1127,11 @@
                 div.innerText = item.name;
                 div.onclick = () => { currentCustomItem = idx; renderCustomItems(); refreshCustomView(); };
                 list.appendChild(div);
+        
             });
         }
-        function openCustomItemModal() { document.getElementById('customItemModal').classList.add('open'); }
+        function openCustomItemModal() { document.getElementById('customItemModal').classList.add('open');
+        }
         async function addCustomItem() {
             const name = document.getElementById('ciName').value;
             const type = document.getElementById('ciType').value;
@@ -1738,129 +1144,112 @@
         }
         
         async function refreshCustomView() {
+            // [수정] 모바일에서도 호출되므로 currentCustomItem 체크 제거 또는 조건부 실행
+            // PC 모드일 때만 차트 로딩 표시
             const chartArea = document.getElementById('customStatsChart'); 
             if(chartArea) chartArea.innerHTML = '<div style="text-align:center; padding:20px;">로딩<span class="loading-anim"></span></div>';
+            
             const pcList = document.getElementById('customCheckList');
             if(pcList) pcList.innerHTML = '<div style="text-align:center; padding:20px;">불러오는 중<span class="loading-anim"></span></div>';
             
             const allData = await sendRequest('custom_record', {mode:'get'});
             customRecordCache = allData || [];
-            if(currentCustomItem !== null) { renderCustomCheckList(); renderCustomStats(); }
             
-            // 모바일 탭이 활성화되어 있다면 리스트 갱신
-            if(mobileMode === 'custom') renderMobileCustomList();
+            // PC 화면 갱신
+            if(currentCustomItem !== null) {
+                renderCustomCheckList(); 
+                renderCustomStats(); 
+            }
         }
 
-        // [모바일 기타 항목 리스트]
-        function renderMobileCustomList() {
-             const idx = document.getElementById('mobCustomSelect').value;
-             const container = document.getElementById('mobCustomList');
-             container.innerHTML = '';
-             if(idx === null || idx === undefined || idx === "") return;
-             
-             const itemDef = customItems[idx];
-             const targetDate = document.getElementById('mobDate').value;
-
-             studentList.forEach(st => {
-                 const row = document.createElement('div'); row.className = 'student-row';
-                 const record = customRecordCache.find(r => r.date === targetDate && r.item === itemDef.name && r.name === st.name);
-                 let savedVal = record ? record.value : "";
-                 let inputHtml = '';
-                 
-                 if(itemDef.type === 'check') {
-                     const chk = savedVal === 'O' ? 'checked' : '';
-                     inputHtml = `<input type="checkbox" class="mob-cust-val" style="width:20px; height:20px; margin:0;" ${chk}>`;
-                 } else if(itemDef.type === 'switch') {
-                     const chk = savedVal === 'ON' ? 'checked' : '';
-                     inputHtml = `<label class="switch"><input type="checkbox" class="mob-cust-val" ${chk}><span class="slider"></span></label>`;
-                 } else if(itemDef.type === 'select') {
-                     inputHtml = `<select class="mob-cust-val" style="margin:0;"><option value="">-</option><option ${savedVal==='상'?'selected':''}>상</option><option ${savedVal==='중'?'selected':''}>중</option><option ${savedVal==='하'?'selected':''}>하</option></select>`;
-                 }
-                 row.innerHTML = `<div class="st-name" style="width:80px; font-weight:bold;">${st.name}</div><div style="flex:1;"></div>${inputHtml}`;
-                 container.appendChild(row);
-             });
-        }
-        
-        // [PC 기타 항목 리스트]
         function renderCustomCheckList() {
             const container = document.getElementById('customCheckList');
             container.innerHTML = '';
             if (currentCustomItem === null) return;
             const itemDef = customItems[currentCustomItem];
             const today = document.getElementById('rDate').value;
+            
             studentList.forEach(st => {
-                const row = document.createElement('div'); row.className = 'quick-row'; 
+                const row = document.createElement('div'); 
+                row.className = 'quick-row'; 
+                
                 const record = customRecordCache.find(r => r.date === today && r.item === itemDef.name && r.name === st.name);
                 let savedVal = record ? record.value : "";
+
                 let inputHtml = '';
                 if(itemDef.type === 'check') {
                     const chk = savedVal === 'O' ? 'checked' : '';
                     inputHtml = `<input type="checkbox" class="cust-val" style="width:24px; height:24px; margin:0;" ${chk}>`;
-                } else if(itemDef.type === 'switch') {
+                }
+                else if(itemDef.type === 'switch') {
                     const chk = savedVal === 'ON' ? 'checked' : '';
                     inputHtml = `<label class="switch"><input type="checkbox" class="cust-val" ${chk}><span class="slider"></span></label>`;
-                } else if(itemDef.type === 'select') {
-                    inputHtml = `<select class="cust-val" style="margin:0;"><option value="">-</option><option ${savedVal==='상'?'selected':''}>상</option><option ${savedVal==='중'?'selected':''}>중</option><option ${savedVal==='하'?'selected':''}>하</option></select>`;
                 }
-                row.innerHTML = `<div class="quick-name">${st.name}</div><div class="quick-input">${inputHtml}</div>`;
+                else if(itemDef.type === 'select') {
+                    inputHtml = `<select class="cust-val" style="margin:0;">
+                        <option value="">-</option>
+                        <option ${savedVal==='상'?'selected':''}>상</option>
+                        <option ${savedVal==='중'?'selected':''}>중</option>
+                        <option ${savedVal==='하'?'selected':''}>하</option>
+                    </select>`;
+                }
+           
+                 row.innerHTML = `<div class="quick-name">${st.name}</div><div class="quick-input">${inputHtml}</div>`;
                 container.appendChild(row);
             });
         }
 
         async function saveCustomData() {
-            // PC용 저장
-            await saveCustomLogic('customCheckList', 'cust-val', 'rDate');
-        }
-        async function saveMobileCustom() {
-            // 모바일용 저장
-            await saveCustomLogic('mobCustomList', 'mob-cust-val', 'mobDate');
-        }
-        
-        async function saveCustomLogic(listId, inputClass, dateId) {
-             const selectId = listId === 'mobCustomList' ? 'mobCustomSelect' : null;
-             let itemDef;
-             if(selectId) {
-                 const idx = document.getElementById(selectId).value;
-                 if(idx === null || idx === "") return;
-                 itemDef = customItems[idx];
-             } else {
-                 if(currentCustomItem === null) return;
-                 itemDef = customItems[currentCustomItem];
-             }
-
-             const rows = document.querySelectorAll(`#${listId} ${listId==='mobCustomList'?'.student-row':'.quick-row'}`);
-             const data = [];
-             const date = document.getElementById(dateId).value;
-             
-             rows.forEach(row => {
-                 const nameEl = listId === 'mobCustomList' ? row.querySelector('.st-name') : row.querySelector('.quick-name');
-                 const name = nameEl.innerText;
-                 const el = row.querySelector(`.${inputClass}`);
-                 let val = "";
-                 if(itemDef.type === 'select') val = el.value;
-                 else val = el.checked ? (itemDef.type==='check'?'O':'ON') : '';
-                 if(val) data.push({date: date, item: itemDef.name, name: name, value: val});
-             });
-             if(data.length > 0) {
-                 await sendRequest('custom_record', {mode:'save', data: data});
-                 showToast("저장 완료");
-                 refreshCustomView(); 
-             } else { showToast("선택된 내용 없음"); }
+            if(currentCustomItem === null) return;
+            const itemDef = customItems[currentCustomItem];
+            const rows = document.querySelectorAll('#customCheckList .quick-row');
+            const data = [];
+            const today = document.getElementById('rDate').value;
+            
+            rows.forEach(row => {
+                const name = row.querySelector('.quick-name').innerText;
+                const el = row.querySelector('.cust-val');
+                let val = "";
+                if(itemDef.type === 'select') val = el.value;
+                else val = el.checked 
+                ? (itemDef.type==='check'?'O':'ON') : '';
+                
+                if(val) data.push({date: today, item: itemDef.name, name: name, value: val});
+            });
+            
+            if(data.length > 0) {
+                await sendRequest('custom_record', {mode:'save', data: data});
+                showToast("저장 완료");
+                refreshCustomView(); 
+            } else { showToast("선택된 내용 없음"); }
         }
 
         async function renderCustomStats() {
             if(currentCustomItem === null) return;
             const chartArea = document.getElementById('customStatsChart'); 
+            
             const allData = customRecordCache;
             const itemDef = customItems[currentCustomItem];
             const range = document.getElementById('statsRangeSelect').value;
+            
             const today = new Date();
-            let startDate = new Date(today); let endDate = new Date(today);
-            if (range === 'month') { startDate.setDate(1); endDate.setMonth(endDate.getMonth() + 1); endDate.setDate(0); } 
-            else if (range === 's1') { startDate = new Date(today.getFullYear(), 2, 1); endDate = new Date(today.getFullYear(), 7, 31); } 
-            else if (range === 's2') { startDate = new Date(today.getFullYear(), 8, 1); endDate = new Date(today.getFullYear() + 1, 1, 28); } 
-            else if (range === 'year') { startDate = new Date(today.getFullYear(), 2, 1); endDate = new Date(today.getFullYear() + 1, 1, 28); }
-            const startStr = formatDateYMD(startDate); const endStr = formatDateYMD(endDate);
+            let startDate = new Date(today);
+            let endDate = new Date(today);
+            
+            if (range === 'today') {
+            } else if (range === 'month') {
+                startDate.setDate(1); endDate.setMonth(endDate.getMonth() + 1); endDate.setDate(0);
+            } else if (range === 's1') {
+                startDate = new Date(today.getFullYear(), 2, 1); endDate = new Date(today.getFullYear(), 7, 31); 
+            } else if (range === 's2') {
+                startDate = new Date(today.getFullYear(), 8, 1); endDate = new Date(today.getFullYear() + 1, 1, 28); 
+            } else if (range === 'year') {
+                startDate = new Date(today.getFullYear(), 2, 1); endDate = new Date(today.getFullYear() + 1, 1, 28);
+            }
+            
+            const startStr = formatDateYMD(startDate);
+            const endStr = formatDateYMD(endDate);
+            
             const filteredData = allData.filter(d => {
                 if (d.item !== itemDef.name) return false;
                 if (range === 'today') return d.date === formatDateYMD(today);
@@ -1871,198 +1260,38 @@
                 return { id: st.id, name: st.name, count: count };
             });
             const maxVal = Math.max(...studentStats.map(s => s.count)) || 1; 
-            const total = studentStats.length; const oneThird = Math.ceil(total / 3);
+            const total = studentStats.length;
+            const oneThird = Math.ceil(total / 3);
+
             chartArea.innerHTML = `<div class="chart-bars-area" id="barsContainer"></div>`;
             const barsContainer = document.getElementById('barsContainer');
+            
             studentStats.forEach((st, i) => {
                 const bar = document.createElement('div');
                 bar.className = 'stat-bar';
-                let heightPct = 0;
-                if (st.count > 0) { heightPct = 10 + ((st.count / maxVal) * 90); } // 0회는 0%, 1회 이상은 최소 10%
+                
+                let heightPct = 0; // Default 0
+                if (st.count > 0) {
+                    // 10% base + 90% relative
+                    heightPct = 10 + ((st.count / maxVal) * 90); 
+                }
+                
                 bar.style.height = `${heightPct}%`;
+                
+                // [툴팁 정렬 로직]
                 let alignClass = "";
                 if (i < oneThird) alignClass = "left-align"; 
                 else if (i >= total - oneThird) alignClass = "right-align";
+                
                 bar.innerHTML = `<div class="tooltip ${alignClass}">${st.id}. ${st.name} (${st.count}회)</div>`;
                 barsContainer.appendChild(bar);
             });
-            if (studentStats.every(s => s.count === 0)) { barsContainer.innerHTML = '<div style="position:absolute; width:100%; text-align:center; top:50%; color:#aaa;">데이터 없음</div>'; }
-        }
-
-        // ==========================================
-        // 6. [NEIS 및 기타 기능]
-        // ==========================================
-        function toggleNeisType() {
-            const type = document.getElementById('neisType').value;
-            const subOpt = document.getElementById('neisSubOption');
-            if(subOpt) subOpt.style.display = (type === 'subject') ? 'block' : 'none';
-            const btnSub = document.getElementById('btnGroupSubject');
-            const btnBeh = document.getElementById('btnGroupBehavior');
-            if (type === 'subject') {
-                if(btnSub) btnSub.style.display = 'block';
-                if(btnBeh) btnBeh.style.display = 'none';
-            } else {
-                if(btnSub) btnSub.style.display = 'none';
-                if(btnBeh) btnBeh.style.display = 'block';
+            if (studentStats.every(s => s.count === 0)) {
+                barsContainer.innerHTML = '<div style="position:absolute; width:100%; text-align:center; top:50%; color:#aaa;">데이터 없음</div>';
             }
         }
-        async function startSubjectGeneration() {
-            const container = document.getElementById('neisResultList');
-            if(studentList.length === 0) { showToast("학생 명단이 없습니다."); return; }
-            container.innerHTML = "";
-            const targetLen = document.getElementById('neisLen').value;
-            studentList.forEach(st => {
-                const card = document.createElement('div');
-                card.className = 'card'; card.style.marginBottom = '15px'; card.id = `neis_card_${st.id}`;
-                card.innerHTML = `<div style="font-weight:bold; margin-bottom:8px; color:var(--primary-dark);">${st.name} <span style="font-size:0.8rem; color:#aaa;">(과목세특)</span></div><textarea class="n-textarea" style="width:100%; height:120px; padding:10px; border:1px solid #eee;">⏳ 생성 대기 중...</textarea><div style="text-align:right; margin-top:5px;"><button class="btn-copy btn-sm" onclick="copyResult(this)">복사</button></div>`;
-                container.appendChild(card);
-            });
-            const btn = document.querySelector('#btnGroupSubject button');
-            // 버튼 상태 변경은 showStatusBar로 대체해도 무방하나, 여기서 간단히 상태바만 띄움
-            showStatusBar("✨ 과목 세특 일괄 생성 시작...");
-            for(const st of studentList) { await generateSingleStudent(st.id, st.name, 'subject', ""); }
-            hideStatusBar();
-            showToast("과목 세특 생성 완료! 🎉");
-        }
-        function prepareBehaviorUI() {
-            const container = document.getElementById('neisResultList');
-            if(studentList.length === 0) { showToast("학생 명단이 없습니다."); return; }
-            container.innerHTML = "";
-            studentList.forEach(st => {
-                const card = document.createElement('div');
-                card.className = 'card'; card.style.marginBottom = '15px'; card.id = `neis_card_${st.id}`;
-                card.innerHTML = `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span style="font-weight:bold; color:var(--primary-dark);">${st.name}</span><button class="btn-sm" onclick="generateSingleStudent('${st.id}', '${st.name}', 'behavior', getIndivKey('${st.id}'))">이 학생만 생성</button></div><input type="text" class="individual-keyword" placeholder="키워드 (예: 반장, 봉사, 배려)..." style="margin-bottom:10px; background:#fffbe6; border:1px solid #ffd591;"><textarea class="n-textarea" style="width:100%; height:150px; padding:10px; border:1px solid #eee;" placeholder="키워드 입력 후 생성 버튼을 누르세요."></textarea><div style="text-align:right; margin-top:5px;"><button class="btn-copy btn-sm" onclick="copyResult(this)">복사</button></div>`;
-                container.appendChild(card);
-            });
-            showToast("키워드를 입력해주세요.");
-        }
-        async function startBehaviorGeneration() {
-            const container = document.getElementById('neisResultList');
-            if(container.children.length === 0) { showToast("먼저 '1. 키워드 세팅'을 해주세요."); return; }
-            showStatusBar("✨ 행동특성 일괄 생성 시작...");
-            for(const st of studentList) { const keyword = getIndivKey(st.id); await generateSingleStudent(st.id, st.name, 'behavior', keyword); }
-            hideStatusBar();
-            showToast("행동특성 생성 완료! 🎉");
-        }
-        async function generateSingleStudent(id, name, typeMode, finalKeyword) {
-            const card = document.getElementById(`neis_card_${id}`);
-            if(!card) return;
-            const textarea = card.querySelector('textarea');
-            textarea.value = "⏳ 작성 중...";
-            let targetType = typeMode === 'subject' ? document.getElementById('neisSubjectSelect').value : '행동';
-            const len = document.getElementById('neisLen').value;
-            const currentPersona = document.getElementById('personaText').value;
-            const useRefEl = document.getElementById('useRefFiles');
-            const useRef = useRefEl ? useRefEl.checked : false;
-            try {
-                const data = await sendRequest('generate_neis_individual', { 
-                    name: name, type: targetType, keyword: finalKeyword, length: len, persona: currentPersona, useRef: useRef
-                });
-                const finalTxt = data && data.text ? data.text.replace(/['"]/g, "").replace(/\*\*/g, "").replace(/##/g, "").trim() : "기록이 없어 생성하지 못했습니다.";
-                textarea.value = finalTxt;
-            } catch(e) { textarea.value = "오류: " + e.message; }
-        }
-        function getIndivKey(id) {
-            const card = document.getElementById(`neis_card_${id}`);
-            if(!card) return "";
-            const input = card.querySelector('.individual-keyword');
-            return input ? input.value.trim() : "";
-        }
-        function copyResult(btn) {
-            const txt = btn.closest('.card').querySelector('textarea').value;
-            if(!txt) return;
-            navigator.clipboard.writeText(txt).then(() => {
-                const org = btn.innerText; btn.innerText = "완료"; btn.style.background="#27ae60"; btn.style.color="white";
-                setTimeout(()=> { btn.innerText = org; btn.style.background=""; btn.style.color=""; }, 1500);
-            });
-        }
 
-        // [ETC]
-        async function loadHomeData() { 
-            const d = await sendRequest('get_home_data');
-            if (d) { 
-                if (d.image) { 
-                    let finalUrl = d.image;
-                    if(finalUrl.includes('drive.google.com') && finalUrl.includes('/view')) {
-                         const idMatch = finalUrl.match(/\/d\/(.+?)\//);
-                         if(idMatch && idMatch[1]) finalUrl = `https://lh3.googleusercontent.com/d/${idMatch[1]}`;
-                    }
-                    document.getElementById('homeMainImg').src = finalUrl; 
-                    document.getElementById('homeMainImg').style.display = 'block'; 
-                    document.querySelector('.home-image-msg').style.display = 'none'; 
-                } 
-                homeQuickLinks = d.links || []; 
-                renderQuickLinks(); 
-            } 
-        }
-        async function saveMobileQuickRecord() {
-            const t = document.getElementById('mobQuickInput').value.trim();
-            if(!t) return;
-            showToast("✨ 처리 중");
-            try {
-                let prompt = "";
-                if(mobileMode === 'subject') prompt = `입력:"${t}". 규칙: 이름/과목/내용 분리. JSON출력:{"name":"이름","type":"과목","text":"내용"}`;
-                else prompt = `입력:"${t}". 규칙: 이름/내용 분리. 과목은 '행동'으로 고정. JSON출력:{"name":"이름","type":"행동","text":"내용"}`;
-                
-                const a = await sendRequest('call_ai', {prompt});
-                const j = JSON.parse(a.text.replace(/```json/g,"").replace(/```/g,""));
-                await sendRequest('save_record', {
-                    date: document.getElementById('mobDate').value, name: j.name, type: j.type, text: j.text, check: "없음"
-                });
-                document.getElementById('mobQuickInput').value = "";
-                showToast("저장 완료");
-            } catch(e) { showToast("실패"); }
-        }
-        
-        // 헬퍼 함수들 (이미 중복되어 위에서 정의했으므로 중복 제거)
-        // ... (필요 시 추가) ...
-
-        // [NEW] 사용 가능한 AI 모델 조회 함수
-        async function checkAvailableModels() {
-            showToast("✨ AI 모델 검색 중...");
-            const models = await sendRequest('check_ai_models');
-            const textarea = document.getElementById('modelListText');
-            if (models && Array.isArray(models)) {
-                let msg = "===== ✅ 사용 가능 모델 목록 =====\n\n";
-                models.forEach(m => {
-                    if(m.id.includes('gemini')) { msg += `🔹 ${m.name}\n   ID: ${m.id}\n   (입력: ${m.inputLimit} / 출력: ${m.outputLimit})\n\n`; }
-                });
-                textarea.value = msg;
-                document.getElementById('modelListModal').classList.add('open');
-            } else {
-                textarea.value = "❌ 모델 목록을 불러오지 못했습니다.\nAPI 키를 확인하거나 잠시 후 다시 시도해주세요.\n\n" + JSON.stringify(models);
-                document.getElementById('modelListModal').classList.add('open');
-            }
-        }
-        
-        // [필수] 상태바 및 로딩 헬퍼 (중복 방지, 맨 아래 배치)
-        function showStatusBar(msg) {
-            const bar = document.getElementById('aiStatusBar');
-            const txt = document.getElementById('aiStatusText');
-            if(bar && txt) { txt.innerText = msg; bar.classList.add('show'); }
-        }
-        function updateStatusText(msg) {
-            const txt = document.getElementById('aiStatusText');
-            if(txt) txt.innerText = msg;
-        }
-        function hideStatusBar() {
-            const bar = document.getElementById('aiStatusBar');
-            if(bar) bar.classList.remove('show');
-        }
-        function setLoading(el, text) { 
-            if(!el) return; 
-            el.dataset.orgText = el.innerText; el.innerText = text; 
-            el.classList.add('loading-anim'); el.disabled = true; 
-        }
-        function clearLoading(el) { 
-            if(!el) return; 
-            el.innerText = el.dataset.orgText || "완료"; 
-            el.classList.remove('loading-anim'); el.disabled = false; 
-        }
-        // ... 나머지 중복된 함수들 제거 및 정리 ...
-        // (주의: 위에서 이미 정의된 renderHomeToDo, saveHomeQuickRecord 등은 중복 정의하지 않도록 코드 정리함)
-        
-        // [중요] 학생 관리 및 기타 필수 함수들 (누락 방지)
+        // [Normal Record Logic]
         function renderSubjectTags() { 
             const c=document.getElementById('subjectTags');
             c.innerHTML=''; 
@@ -2078,16 +1307,23 @@
         }
         function selectSub(el) { if(el.classList.contains('selected')) {el.classList.remove('selected');} else {document.querySelectorAll('#subjectTags .tag').forEach(t=>t.classList.remove('selected'));
             el.classList.add('selected');} }
-        function openDelSub(s,e) { e.stopPropagation(); targetSubjectToDelete=s; document.getElementById('deleteSubjectModal').classList.add('open'); }
-        async function confirmDeleteSubject() { await sendRequest('delete_subject',{subject:targetSubjectToDelete}); subjectList=subjectList.filter(s=>s!==targetSubjectToDelete); renderSubjectTags(); document.getElementById('deleteSubjectModal').classList.remove('open'); }
+        function openDelSub(s,e) { e.stopPropagation(); targetSubjectToDelete=s; document.getElementById('deleteSubjectModal').classList.add('open');
+        }
+        async function confirmDeleteSubject() { await sendRequest('delete_subject',{subject:targetSubjectToDelete}); subjectList=subjectList.filter(s=>s!==targetSubjectToDelete); renderSubjectTags(); document.getElementById('deleteSubjectModal').classList.remove('open');
+        }
         async function confirmAddSubject() { const n=document.getElementById('newSubjectName').value.trim(); if(n && !subjectList.includes(n)) { await sendRequest('add_subject',{subject:n});
             subjectList.push(n); renderSubjectTags(); closeSubjectModal(); } }
-        function openSubjectModal() { document.getElementById('newSubjectName').value=''; document.getElementById('subjectModal').classList.add('open'); }
-        function closeSubjectModal() { document.getElementById('subjectModal').classList.remove('open'); }
+        function openSubjectModal() { document.getElementById('newSubjectName').value=''; document.getElementById('subjectModal').classList.add('open');
+        }
+        function closeSubjectModal() { document.getElementById('subjectModal').classList.remove('open');
+        }
+        
         function renderRecordList() {
-             const l=document.getElementById('recordList'); l.innerHTML='';
+             const l=document.getElementById('recordList');
+             l.innerHTML='';
              studentList.forEach(st=>{
-                 const r=document.createElement('div'); r.className='student-row'; 
+                 const r=document.createElement('div'); 
+                 r.className='student-row'; 
                  let chk = currentMode === 'subject' 
                     ? `<div class="st-check-group"><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div><div class="check-circle" onclick="toggleCheck(this)"></div></div>`
                     : '';
@@ -2095,7 +1331,412 @@
                  l.appendChild(r);
              });
         }
-        function toggleCheck(el) { const p=el.parentElement; const w=el.classList.contains('checked'); p.querySelectorAll('.check-circle').forEach(c=>c.classList.remove('checked')); if(!w) el.classList.add('checked'); }
+        function toggleCheck(el) { const p=el.parentElement; const w=el.classList.contains('checked'); p.querySelectorAll('.check-circle').forEach(c=>c.classList.remove('checked')); if(!w) el.classList.add('checked');
+        }
+        
+        // [수정됨] 저장 로직: 중복 방지 및 Raw 데이터 형식([주제] 내용) 지정
+        async function saveData() {
+            const inputs = document.querySelectorAll('.st-input'); 
+            const btn = document.getElementById('btnSaveAll'); 
+            const isAI = document.getElementById('aiToggle').checked;
+            
+            let targetType = "행동";
+            if(currentMode === 'subject') { 
+                const selTag = document.querySelector('#subjectTags .tag.selected'); 
+                if(!selTag) { showToast("과목 선택 필요"); return; } 
+                targetType = selTag.innerText.split(' ')[0].trim(); 
+            }
+            
+            // setLoading(btn, "저장 중"); // 버튼 잠금 대신 상태바 사용
+            showStatusBar("💾 저장 준비 중...");
+
+            let itemsToSave = [];
+            
+            inputs.forEach(input => {
+                const text = input.value.trim(); 
+                const row = input.closest('.student-row'); 
+                
+                // [🚨 에러 수정 부분] 이름 가져오기 안전장치
+                const rawName = row.querySelector('.st-name').innerText;
+                // 점(.)이 있으면 분리해서 뒤에꺼 쓰고, 없으면 그냥 씀
+                const name = rawName.includes('.') ? rawName.split('.')[1].trim() : rawName.trim();
+                
+                let checkVal = "없음";
+                if(currentMode === 'subject') { 
+                    const checks = row.querySelectorAll('.check-circle'); 
+                    if(checks[0].classList.contains('checked')) checkVal = "매우잘함"; 
+                    else if(checks[1].classList.contains('checked')) checkVal = "잘함"; 
+                    else if(checks[2].classList.contains('checked')) checkVal = "보통"; 
+                    else if(checks[3].classList.contains('checked')) checkVal = "노력요함"; 
+                }
+                
+                if (text.length > 0 || checkVal !== "없음") itemsToSave.push({ input, name, text, checkVal });
+            });
+            
+            if (itemsToSave.length === 0) { showToast("저장할 내용 없음"); hideStatusBar(); return; }
+            
+            // UI 초기화 (사용자 경험 향상)
+            inputs.forEach(el => el.value = ''); 
+            document.querySelectorAll('.check-circle').forEach(el => el.classList.remove('checked')); 
+
+            // 순차 저장
+            let savedCount = 0;
+            for (const item of itemsToSave) {
+                let period = document.getElementById('rPeriod').value; 
+                const topic = document.getElementById('rTopic').value.trim(); 
+                let periodPrefix = period ? `[${period}]` : "";
+                
+                // 3. AI 미적용 시 형식: [주제] 내용
+                let rawBody = item.text;
+                if(topic) rawBody = `[${topic}] ${item.text}`;
+                if(item.text.length === 0 && topic) rawBody = `[${topic}] 활동에 참여함`;
+                
+                rawBody = `${periodPrefix} ${rawBody}`.trim();
+                
+                updateStatusText(`💾 저장 중... [${item.name}] (${savedCount + 1}/${itemsToSave.length})`);
+
+                // 1. 일단 있는 그대로 저장 (서버가 rowNum을 줌)
+                const res = await sendRequest('save_record', { 
+                    date: document.getElementById('rDate').value, 
+                    name: item.name, 
+                    type: targetType, 
+                    text: rawBody, 
+                    check: item.checkVal 
+                });
+                
+                savedCount++;
+
+                // 1-1. 저장 성공했고, AI 켜져있으면 -> 수정 대기열(Queue)에 등록
+                // (새로 저장이 아니라, 방금 저장한 rowNum 위치를 찾아서 '수정'하는 방식이므로 중복 안 됨)
+                if (isAI && res && res.rowNum) {
+                    aiJobQueue.push({ 
+                        rowNum: res.rowNum, // 방금 저장된 줄 번호
+                        type: targetType, 
+                        topic: topic, 
+                        text: item.text, 
+                        check: item.checkVal, 
+                        name: item.name, 
+                        periodPrefix: periodPrefix 
+                    });
+                }
+            }
+            
+            // clearLoading(btn); 
+            
+            if(isAI && aiJobQueue.length > 0) {
+                showToast(`저장 완료. AI 변환 시작 (${aiJobQueue.length}건)`);
+                processNextAiJob(); // AI 작업 시작
+            } else {
+                hideStatusBar();
+                showToast("저장 완료");
+            }
+        }
+
+        // [수정됨] AI 처리 로직: 프롬프트 개선 (자연스러운 연결, 대괄호 제거)
+        async function processNextAiJob() {
+            if (aiJobQueue.length === 0) { 
+                isAiQueueRunning = false; 
+                hideStatusBar();
+                showToast("✨ 모든 AI 변환 완료!");
+                return; 
+            }
+            
+            isAiQueueRunning = true; 
+            const job = aiJobQueue[0];
+            showStatusBar(`✨ AI 다듬는 중... [${job.name}] (대기: ${aiJobQueue.length}건)`);
+            
+            // 2. 개선된 프롬프트: 주제를 자연스럽게 녹이고, 특수문자 금지
+            const prompt = `
+                역할: 초등학교 교사. 
+                작업: 생활기록부 기재용 평어 한 문장 작성.
+                입력정보: [주제: ${job.topic || '없음'}], [활동내용: ${job.text || '없음'}], [평가: ${job.check}].
+                
+                [작성 원칙]
+                1. 주제와 활동내용, 평가를 자연스럽게 이어지는 **하나의 문장**으로 만드세요.
+                2. '[주제]' 처럼 대괄호를 절대 쓰지 말고, 문맥 속에 녹여내세요. (예: '[탐구] ~함' (X) -> '탐구 활동을 통해 ~함' (O))
+                3. **굵게(볼드)**, "따옴표", '작은따옴표' 등 특수문자를 절대 사용하지 마세요.
+                4. 문장은 반드시 '~함' 또는 '~음'으로 명사형 종결하세요. (합쇼체 금지)
+                5. 학생의 성취 수준(${job.check})을 문장 끝부분 서술어에 적절히 반영하세요. (예: 매우잘함 -> 탁월하게 수행함 / 노력요함 -> 지도가 필요함 등)
+                6. 페르소나: ${aiPersona}
+            `;
+
+            try {
+                const aiData = await sendRequest('call_ai', { prompt });
+                
+                if (aiData && aiData.text) {
+                    // 불필요한 기호 한 번 더 제거 (안전장치)
+                    let finalBody = aiData.text
+                        .replace(/['"\[\]]/g, "") // 대괄호, 따옴표 제거
+                        .replace(/\*\*/g, "")     // 볼드 제거
+                        .trim();
+                    
+                    // 교시는 앞에 붙여줌
+                    if(job.periodPrefix) finalBody = `${job.periodPrefix} ${finalBody}`;
+                    
+                    // 1에서 저장했던 위치(rowNum)를 찾아가서 '내용'만 덮어쓰기 (중복 방지)
+                    await sendRequest('update_record_row', { 
+                        type: job.type, 
+                        rowNum: job.rowNum, 
+                        text: finalBody 
+                    });
+                }
+            } catch (e) { 
+                console.error("AI Error:", e); 
+            }
+            
+            // 작업 끝났으면 목록에서 제거하고 다음 작업 실행
+            aiJobQueue.shift(); 
+            processNextAiJob();
+        }
+
+        // [Student Manager]
+        async function loadStudents() { studentList=await sendRequest('get_students')||[];
+            renderRecordList(); renderStudentNav(); }
+        function renderStudentNav() { const l=document.getElementById('studentNavList'); l.innerHTML=''; studentList.forEach(s=>{const d=document.createElement('div');d.className='student-nav-item';d.innerHTML=`<span>${s.id}. <b>${s.name}</b></span><span>></span>`;d.onclick=()=>{selectedStudentName=s.name;loadHistory();};l.appendChild(d);});
+        }
+        function openStudentManageModal() { const c=document.getElementById('manageStudentRows'); c.innerHTML=''; if(studentList.length>0)studentList.forEach(s=>addStudentRow(s.id,s.name)); else for(i=0;i<3;i++)addStudentRow(); document.getElementById('manageStudentModal').classList.add('open');
+        }
+        function closeStudentManageModal() { document.getElementById('manageStudentModal').classList.remove('open');
+        }
+        function addStudentRow(id='',name='') { 
+            let maxId = 0;
+            const existingIds = document.querySelectorAll('.st-add-id');
+            if (existingIds.length > 0) {
+                existingIds.forEach(el => {
+                    const val = parseInt(el.value) || 0;
+                    if(val > maxId) maxId = val;
+                });
+            } else if (studentList.length > 0) {
+                maxId = Math.max(...studentList.map(s => s.id));
+            }
+            const newId = id !== '' ? id : (maxId + 1);
+            
+            const d=document.createElement('div'); d.style.display='flex'; d.style.gap='5px'; d.style.marginBottom='5px';
+            d.innerHTML=`<input type="number" class="st-add-id" value="${newId}" style="width:60px;margin:0"><input type="text" class="st-add-name" value="${name}" style="flex:1;margin:0"><button class="btn-sm btn-del" onclick="this.parentElement.remove()">-</button>`; document.getElementById('manageStudentRows').appendChild(d);
+        }
+        async function saveStudentManagement() { const ids=document.querySelectorAll('.st-add-id'); const nms=document.querySelectorAll('.st-add-name'); let l=[]; for(let i=0;i<ids.length;i++)if(ids[i].value&&nms[i].value)l.push({id:parseInt(ids[i].value),name:nms[i].value.trim()});
+            await sendRequest('sync_student_list',{students:l}); closeStudentManageModal(); loadStudents(); }
+
+        // [Bookmarks]
+        function renderBmTags() { 
+            const c=document.getElementById('bmTagArea');
+            c.innerHTML=''; 
+            bmTags.forEach(t=>{const b=document.createElement('div');b.className='tag';b.innerHTML=`${t} <span class="x-btn" onclick="removeBmTag('${t}', event)">x</span>`;if(selectedBmTags.includes(t))b.classList.add('selected');b.onclick=(e)=>{if(e.target.classList.contains('x-btn'))return;if(selectedBmTags.includes(t))selectedBmTags=selectedBmTags.filter(x=>x!==t);else selectedBmTags.push(t);renderBmTags();};c.appendChild(b);});
+            
+            const fc = document.getElementById('bmFilterContainer'); fc.innerHTML = '';
+            const allBtn = document.createElement('div');
+            allBtn.className = `bm-filter-tag ${currentBmFilter===null?'active':''}`; allBtn.innerText = "전체"; allBtn.onclick = () => filterBookmark(null);
+            fc.appendChild(allBtn);
+            bmTags.forEach(t => {
+                const btn = document.createElement('div'); btn.className = `bm-filter-tag ${currentBmFilter===t?'active':''}`; btn.innerText = t;
+                btn.onclick = () => filterBookmark(currentBmFilter === t ? null : t);
+                fc.appendChild(btn);
+            });
+        }
+        function removeBmTag(t,e) { e.stopPropagation(); reqConfirm('태그를 삭제하시겠습니까?', ()=>{ bmTags=bmTags.filter(x=>x!==t); renderBmTags(); });
+        }
+        function addNewBmTag() { const v=document.getElementById('newBmTagInput').value; if(v && !bmTags.includes(v)) { bmTags.push(v); renderBmTags(); document.getElementById('newBmTagInput').value='';
+        } }
+        async function loadBookmarks() { bmList=await sendRequest('get_bookmarks')||[]; renderBmList();
+        }
+        function renderBmList() { const l=document.getElementById('bmList'); l.innerHTML=''; let f=currentBmFilter?bmList.filter(b=>b.tags&&b.tags.includes(currentBmFilter)):bmList; f.sort((a,b)=>(b.starred===true)-(a.starred===true));
+            f.forEach(b=>{const d=document.createElement('div');d.className='bm-card';d.innerHTML=`<div class="bm-star ${b.starred?'active':''}" onclick="toggleBmStar(${b.row},${!b.starred},event)">★</div><div style="padding-right:20px"><a href="${b.url}" target="_blank" class="bm-link">${b.title}</a><div style="font-size:0.8rem;color:#666">${b.memo}</div></div><div style="margin-top:10px;text-align:right"><button class="btn-icon" onclick="editBookmark(${b.row})">수정</button> <button class="btn-icon" style="color:var(--danger)" onclick="deleteBookmark(${b.row})">삭제</button></div>`;l.appendChild(d);});
+        }
+        async function toggleBmStar(r,v,e) { e.stopPropagation(); const i=bmList.find(b=>b.row===r);
+            if(i){i.starred=v;renderBmList();await sendRequest('save_bookmark',{row:r,tags:i.tags,title:i.title,url:i.url,memo:i.memo,starred:v});} }
+        function editBookmark(r) { const item=bmList.find(b=>b.row===r); if(!item)return; document.getElementById('bmUrl').value=item.url; document.getElementById('bmTitle').value=item.title; document.getElementById('bmMemo').value=item.memo; document.getElementById('bmEditRow').value=item.row;
+            selectedBmTags=item.tags?item.tags.split(',').map(s=>s.trim()):[]; renderBmTags(); }
+        async function saveBookmark() { const r = document.getElementById('bmEditRow').value;
+            let star = false; if(r) { const ex = bmList.find(b=>b.row==r); if(ex) star=ex.starred; } await sendRequest('save_bookmark',{row:r||null, tags:selectedBmTags.join(','), title:document.getElementById('bmTitle').value, url:document.getElementById('bmUrl').value, memo:document.getElementById('bmMemo').value, starred:star});
+            clearBmInput(); loadBookmarks(); }
+        function clearBmInput() { document.getElementById('bmUrl').value='';document.getElementById('bmTitle').value='';document.getElementById('bmMemo').value='';document.getElementById('bmEditRow').value='';selectedBmTags=[];renderBmTags();
+        }
+        async function deleteBookmark(r) { reqConfirm('삭제하시겠습니까?', async()=>{ await sendRequest('delete_bookmark',{row:r}); loadBookmarks(); });
+        }
+        function filterBookmark(t) { currentBmFilter=t; renderBmTags(); renderBmList();
+        }
+
+        // [Calendar & Memo]
+        async function loadGoogleEvents() { calendarEvents=await sendRequest('get_events')||[];
+            updateTodayScheduleInCal(); }
+        async function loadAttendanceForDots() {
+            const data = await sendRequest('get_attendance');
+            attendanceCache = data || [];
+        }
+
+        function updateTodayScheduleInCal() { const t=formatDateYMD(new Date());
+            const l=calendarEvents.filter(e=>e.date===t); document.getElementById('todayTodoListCal').innerHTML = l.length>0 ? l.map(e=>`• ${e.title}`).join('<br>') : "일정 없음";
+        }
+        function moveMonth(d) { curMonth+=d; if(curMonth>11){curMonth=0;curYear++;}else if(curMonth<0){curMonth=11;curYear--;} renderCalendar();
+        }
+        function goToToday() { const t=new Date(); curYear=t.getFullYear(); curMonth=t.getMonth(); selectedDate=formatDateYMD(t); renderCalendar(); showDailyView(t.getDate());
+        }
+        
+        function renderCalendar() { 
+            const g=document.getElementById('calGrid');
+            g.innerHTML=''; 
+            document.getElementById('calMonth').innerText=`${curYear}.${curMonth+1}`; 
+            const f=new Date(curYear,curMonth,1); const l=new Date(curYear,curMonth+1,0); 
+            
+            ['일','월','화','수','목','금','토'].forEach(d=>g.innerHTML+=`<div style="font-weight:bold">${d}</div>`); 
+            for(i=0;i<f.getDay();i++)g.appendChild(document.createElement('div'));
+            for(i=1;i<=l.getDate();i++){
+                const dStr=`${curYear}-${String(curMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; 
+                const d=document.createElement('div');d.className='cal-day';
+                if(dStr===selectedDate)d.classList.add('selected');
+                
+                let dotsHtml = '';
+                if(calendarEvents.some(e=>e.date===dStr)) dotsHtml += '<div class="cal-dot event"></div>';
+                if(attendanceCache.some(a=>a.date===dStr)) dotsHtml += '<div class="cal-dot att"></div>';
+                
+                d.innerHTML=`<span>${i}</span><div class="cal-dots-container">${dotsHtml}</div>`;
+                d.onclick=()=>{selectedDate=dStr;renderCalendar();showDailyView(i);};
+                g.appendChild(d);
+            } 
+        }
+
+        async function showDailyView(day) { document.getElementById('calDetailTitle').innerText=`${selectedDate} 일정`;
+            const div=document.getElementById('dailyEvents'); div.innerHTML=''; const evs=calendarEvents.filter(e=>e.date===selectedDate); if(evs.length===0)div.innerHTML='<div style="color:#999">일정 없음</div>'; else evs.forEach(e=>div.innerHTML+=`<div>• ${e.title}</div>`); loadAtt();
+        }
+        async function loadAtt() { const l=document.getElementById('attList'); l.innerHTML='로딩<span class="loading-anim"></span>'; const d=await sendRequest('get_attendance');
+            attendanceCache = d || []; const t=d?d.filter(a=>a.date===selectedDate):[]; l.innerHTML=''; studentList.forEach(s=>{const e=t.find(a=>a.name===s.name); const row=document.createElement('div');row.className='att-row';row.innerHTML=`<span class="att-name">${s.name}</span><select class="att-status att-sel" data-name="${s.name}"><option ${e?.status==='출석'?'selected':''}>출석</option><option ${e?.status==='결석'?'selected':''}>결석</option><option ${e?.status==='지각'?'selected':''}>지각</option><option ${e?.status==='조퇴'?'selected':''}>조퇴</option><option ${e?.status==='결과'?'selected':''}>결과</option><option ${e?.status==='체험'?'selected':''}>체험</option></select><input type="text" class="att-memo" value="${e?.memo||''}" placeholder="비고">`;l.appendChild(row);});
+        }
+        async function saveAttendance() { let l=[]; document.querySelectorAll('.att-row').forEach(r=>l.push({name:r.querySelector('.att-status').dataset.name, status:r.querySelector('.att-status').value, memo:r.querySelector('.att-memo').value})); await sendRequest('save_attendance',{date:selectedDate,data:l});
+            showToast("출석 저장"); loadAttendanceForDots().then(renderCalendar); }
+        async function addEvent() { const t=document.getElementById('newEvent').value;
+            if(t) { await sendRequest('save_event',{date:selectedDate,title:t}); document.getElementById('newEvent').value=''; loadGoogleEvents().then(()=>showDailyView()); } }
+        async function openMonthAttSummary() { 
+            document.getElementById('monthAttModal').classList.add('open');
+            document.getElementById('monthAttBody').innerHTML='로딩<span class="loading-anim"></span>'; 
+            const d=await sendRequest('get_attendance'); const m=`${curYear}-${String(curMonth+1).padStart(2,'0')}`; 
+            const t=d.filter(a=>a.date.startsWith(m)&&a.status!=='출석'); 
+            let h='<table style="width:100%;border-collapse:collapse;font-size:0.9rem"><thead><tr style="background:#eee"><th style="border:1px solid #ddd;padding:5px">날짜</th><th>이름</th><th>상태</th><th>비고</th></tr></thead><tbody>'; 
+            if(t.length===0)h='<div style="padding:20px;text-align:center">특이사항 없음</div>';
+            else t.forEach(r=>{h+=`<tr><td style="border:1px solid #ddd;padding:4px">${r.date.substr(5)}</td><td style="border:1px solid #ddd;text-align:center">${r.name}</td><td style="border:1px solid #ddd;text-align:center;color:red;">${r.status}</td><td style="border:1px solid #ddd;padding:4px">${r.memo}</td></tr>`;}); 
+            if(t.length>0)h+='</tbody></table>'; 
+            document.getElementById('monthAttBody').innerHTML=h;
+        }
+
+        // Memo
+        function setMemoMode(m) { 
+            memoMode=m;
+            document.getElementById('btnMemoModeCal').className=m==='cal'?'btn-sm active':'btn-sm inactive'; 
+            document.getElementById('btnMemoModeList').className=m==='list'?'btn-sm active':'btn-sm inactive'; 
+            document.getElementById('memoCalView').style.display=m==='cal'?'block':'none'; 
+            document.getElementById('memoListView').style.display=m==='list'?'block':'none'; 
+            document.getElementById('memoSearchArea').style.display = m==='list'?'block':'none';
+            if(m==='cal') renderMemoCalendar(); else renderMemoList();
+        }
+        async function loadMemos() { memoList=await sendRequest('get_memos')||[]; setMemoMode(memoMode);
+        }
+        function moveMemoMonth(d) { curMemoMonth+=d; if(curMemoMonth>11){curMemoMonth=0;curMemoYear++;}else if(curMemoMonth<0){curMemoMonth=11;curMemoYear--;} renderMemoCalendar();
+        }
+        // [New] Go to Today for Memo
+        function goToMemoToday() { const t=new Date();
+            curMemoYear=t.getFullYear(); curMemoMonth=t.getMonth(); selectedMemoDate=formatDateYMD(t); renderMemoCalendar(); renderMemoPreview(); }
+
+        function renderMemoCalendar() { 
+            const g=document.getElementById('memoCalGrid');
+            g.innerHTML=''; 
+            document.getElementById('memoMonthTitle').innerText=`${curMemoYear}.${curMemoMonth+1}`; 
+            const f=new Date(curYear,curMonth,1); const l=new Date(curYear,curMonth+1,0); 
+            
+            ['일','월','화','수','목','금','토'].forEach(d=>g.innerHTML+=`<div style="font-weight:bold">${d}</div>`); 
+            for(i=0;i<f.getDay();i++)g.appendChild(document.createElement('div'));
+            for(i=1;i<=l.getDate();i++){
+                const dStr=`${curYear}-${String(curMonth+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; 
+                const d=document.createElement('div');d.className='cal-day';
+                if(dStr===selectedMemoDate)d.classList.add('selected');
+                
+                // Only show dot if there is actual content
+                if(memoList.some(m=>m.date===dStr && m.content && m.content.trim() !== '')) {
+                    d.classList.add('has-memo');
+                    d.innerHTML=`<span>${i}</span><div class="cal-dot event"></div>`;
+                } else {
+                    d.innerHTML=`<span>${i}</span><div class="cal-dots-container"></div>`;
+                }
+                
+                d.onclick=()=>{selectedMemoDate=dStr;renderMemoCalendar();renderMemoPreview();openMemoForm();};
+                g.appendChild(d);
+            } 
+            renderMemoPreview();
+        }
+
+        function renderMemoPreview() { const a=document.getElementById('memoDatePreview'); const t=memoList.filter(m=>m.date===selectedMemoDate); if(t.length===0){a.style.display='none';return;} a.style.display='block'; a.innerHTML='';
+        t.forEach(m=>{const d=document.createElement('div');d.className='memo-mini-item'+(m.done?' done-memo':'');d.innerText=(m.pinned?'★ ':'')+m.content;d.onclick=()=>openMemoForm(m);a.appendChild(d);}); }
+        function renderMemoList() { 
+            const keyword = document.getElementById('memoSearchInput').value.toLowerCase();
+            const l=document.getElementById('memoListView'); l.innerHTML=''; 
+            let filtered = memoList.filter(m => m.content.toLowerCase().includes(keyword));
+            
+            // 중요(pinned) 우선, 그 다음 날짜 최신순 정렬
+            filtered.sort((a,b) => {
+                if (a.pinned !== b.pinned) return b.pinned ? 1 : -1; 
+                return new Date(b.date) - new Date(a.date);
+            });
+
+            filtered.forEach(m=>{
+                const d=document.createElement('div');d.className='memo-list-item'+(m.done?' done-memo':'');
+                const pinIcon = m.pinned ? '<span class="memo-pinned-icon">★</span>' : '';
+                d.innerHTML=`<div class="memo-list-date"><span>${m.date}</span></div><div class="memo-list-content">${pinIcon}${m.content}</div>`;
+                d.onclick=()=>{selectedMemoDate=m.date;openMemoForm(m);};
+                l.appendChild(d);
+            });
+        }
+        function openMemoForm(i) { document.getElementById('memoDateDisp').innerText=selectedMemoDate; if(i){document.getElementById('memoContent').value=i.content;document.getElementById('memoPinned').checked=i.pinned;document.getElementById('memoDone').checked=i.done;document.getElementById('memoEditRow').value=i.row;document.getElementById('btnDelMemo').style.display='inline-block';}else clearMemoInput();
+        }
+        function clearMemoInput() { document.getElementById('memoContent').value='';document.getElementById('memoPinned').checked=false;document.getElementById('memoDone').checked=false;document.getElementById('memoEditRow').value='';document.getElementById('btnDelMemo').style.display='none';
+        }
+        async function saveMemo() { const c=document.getElementById('memoContent').value; if(!c)return; await sendRequest('save_memo',{row:document.getElementById('memoEditRow').value||null,content:c,pinned:document.getElementById('memoPinned').checked,done:document.getElementById('memoDone').checked}); showToast("메모 저장"); loadMemos();
+        }
+        async function deleteMemo() { reqConfirm('삭제하시겠습니까?', async()=>{ await sendRequest('delete_memo',{row:parseInt(document.getElementById('memoEditRow').value)}); loadMemos(); });
+        }
+
+        // Utils & Files
+        function showToast(m) { const t=document.getElementById("toast");t.innerText=m;t.className="show";setTimeout(()=>{t.className=t.className.replace("show","")},3000);
+        }
+        function formatDateYMD(d) { if(!d)return""; const D=new Date(d); return `${D.getFullYear()}-${String(D.getMonth()+1).padStart(2,'0')}-${String(D.getDate()).padStart(2,'0')}`;
+        }
+        function initEnvironment() { if(IS_PRO_MODE) document.getElementById('publicModeSettings').style.display='none'; else { document.getElementById('publicModeSettings').style.display='block'; sendRequest('load_settings').then(res=>{if(res)document.getElementById('settingApiKey').value=res.apiKey});
+        } }
+        function sendRequest(a,p={}) { if(IS_PRO_MODE){p.action=a;return fetch(PRO_BACKEND_URL,{method:'POST',mode:'cors',body:JSON.stringify(p)}).then(r=>r.json()).then(j=>j.data).catch(e=>null);}else return new Promise(r=>{google.script.run.withSuccessHandler(res=>r(res.data)).withFailureHandler(e=>r(null)).dispatch(a,p)});}
+        async function loadFiles() { const l=document.getElementById('fileList');
+            l.innerHTML='로딩<span class="loading-anim"></span>'; const f=await sendRequest('get_files')||[]; l.innerHTML=''; if(f.length===0) l.innerHTML='<div style="color:#999;font-size:0.9rem">파일 없음</div>'; f.forEach(d=>{ const r=document.createElement('div'); r.style.display='flex'; r.style.justifyContent='space-between'; r.style.marginBottom='5px'; r.innerHTML=`<a href="${d.url}" target="_blank" style="text-decoration:none;color:var(--primary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.name}</a> <button class="btn-sm btn-del" onclick="deleteFile(${d.row})">삭제</button>`; l.appendChild(r); });
+        }
+        function uploadFile() { const i=document.getElementById('uploadInput'); if(i.files.length===0)return; const f=i.files[0]; const r=new FileReader();
+            r.onload=async(e)=>{ await sendRequest('upload_file',{name:f.name,mimeType:f.type,data:e.target.result.split(',')[1]}); loadFiles(); }; r.readAsDataURL(f); }
+        async function deleteFile(r) { reqConfirm('삭제하시겠습니까?', async()=>{ await sendRequest('delete_file',{row:r}); loadFiles(); });
+        }
+        
+        function viewTab(m) { viewTabMode=m;
+            document.getElementById('viewSubBtn').className=m==='subject'?'btn-sm active':'btn-sm inactive'; document.getElementById('viewBehBtn').className=m==='behavior'?'btn-sm active':'btn-sm inactive'; document.getElementById('viewSubjectFilter').style.display=m==='subject'?'block':'none'; loadHistory(); }
+        let subjectFilterPreserved = "";
+        async function loadHistory() { 
+            if(!selectedStudentName)return; 
+            const c=document.getElementById('historyViewer'); c.innerHTML='로딩<span class="loading-anim"></span>';
+            const filterEl = document.getElementById('viewSubjectFilter');
+            if (subjectFilterPreserved && filterEl.options.length > 0) { filterEl.value = subjectFilterPreserved;
+            }
+            const t=viewTabMode==='subject'?filterEl.value:'행동'; 
+            const h=await sendRequest('get_history',{name:selectedStudentName,type:t})||[]; 
+            c.innerHTML='';
+            if(h.length===0){c.innerHTML='<div style="color:#999;padding:20px;text-align:center">기록 없음</div>';return;} 
+            h.forEach(i=>{
+                const d=document.createElement('div'); d.className='history-card';
+                d.innerHTML=`<div class="h-left"><input type="checkbox" class="hist-chk" value="${i.rowNum}" data-org-text="${i.txt}"><span class="h-date">${i.date}</span>${i.check!=='없음'?`<span class="h-badge">${i.check}</span>`:''}</div><textarea class="h-text" id="hist_txt_${i.rowNum}" oninput="markEdited(this, ${i.rowNum})">${i.txt}</textarea><div class="h-btn-area"><button class="btn-icon" onclick="copyText('hist_txt_${i.rowNum}')">복사</button></div>`;
+                c.appendChild(d);
+            });
+        }
+
+        function markEdited(el, rowNum) { const chk = document.querySelector(`.hist-chk[value="${rowNum}"]`); if(chk) chk.checked = true;
+        }
+        async function saveSelectedHistory() { const checkboxes = document.querySelectorAll('.hist-chk:checked');
+            if(checkboxes.length === 0) { showToast("수정된 항목이 없습니다."); return; } const updates = [];
+            checkboxes.forEach(chk => { const row = chk.value; const text = document.getElementById(`hist_txt_${row}`).value; const type = viewTabMode==='subject'?document.getElementById('viewSubjectFilter').value:'행동'; updates.push({ type: type, row: parseInt(row), text: text }); });
+            reqConfirm(`${updates.length}건을 저장하시겠습니까?`, async() => { await sendRequest('update_record_bulk', { updates: updates }); showToast("일괄 저장 완료"); loadHistory(); });
+        }
+        function copyText(id) { const el = document.getElementById(id); if(el) { navigator.clipboard.writeText(el.value).then(()=>showToast("복사됨"));
+        } }
         function updateSubjectFilterOptions() { const s=document.getElementById('viewSubjectFilter'); const current = s.value; s.innerHTML='';
             subjectList.forEach(sub=>{const o=document.createElement('option');o.value=sub;o.innerText=sub;s.appendChild(o)}); if(current) s.value = current; subjectFilterPreserved = s.value; s.onchange = () => { subjectFilterPreserved = s.value; loadHistory(); };
         }
@@ -2104,10 +1745,199 @@
         async function deleteSelectedHistory() { const c=document.querySelectorAll('.hist-chk:checked'); if(c.length===0)return;
             reqConfirm(`${c.length}건 삭제하시겠습니까?`, async()=>{ const r=Array.from(c).map(e=>parseInt(e.value)); const t=viewTabMode==='subject'?document.getElementById('viewSubjectFilter').value:'행동'; await sendRequest('delete_record_bulk',{type:t,rows:r}); loadHistory(); });
         }
-        async function savePublicSettings() { await sendRequest('save_settings',{apiKey:document.getElementById('settingApiKey').value}); showToast("저장"); }
-        async function archiveData() { await sendRequest('archive_data'); location.reload(); }
+        async function savePublicSettings() { await sendRequest('save_settings',{apiKey:document.getElementById('settingApiKey').value}); showToast("저장");
+        }
+        async function savePersona() { aiPersona=document.getElementById('personaText').value; await sendRequest('save_settings',{persona:aiPersona}); showToast("저장");
+        }
+        async function archiveData() { await sendRequest('archive_data'); location.reload();
+        }
+        async function savePersona() { 
+            const p = document.getElementById('personaText').value; 
+            const btn = document.getElementById('btnPersona'); 
+            setLoading(btn, "저장 중"); 
+            
+            // 서버에 저장 요청
+            await sendRequest('save_settings', { persona: p }); 
+            
+            showToast("페르소나 저장 완료!"); 
+            clearLoading(btn); 
+        }
+// [UI] 유형 선택에 따라 버튼과 옵션 표시 변경
+        function toggleNeisType() {
+            const type = document.getElementById('neisType').value;
+            
+            // 1. 과목 선택 옵션 제어 (과목일 때만 보임)
+            const subOpt = document.getElementById('neisSubOption');
+            if(subOpt) subOpt.style.display = (type === 'subject') ? 'block' : 'none';
+            
+            // 2. 버튼 그룹 교체 (핵심: 이 부분이 빠져서 버튼이 안 바뀌었던 것!)
+            const btnSub = document.getElementById('btnGroupSubject');
+            const btnBeh = document.getElementById('btnGroupBehavior');
+
+            if (type === 'subject') {
+                if(btnSub) btnSub.style.display = 'block';
+                if(btnBeh) btnBeh.style.display = 'none';
+            } else {
+                if(btnSub) btnSub.style.display = 'none';
+                if(btnBeh) btnBeh.style.display = 'block';
+            }
+        }
+
+        // ===========================================
+        // [CASE 1] 과목별 세특 (일괄 자동 생성)
+        // ===========================================
+        async function startSubjectGeneration() {
+            const container = document.getElementById('neisResultList');
+            if(studentList.length === 0) { showToast("학생 명단이 없습니다."); return; }
+            
+            // 1. 화면 초기화 및 카드 뼈대 만들기
+            container.innerHTML = "";
+            const targetLen = document.getElementById('neisLen').value;
+            
+            studentList.forEach(st => {
+                const card = document.createElement('div');
+                card.className = 'card'; card.style.marginBottom = '15px'; card.id = `neis_card_${st.id}`;
+                card.innerHTML = `
+                    <div style="font-weight:bold; margin-bottom:8px; color:var(--primary-dark);">${st.name} <span style="font-size:0.8rem; color:#aaa;">(과목세특)</span></div>
+                    <textarea class="n-textarea" style="width:100%; height:120px; padding:10px; border:1px solid #eee;">⏳ 생성 대기 중...</textarea>
+                    <div style="text-align:right; margin-top:5px;"><button class="btn-copy btn-sm" onclick="copyResult(this)">복사</button></div>
+                `;
+                container.appendChild(card);
+            });
+
+            // 2. 순차적 생성 시작
+            const btn = document.querySelector('#btnGroupSubject button');
+            setLoading(btn, "전체 생성 중...");
+            
+            for(const st of studentList) {
+                await generateSingleStudent(st.id, st.name, 'subject', ""); // 키워드 없이 호출
+            }
+            clearLoading(btn);
+            showToast("과목 세특 생성 완료! 🎉");
+        }
         
-        // (중복 선언 방지를 위해 마지막 정리: homeQuickInputMobile 등은 위에서 이미 처리됨)
+        // ===========================================
+        // [CASE 2] 행동특성 (1. 키워드 세팅 -> 2. 생성)
+        // ===========================================
+        
+        // 1단계: 입력창 깔아주기
+        function prepareBehaviorUI() {
+            const container = document.getElementById('neisResultList');
+            if(studentList.length === 0) { showToast("학생 명단이 없습니다."); return; }
+            
+            container.innerHTML = "";
+            studentList.forEach(st => {
+                const card = document.createElement('div');
+                card.className = 'card'; card.style.marginBottom = '15px'; card.id = `neis_card_${st.id}`;
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                        <span style="font-weight:bold; color:var(--primary-dark);">${st.name}</span>
+                        <button class="btn-sm" onclick="generateSingleStudent('${st.id}', '${st.name}', 'behavior', getIndivKey('${st.id}'))">이 학생만 생성</button>
+                    </div>
+                    <input type="text" class="individual-keyword" placeholder="키워드 (예: 반장, 봉사, 배려)..." style="margin-bottom:10px; background:#fffbe6; border:1px solid #ffd591;">
+                    <textarea class="n-textarea" style="width:100%; height:150px; padding:10px; border:1px solid #eee;" placeholder="키워드 입력 후 생성 버튼을 누르세요."></textarea>
+                    <div style="text-align:right; margin-top:5px;"><button class="btn-copy btn-sm" onclick="copyResult(this)">복사</button></div>
+                `;
+                container.appendChild(card);
+            });
+            showToast("키워드를 입력해주세요.");
+        }
+
+        // 2단계: 입력된 키워드로 일괄 생성
+        async function startBehaviorGeneration() {
+            const container = document.getElementById('neisResultList');
+            if(container.children.length === 0) { showToast("먼저 '1. 키워드 세팅'을 해주세요."); return; }
+            
+            const btn = document.querySelector('#btnGroupBehavior .btn-primary');
+            setLoading(btn, "생성 중...");
+            
+            for(const st of studentList) {
+                // 입력된 키워드 가져오기
+                const keyword = getIndivKey(st.id);
+                await generateSingleStudent(st.id, st.name, 'behavior', keyword);
+            }
+            clearLoading(btn);
+            showToast("행동특성 생성 완료! 🎉");
+        }
+
+        // ===========================================
+        // [공통] AI 요청 함수 (한 명 처리)
+        // ===========================================
+        async function generateSingleStudent(id, name, typeMode, finalKeyword) {
+            const card = document.getElementById(`neis_card_${id}`);
+            if(!card) return;
+            
+            const textarea = card.querySelector('textarea');
+            textarea.value = "⏳ 작성 중...";
+            
+            // 옵션값 수집
+            let targetType = typeMode === 'subject' ? document.getElementById('neisSubjectSelect').value : '행동';
+            const len = document.getElementById('neisLen').value;
+            const currentPersona = document.getElementById('personaText').value;
+            const useRefEl = document.getElementById('useRefFiles');
+            const useRef = useRefEl ? useRefEl.checked : false;
+
+            try {
+                const data = await sendRequest('generate_neis_individual', { 
+                    name: name, 
+                    type: targetType, 
+                    keyword: finalKeyword, // 과목일 땐 빈값, 행동일 땐 개별키워드 들어감
+                    length: len,
+                    persona: currentPersona,
+                    useRef: useRef
+                });
+                
+                const finalTxt = data && data.text 
+                    ? data.text.replace(/['"]/g, "").replace(/\*\*/g, "").replace(/##/g, "").trim()
+                    : "기록이 없어 생성하지 못했습니다.";
+                
+                textarea.value = finalTxt;
+                
+            } catch(e) {
+                textarea.value = "오류: " + e.message;
+            }
+        }
+
+        // 헬퍼: 개별 키워드 값 가져오기
+        function getIndivKey(id) {
+            const card = document.getElementById(`neis_card_${id}`);
+            if(!card) return "";
+            const input = card.querySelector('.individual-keyword');
+            return input ? input.value.trim() : "";
+        }
+
+        // 헬퍼: 복사 기능
+        function copyResult(btn) {
+            const txt = btn.closest('.card').querySelector('textarea').value;
+            if(!txt) return;
+            navigator.clipboard.writeText(txt).then(() => {
+                const org = btn.innerText; btn.innerText = "완료"; btn.style.background="#27ae60"; btn.style.color="white";
+                setTimeout(()=> { btn.innerText = org; btn.style.background=""; btn.style.color=""; }, 1500);
+            });
+        }
+        function toggleNeisType() { const t=document.getElementById('neisType').value; document.getElementById('neisSubOption').style.display=t==='subject'?'block':'none'; document.getElementById('neisBehOption').style.display=t==='behavior'?'block':'none'; }
+
+        // [NEW] 사용 가능한 AI 모델 조회 함수
+        async function checkAvailableModels() {
+            showToast("✨ AI 모델 검색 중...");
+            const models = await sendRequest('check_ai_models');
+            
+            const textarea = document.getElementById('modelListText');
+            
+            if (models && Array.isArray(models)) {
+                let msg = "===== ✅ 사용 가능 모델 목록 =====\n\n";
+                models.forEach(m => {
+                    if(m.id.includes('gemini')) {
+                        msg += `🔹 ${m.name}\n   ID: ${m.id}\n   (입력: ${m.inputLimit} / 출력: ${m.outputLimit})\n\n`;
+                    }
+                });
+                textarea.value = msg;
+                document.getElementById('modelListModal').classList.add('open');
+            } else {
+                textarea.value = "❌ 모델 목록을 불러오지 못했습니다.\nAPI 키를 확인하거나 잠시 후 다시 시도해주세요.\n\n" + JSON.stringify(models);
+                document.getElementById('modelListModal').classList.add('open');
+            }
+        }
     </script>
 </body>
 </html>
