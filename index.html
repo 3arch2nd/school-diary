@@ -15,6 +15,21 @@
             --success: #27ae60; --danger: #e74c3c;
             --att-dot: #ff8fab;
         }
+        /* [추가] 전체 스크롤바 디자인 (연하고 심플하게) */
+        ::-webkit-scrollbar {
+            width: 8px;  /* 너비를 얇게 조절 */
+            height: 8px; /* 가로 스크롤바 높이 */
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent; /* 트랙 배경 투명하게 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #e0e0e0; /* 아주 연한 회색 */
+            border-radius: 4px;        /* 둥글게 처리 */
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #c0c0c0; /* 마우스 올렸을 때만 살짝 진하게 */
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Gowun Dodum', sans-serif;
             -webkit-tap-highlight-color: transparent; }
         
@@ -408,6 +423,8 @@
             --primary: #6096ba; 
             --primary-dark: #8bb6d9;
             --danger: #ff6b6b; 
+            /* [추가] 다크 모드일 때 스크롤바 색상 어둡게 변경 */
+            & ::-webkit-scrollbar-thumb { background-color: #4a5568; }
             color-scheme: dark;
         }
 
