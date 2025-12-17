@@ -1234,6 +1234,7 @@
         }
 
 // [수정] 통계 그래프 렌더링 (0회는 바닥에, 1회 이상은 확실히 구분)
+        // [수정] 통계 그래프 렌더링 (학년도 및 학기 날짜 정밀 보정)
         async function renderCustomStats() {
             if(currentCustomItem === null) return;
             const chartArea = document.getElementById('customStatsChart'); 
@@ -1243,17 +1244,32 @@
             const range = document.getElementById('statsRangeSelect').value;
             
             const today = new Date();
+            
+            // [✨ 핵심] 학년도 계산 (1월, 2월은 아직 '작년도' 학기로 침)
+            let academicYear = today.getFullYear();
+            if (today.getMonth() < 2) { // 0(1월)이나 1(2월)이면
+                academicYear -= 1;      // 예: 2025년 1월 -> 2024학년도로 설정
+            }
+
             let startDate = new Date(today);
             let endDate = new Date(today);
             
             if (range === 'month') {
-                startDate.setDate(1); endDate.setMonth(endDate.getMonth() + 1); endDate.setDate(0);
+                // 이번 달은 현재 날짜 기준 (학년도 무관)
+                startDate = new Date(today.getFullYear(), today.getMonth(), 1); 
+                endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
             } else if (range === 's1') {
-                startDate = new Date(today.getFullYear(), 2, 1); endDate = new Date(today.getFullYear(), 7, 31); 
+                // 1학기: 3월 2일 ~ 7월 31일
+                startDate = new Date(academicYear, 2, 2); 
+                endDate = new Date(academicYear, 6, 31); 
             } else if (range === 's2') {
-                startDate = new Date(today.getFullYear(), 8, 1); endDate = new Date(today.getFullYear() + 1, 1, 28); 
+                // 2학기: 8월 10일 ~ 다음 해 1월 10일
+                startDate = new Date(academicYear, 7, 10); 
+                endDate = new Date(academicYear + 1, 0, 10); 
             } else if (range === 'year') {
-                startDate = new Date(today.getFullYear(), 2, 1); endDate = new Date(today.getFullYear() + 1, 1, 28);
+                // 1년: 3월 1일 ~ 다음 해 2월 말일
+                startDate = new Date(academicYear, 2, 1); 
+                endDate = new Date(academicYear + 1, 1, 28);
             }
             
             const startStr = formatDateYMD(startDate);
