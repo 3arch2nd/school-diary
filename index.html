@@ -180,7 +180,7 @@
         }
         .lock-float-btn.show { right: 80px; opacity: 1; pointer-events: auto; }
 
-        /* [수정] 음악 패널: 전체 크기 유지 (480x190) */
+        /* [수정] 음악 패널: 크기는 유지 */
         .music-panel { 
             position: fixed; top: 80px; 
             left: -500px; 
@@ -194,48 +194,49 @@
         }
         .music-panel.show { left: 20px; opacity: 1; } 
 
-        /* [수정] 비디오 영역: 65%로 대폭 확장 (영상 시원하게) */
+        /* [수정] 비디오 영역: 40%로 축소 (리스트의 2/3 수준) */
         .mp-video { 
-            width: 65%; /* 50% -> 65% */
+            width: 40%; /* 너비를 줄임 */
             background: black; 
             display: flex; align-items: center; justify-content: center; 
+            flex-shrink: 0; /* 리스트 내용이 많아도 찌그러지지 않게 고정 */
         }
-/* [수정] 유튜브 iframe: 4:3 비율로 변경하고, 높이에 맞춰 너비 자동 조절 */
+        
+        /* [수정] iframe: 너비를 꽉 채우고, 높이는 비율(4:3)에 따라 자동 조절 */
+        /* 결과적으로 위아래에 검은 여백이 생김 */
         #musicIframe { 
-            height: 100%;       /* 높이를 부모(검은 배경)에 꽉 채움 (190px) */
-            width: auto;        /* 너비는 비율에 맞춰 자동 조절 */
-            aspect-ratio: 4 / 3; /* 4:3 비율 고정 (레트로/유틸리티 감성) */
-            max-width: 100%;    /* 혹시라도 부모보다 커지지 않게 방지 */
+            width: 100%;       /* 부모(40% 영역) 너비에 맞춤 */
+            height: auto;      /* 높이는 비율대로 자동 계산 (작아짐) */
+            aspect-ratio: 4 / 3; /* 4:3 비율 유지 */
         }
 
-        /* [수정] 리스트 영역: 남은 공간(35%) 사용 */
+        /* [수정] 리스트 영역: 60%로 확장 (메인 공간) */
         .mp-list { 
-            flex: 1; /* 남은 공간 자동 차지 */
+            flex: 1; /* 남은 공간(60%) 모두 차지 */
             display: flex; flex-direction: column; 
             padding: 0; 
             border-left: 1px solid #eee; 
             gap: 0px; 
             overflow-y: auto; 
         }
-        .mp-list::-webkit-scrollbar { width: 4px; } /* 스크롤바 더 얇게 */
+        .mp-list::-webkit-scrollbar { width: 4px; }
         .mp-list::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 2px; }
         .mp-list::-webkit-scrollbar-track { background-color: #f9f9f9; }
 
-        /* [수정] 리스트 아이템: 커서 초기화 (default) */
+        /* 아이템 스타일 유지 */
         .mp-item { 
             font-size: 0.8rem; padding: 6px 8px; 
             border-bottom: 1px solid #f9f9f9; 
-            cursor: default; /* 기본 커서로 변경 (전체 grab 삭제) */
+            cursor: default; 
             display: flex; justify-content: space-between; color: #333; line-height: 1.3; align-items: center;
             background: white; transition: 0.2s;
         }
-        .mp-item:hover { background: #f0f8ff;} /* 호버 색상만 변경 */
+        .mp-item:hover { background: #f0f8ff;}
         .mp-item.dragging { opacity: 0.5; background: #eaf6fc; border: 2px dashed var(--primary); }
         .mp-item.over { border-top: 2px solid var(--primary); }
         
-        /* [추가] 핸들과 제목 커서 분리 */
-        .mp-handle { cursor: grab; color: #aaa; margin-right: 6px; padding: 2px; } /* 핸들만 grab */
-        .mp-title { cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } /* 제목은 pointer */
+        .mp-handle { cursor: grab; color: #aaa; margin-right: 6px; padding: 2px; }
+        .mp-title { cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 160px; /* 제목 길어지면 말줄임 */ } 
         .mp-title:hover { color: var(--primary); font-weight: bold; }
 
         .mp-add { margin-top: auto; display: flex; gap: 5px; padding: 6px; border-top: 1px solid #eee; background: #fafafa;}
