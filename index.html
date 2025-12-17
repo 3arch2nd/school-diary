@@ -916,9 +916,15 @@
         <label>2. 과제 선택</label>
         <select id="crWorkSelect"></select>
         
-        <div style="margin-top:15px; background:var(--bg-main); padding:10px; border-radius:6px; font-size:0.85rem; color:var(--text-sub);">
-            <p>💡 점수에 따라 성취도(상/중/하)가 자동 체크됩니다.</p>
-            <p>💡 과제 제목이 '주제'로 입력됩니다.</p>
+        <div style="margin-top:15px; background:var(--bg-main); padding:10px; border-radius:6px; font-size:0.85rem; color:var(--text-sub); border: 1px solid var(--border-color);">
+            <p style="margin-bottom:5px;">💡 <b>점수별 성취도 자동 체크</b></p>
+            <ul style="margin-left:20px; color:var(--text-main);">
+                <li>90점 이상 : <b>매우 잘함</b></li>
+                <li>80점 이상 : <b>잘함</b></li>
+                <li>70점 이상 : <b>보통</b></li>
+                <li>70점 미만 : <b>노력 요함</b></li>
+            </ul>
+            <p style="margin-top:8px;">💡 과제 제목이 '주제'로, 피드백이 '내용'으로 입력됩니다.</p>
         </div>
 
         <div style="text-align:right; margin-top:15px;">
