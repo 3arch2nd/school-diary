@@ -180,45 +180,58 @@
         }
         .lock-float-btn.show { right: 80px; opacity: 1; pointer-events: auto; }
 
+        /* [수정] 음악 패널: 가로를 늘리고 세로를 줄여 영상 비율 확보 */
         .music-panel { 
-            position: fixed; top: 80px; left: -420px; width: 400px; height: 220px;
-            background: white; color: #333; border-radius: 12px; box-shadow: 2px 2px 15px rgba(0,0,0,0.2); 
+            position: fixed; top: 80px; 
+            left: -500px; /* 패널 너비보다 더 왼쪽으로 숨김 */
+            width: 480px; /* 너비 확장 (400 -> 480) */
+            height: 190px; /* 높이 축소 (220 -> 190) */
+            background: white; color: #333; border-radius: 12px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15); /* 그림자 조금 더 부드럽게 */
             z-index: 2200; display: flex; overflow: hidden; border: 1px solid #eee;
             transition: left 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease; 
             opacity: 0;
         }
         .music-panel.show { left: 20px; opacity: 1; } 
-        /* [수정] 유튜브 컨테이너: 내부 요소 중앙 정렬 */
-        .mp-video { width: 40%; background: black; display: flex; align-items: center; justify-content: center; }
-        /* [추가] 유튜브 iframe 비율 고정 (최신 CSS) */
+
+        /* [수정] 비디오 영역: 50%로 확장하여 16:9 비율이 꽉 차게 */
+        .mp-video { 
+            width: 50%; /* 40% -> 50% */
+            background: black; 
+            display: flex; align-items: center; justify-content: center; 
+        }
+        
+        /* iframe은 아까 추가한 aspect-ratio 유지 */
         #musicIframe { width: 100%; height: auto; aspect-ratio: 16 / 9; }
 
-        /* [수정] 플레이리스트 영역: 스크롤바 디자인 개선 */
+        /* [수정] 리스트 영역: 나머지 50% 사용 */
         .mp-list { 
-            flex: 1; display: flex; flex-direction: column; padding: 8px; border-left: 1px solid #eee; gap: 0px; overflow-y: auto;
-            /* 스크롤바 숨김 디자인 (선택사항) - 원하시면 주석 해제 */
-            /* scrollbar-width: thin; */
+            flex: 1; 
+            display: flex; flex-direction: column; 
+            padding: 0; /* 패딩 제거하여 공간 확보 */
+            border-left: 1px solid #eee; 
+            gap: 0px; 
+            overflow-y: auto; 
         }
-        /* 스크롤바 커스텀 (Webkit) */
+        /* 스크롤바 커스텀 */
         .mp-list::-webkit-scrollbar { width: 6px; }
         .mp-list::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 3px; }
         .mp-list::-webkit-scrollbar-track { background-color: #f9f9f9; }
 
-        /* [수정] 리스트 아이템: 드래그 관련 스타일 추가 */
+        /* 리스트 아이템 스타일 (드래그 등 기존 유지) */
         .mp-item { 
-            font-size: 0.8rem; padding: 6px 4px; /* 패딩 약간 늘림 */
-            border-bottom: 1px solid #f9f9f9; cursor: grab; /* 커서 변경 */
-            display: flex; justify-content: space-between; color: #333; line-height: 1.2; align-items: center;
+            font-size: 0.8rem; padding: 8px 10px; /* 터치하기 좋게 패딩 조정 */
+            border-bottom: 1px solid #f9f9f9; cursor: grab; 
+            display: flex; justify-content: space-between; color: #333; line-height: 1.3; align-items: center;
             background: white; transition: 0.2s;
         }
         .mp-item:hover { color: var(--primary); font-weight: bold; background: #f0f8ff;}
-        /* 드래그 중일 때 스타일 */
         .mp-item.dragging { opacity: 0.5; background: #eaf6fc; border: 2px dashed var(--primary); }
-        /* 드래그오버 시 타겟 스타일 */
         .mp-item.over { border-top: 2px solid var(--primary); }
-        .mp-add { margin-top: auto; display: flex; gap: 5px; padding-top: 5px;}
-        .mp-add input { flex: 1; margin: 0; font-size: 0.8rem; height: 30px; padding: 5px; border: 1px solid var(--border-color); background: #fcfdfd; }
         
+        /* 추가 버튼 스타일 */
+        .mp-add { margin-top: auto; display: flex; gap: 5px; padding: 8px; border-top: 1px solid #eee; background: #fafafa;}
+        .mp-add input { flex: 1; margin: 0; font-size: 0.8rem; height: 32px; padding: 5px; border: 1px solid var(--border-color); background: white; }
         .music-capsule { position: fixed; top: 20px; left: 20px; width: 220px; height: 50px; background: var(--primary-light); color: var(--primary-dark); border-radius: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 2300; display: flex; align-items: center; padding: 0 5px 0 15px; transition: 0.3s; overflow: hidden; border: 2px solid white; cursor: pointer;}
         .music-info { flex: 1; overflow: hidden; white-space: nowrap; font-size: 0.9rem; font-weight: bold; margin-right: 10px; }
         .music-play-btn { width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
