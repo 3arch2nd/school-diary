@@ -805,10 +805,12 @@
                             
                             <label style="margin-top:15px;">분량 목표</label>
                             <div style="display:flex; gap:10px; align-items:center;">
-                                <input type="range" id="neisLen" min="100" max="1000" step="50" value="300" 
+                                <label style="margin-top:15px;">분량 목표 (NEIS 바이트 기준)</label>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <input type="range" id="neisLen" min="100" max="1500" step="50" value="300" 
                                     oninput="document.getElementById('lenVal').innerText=this.value" style="margin:0; flex:1;">
-                                <span style="color:var(--primary); font-weight:bold; width:50px; text-align:right;">
-                                    <span id="lenVal">300</span>자
+                                <span style="color:var(--primary); font-weight:bold; width:70px; text-align:right;">
+                                    <span id="lenVal">300</span> byte
                                 </span>
                             </div>
 
@@ -1786,11 +1788,11 @@ function toggleFloatMenu() {
             }
         }
 
-        // [수정됨] AI 처리 로직 (상태바 연동)
+        // [수정] AI 처리 로직 (기본 기록: 100~200바이트 내외 간결하게)
         async function processNextAiJob() {
             if (aiJobQueue.length === 0) { 
                 isAiQueueRunning = false; 
-                hideStatusBar(); // 작업 끝나면 숨김
+                hideStatusBar(); 
                 showToast("✨ 모든 AI 변환 완료!");
                 return; 
             }
@@ -1798,21 +1800,22 @@ function toggleFloatMenu() {
             isAiQueueRunning = true; 
             const job = aiJobQueue[0];
             
-            // [UI] 상태바에 뉴스 헤드라인처럼 표시
             showStatusBar(`✨ AI 다듬는 중... [${job.name}] (대기: ${aiJobQueue.length}건)`);
             
             const prompt = `
                 역할: 초등학교 교사. 
-                작업: 생활기록부 기재용 평어 한 문장 작성.
+                작업: 생활기록부 기재용 평어 작성 (문장 다듬기).
                 입력정보: [주제: ${job.topic || '없음'}], [활동내용: ${job.text || '없음'}], [평가: ${job.check}].
                 
                 [작성 원칙]
                 1. 주제와 활동내용, 평가를 자연스럽게 이어지는 **하나의 문장**으로 만드세요.
-                2. '[주제]' 처럼 대괄호를 절대 쓰지 말고, 문맥 속에 녹여내세요. (예: '[탐구] ~함' (X) -> '탐구 활동을 통해 ~함' (O))
-                3. **굵게(볼드)**, "따옴표", '작은따옴표' 등 특수문자를 절대 사용하지 마세요.
-                4. 문장은 반드시 '~함' 또는 '~음'으로 명사형 종결하세요. (합쇼체 금지)
-                5. 학생의 성취 수준(${job.check})을 문장 끝부분 서술어에 적절히 반영하세요.
-                6. 페르소나: ${aiPersona}
+                2. **분량**: 100~200바이트(한글 기준 약 30~70자) 내외로 간결하게 작성하세요. 
+                   - 내용이 적다면 억지로 늘리지 말고 담백하게 100바이트(30자) 내외로 끝내세요.
+                3. '[주제]' 처럼 대괄호를 절대 쓰지 말고, 문맥 속에 녹여내세요.
+                4. **굵게(볼드)**, "따옴표", '작은따옴표' 등 특수문자를 절대 사용하지 마세요.
+                5. 문장은 반드시 '~함' 또는 '~음'으로 명사형 종결하세요. (합쇼체 금지)
+                6. 학생의 성취 수준(${job.check})을 문장 끝부분 서술어에 적절히 반영하세요.
+                7. 페르소나: ${aiPersona}
             `;
 
             try {
