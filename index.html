@@ -302,25 +302,65 @@
         .student-nav-item:hover { background: #eaf6fc; color: var(--primary-dark); border-color: var(--primary-light); }
         .student-nav-item.active { background: #eaf6fc; border-color: var(--primary); font-weight: bold; color: var(--primary-dark); border-width: 2px; }
 
-        /* [수정됨] 기록 상세 보기의 날짜/평가 줄바꿈 및 스타일 */
-        .history-card { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; border-bottom: 1px solid var(--bg-main); padding-bottom: 10px; }
-        
-        /* 세로 정렬(Column)로 변경하여 날짜 아래에 평가가 오도록 함 */
-        .h-info { 
-            width: 90px; 
-            flex-shrink: 0; 
-            text-align: center; 
+        /* [수정] 기록 상세 보기 레이아웃 (날짜/평가 세로 배치) */
+        .history-card { 
             display: flex; 
-            flex-direction: column; /* 세로 배치 */
-            gap: 4px; 
-            justify-content: center;
+            align-items: flex-start; /* 위쪽 정렬 */
+            gap: 8px; 
+            margin-bottom: 10px; 
+            border-bottom: 1px solid var(--border-color); 
+            padding-bottom: 10px; 
         }
         
-        .h-date { font-size: 0.8rem; color: #888; }
-        .h-badge { font-size: 0.8rem; font-weight: bold; color: var(--primary-dark); }
-        .h-eval { font-size: 0.75rem; color: white; background: var(--att-dot); padding: 2px 6px; border-radius: 10px; display: inline-block; align-self: center;}
-        .history-chk { padding-top: 2px; }
-        .history-content { flex: 1; }
+        /* 1. 체크박스 영역 */
+        .h-chk-wrap { 
+            padding-top: 5px; /* 텍스트 높이와 시각적 정렬 맞춤 */
+            flex-shrink: 0;
+        }
+
+        /* 2. 날짜 및 평가 정보 영역 (세로 스택) */
+        .h-meta-col {
+            display: flex; 
+            flex-direction: column; /* 세로 배치 핵심 */
+            width: 70px; /* 고정 너비로 줄바꿈 유도 */
+            flex-shrink: 0;
+            align-items: center;
+            gap: 3px;
+        }
+        .h-date { 
+            font-size: 0.75rem; 
+            color: var(--text-sub); 
+            letter-spacing: -0.5px;
+        }
+        .h-badge { 
+            font-size: 0.75rem; 
+            font-weight: bold; 
+            color: white; 
+            background: var(--primary); /* 배지 배경색 */
+            padding: 2px 6px; 
+            border-radius: 10px; 
+            line-height: 1.2;
+            word-break: keep-all; /* 단어 중간 끊김 방지 */
+            text-align: center;
+        }
+
+        /* 3. 텍스트 입력 영역 */
+        .h-text { 
+            flex-grow: 1; 
+            border: 1px solid var(--border-color); 
+            border-radius: 4px; 
+            padding: 8px; 
+            font-size: 0.95rem; 
+            resize: none; 
+            height: 60px; /* 기본 높이 설정 */
+            line-height: 1.4;
+        }
+        
+        /* 4. 복사 버튼 영역 */
+        .h-btn-area {
+            flex-shrink: 0;
+            padding-top: 5px;
+        }
 
         .att-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #eee; }
         .att-name { width: 50px; font-weight: bold; font-size: 0.9rem; flex-shrink: 0; }
@@ -2102,18 +2142,46 @@ function toggleFloatMenu() {
             document.getElementById('viewSubBtn').className=m==='subject'?'btn-sm active':'btn-sm inactive'; document.getElementById('viewBehBtn').className=m==='behavior'?'btn-sm active':'btn-sm inactive'; document.getElementById('viewSubjectFilter').style.display=m==='subject'?'block':'none'; loadHistory(); }
         let subjectFilterPreserved = "";
         async function loadHistory() { 
-            if(!selectedStudentName)return; 
-            const c=document.getElementById('historyViewer'); c.innerHTML='로딩<span class="loading-anim"></span>';
+            if(!selectedStudentName) return; 
+            
+            const c = document.getElementById('historyViewer'); 
+            c.innerHTML = '<div style="text-align:center; padding:20px;">로딩 중 <span class="loading-anim"></span></div>';
+            
             const filterEl = document.getElementById('viewSubjectFilter');
-            if (subjectFilterPreserved && filterEl.options.length > 0) { filterEl.value = subjectFilterPreserved;
+            if (subjectFilterPreserved && filterEl.options.length > 0) { 
+                filterEl.value = subjectFilterPreserved;
             }
-            const t=viewTabMode==='subject'?filterEl.value:'행동'; 
-            const h=await sendRequest('get_history',{name:selectedStudentName,type:t})||[]; 
-            c.innerHTML='';
-            if(h.length===0){c.innerHTML='<div style="color:#999;padding:20px;text-align:center">기록 없음</div>';return;} 
-            h.forEach(i=>{
-                const d=document.createElement('div'); d.className='history-card';
-                d.innerHTML=`<div class="h-left"><input type="checkbox" class="hist-chk" value="${i.rowNum}" data-org-text="${i.txt}"><span class="h-date">${i.date}</span>${i.check!=='없음'?`<span class="h-badge">${i.check}</span>`:''}</div><textarea class="h-text" id="hist_txt_${i.rowNum}" oninput="markEdited(this, ${i.rowNum})">${i.txt}</textarea><div class="h-btn-area"><button class="btn-icon" onclick="copyText('hist_txt_${i.rowNum}')">복사</button></div>`;
+            
+            const t = viewTabMode === 'subject' ? filterEl.value : '행동'; 
+            const h = await sendRequest('get_history', {name: selectedStudentName, type: t}) || []; 
+            
+            c.innerHTML = '';
+            if(h.length === 0){
+                c.innerHTML = '<div style="color:var(--text-sub); padding:30px; text-align:center;">기록이 없습니다.</div>';
+                return;
+            } 
+            
+            h.forEach(i => {
+                const d = document.createElement('div'); 
+                d.className = 'history-card';
+                
+                // [수정] 구조 변경: 체크박스 / 메타정보(날짜,평가) / 텍스트 / 버튼 분리
+                d.innerHTML = `
+                    <div class="h-chk-wrap">
+                        <input type="checkbox" class="hist-chk" value="${i.rowNum}" data-org-text="${i.txt}">
+                    </div>
+                    
+                    <div class="h-meta-col">
+                        <span class="h-date">${i.date}</span>
+                        ${i.check !== '없음' ? `<span class="h-badge">${i.check}</span>` : ''}
+                    </div>
+                    
+                    <textarea class="h-text" id="hist_txt_${i.rowNum}" oninput="markEdited(this, ${i.rowNum})">${i.txt}</textarea>
+                    
+                    <div class="h-btn-area">
+                        <button class="btn-icon" onclick="copyText('hist_txt_${i.rowNum}')">복사</button>
+                    </div>
+                `;
                 c.appendChild(d);
             });
         }
