@@ -881,20 +881,26 @@
              </div>
         </div>
         
-        <div id="memo" class="section">
+<div id="memo" class="section">
             <div class="split-container">
-                <div class="split-left"><div class="card full-height"><div class="scroll-wrapper"><div class="card-header"><span>메모</span><div style="display:flex; gap:5px;"><button class="btn-sm active" id="btnMemoModeCal" onclick="setMemoMode('cal')">달력</button><button class="btn-sm inactive" id="btnMemoModeList" onclick="setMemoMode('list')">목록</button></div></div><div id="memoSearchArea" style="margin-bottom:10px; display:none;"><input type="text" id="memoSearchInput" placeholder="메모 검색..." oninput="renderMemoList()"></div>
-                <div id="memoCalView">
-                    <div class="card-header" style="justify-content:center; gap:15px; border-bottom:none;">
-                        <button class="arrow-btn" onclick="moveMemoMonth(-1)">◀</button>
-                        <span id="memoMonthTitle"></span>
-                        <button class="arrow-btn" onclick="moveMemoMonth(1)">▶</button>
-                        <button class="btn-sm" style="margin-left:5px;" onclick="goToMemoToday()">오늘</button>
-                    </div>
-                    <div class="cal-grid" id="memoCalGrid"></div>
-                    <div id="memoDatePreview" style="margin-top:15px; border-top:1px solid #eee; padding-top:10px; display:none;"></div>
+                <div class="split-left">
+                    <div class="card full-height">
+                        <div class="scroll-wrapper">
+                            <div class="card-header"><span>메모</span><div style="display:flex; gap:5px;"><button class="btn-sm active" id="btnMemoModeCal" onclick="setMemoMode('cal')">달력</button><button class="btn-sm inactive" id="btnMemoModeList" onclick="setMemoMode('list')">목록</button></div></div>
+                            <div id="memoSearchArea" style="margin-bottom:10px; display:none;"><input type="text" id="memoSearchInput" placeholder="메모 검색..." oninput="renderMemoList()"></div>
+                            <div id="memoCalView">
+                                <div class="card-header" style="justify-content:center; gap:15px; border-bottom:none;">
+                                    <button class="arrow-btn" onclick="moveMemoMonth(-1)">◀</button>
+                                    <span id="memoMonthTitle"></span>
+                                    <button class="arrow-btn" onclick="moveMemoMonth(1)">▶</button>
+                                    <button class="btn-sm" style="margin-left:5px;" onclick="goToMemoToday()">오늘</button>
+                                </div>
+                                <div class="cal-grid" id="memoCalGrid"></div>
+                                <div id="memoDatePreview" style="margin-top:15px; border-top:1px solid #eee; padding-top:10px; display:none;"></div>
+                            </div>
+                            <div id="memoListView" style="display:none;"></div>
+                        </div> </div>
                 </div>
-                <div id="memoListView" style="display:none;"></div></div></div></div>
                 <div class="split-right"><div class="card full-height"><div class="scroll-wrapper"><div class="card-header">작성 <span id="memoDateDisp" style="font-size:0.9rem; color:var(--text-sub); font-weight:normal;"></span></div><input type="hidden" id="memoEditRow"><textarea id="memoContent" style="height:300px; resize:none;" placeholder="내용을 입력하세요..."></textarea><div style="display:flex; gap:15px; margin-bottom:15px;"><label><input type="checkbox" id="memoPinned"> 중요</label><label><input type="checkbox" id="memoDone"> 완료</label></div><div style="text-align:right;"><button class="btn btn-danger" id="btnDelMemo" style="display:none; margin-right:10px;" onclick="deleteMemo()">삭제</button><button class="btn btn-primary" onclick="saveMemo()">저장</button><button class="btn btn-outline" style="margin-left:10px;" onclick="clearMemoInput()">새 메모</button></div></div></div></div>
             </div>
         </div>
