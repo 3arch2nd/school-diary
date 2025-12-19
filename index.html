@@ -1383,24 +1383,28 @@ function toggleFloatMenu() {
         }
         
         // [Mobile Record Mode Logic]
+        // [수정] 모바일 탭 전환 로직 (자동 로딩 방지 & 드롭다운 초기화)
         function setMobileMode(m) {
             mobileMode = m;
             document.getElementById('mobBtnSub').className = m === 'subject' ? 'btn-sm active' : 'btn-sm inactive';
-            document.getElementById('mobBtnBeh').className = m === 'behavior' ?
-            'btn-sm active' : 'btn-sm inactive';
+            document.getElementById('mobBtnBeh').className = m === 'behavior' ? 'btn-sm active' : 'btn-sm inactive';
             document.getElementById('mobBtnCust').className = m === 'custom' ? 'btn-sm active' : 'btn-sm inactive';
+            
             if(m === 'custom') {
                 document.getElementById('mobViewQuick').style.display = 'none';
                 document.getElementById('mobViewCustom').style.display = 'flex';
+                
                 const s = document.getElementById('mobCustomSelect');
-                s.innerHTML = '';
+                s.innerHTML = '<option>로딩 중...</option>';
+                
                 loadCustomItems().then(() => {
+                    s.innerHTML = '<option value="">(항목을 선택하세요)</option>'; // [수정] 기본 안내 문구 추가
                     customItems.forEach((item, idx) => {
                        const opt = document.createElement('option'); opt.value = idx; opt.innerText = item.name;
                        s.appendChild(opt);
-                 
-                   });
-                    if(customItems.length > 0) renderMobileCustomList();
+                    });
+                    // [수정] 자동 로딩 제거: 사용자가 선택하기 전엔 빈 화면 유지
+                    document.getElementById('mobCustomList').innerHTML = '<div style="text-align:center; padding:50px; color:#ccc;">항목을 선택해주세요</div>'; 
                 });
             } else {
                 document.getElementById('mobViewQuick').style.display = 'flex';
@@ -1411,89 +1415,67 @@ function toggleFloatMenu() {
             }
         }
 
-        async function saveMobileQuickRecord() {
-            const t = document.getElementById('mobQuickInput').value.trim();
-            if(!t) return;
-            showToast("✨ 처리 중");
-            try {
-                let prompt = "";
-                if(mobileMode === 'subject') {
-                    prompt = `입력:"${t}".
-                    규칙: 이름/과목/내용 분리. JSON출력:{"name":"이름","type":"과목","text":"내용"}`;
-                } else {
-                    prompt = `입력:"${t}".
-                    규칙: 이름/내용 분리. 과목은 '행동'으로 고정. JSON출력:{"name":"이름","type":"행동","text":"내용"}`;
-                }
-                const a = await sendRequest('call_ai', {prompt});
-                const j = JSON.parse(a.text.replace(/```json/g,"").replace(/```/g,""));
-                await sendRequest('save_record', {
-                    date: document.getElementById('mobDate').value, 
-                    name: j.name, type: j.type, text: j.text, check: "없음"
-                });
-                document.getElementById('mobQuickInput').value = "";
-                showToast("저장 완료");
-            } catch(e) { showToast("실패"); }
-        }
-
-        // [수정] 모바일 커스텀 리스트 렌더링 (데이터 불러오기 기능 추가)
-    async function renderMobileCustomList() {
-        const idx = document.getElementById('mobCustomSelect').value;
-        const container = document.getElementById('mobCustomList');
-        
-        // 선택된 항목이 없으면 중단
-        if (idx === null || idx === undefined || idx === "") {
-            container.innerHTML = '';
-            return;
-        }
-
-        // 로딩 표시
-        container.innerHTML = '<div style="text-align:center; padding:15px; color:#888;">데이터 불러오는 중... <span class="loading-anim"></span></div>';
-
-        // 1. 최신 데이터 가져오기
-        const allData = await sendRequest('custom_record', {mode: 'get'});
-        customRecordCache = allData || [];
-
-        // UI 초기화
-        container.innerHTML = '';
-        const itemDef = customItems[idx];
-        const date = document.getElementById('mobDate').value;
-
-        studentList.forEach(st => {
-            const row = document.createElement('div');
-            row.className = 'student-row';
-
-            // 2. 현재 날짜/항목/학생에 맞는 기록 찾기
-            const record = customRecordCache.find(r => r.date === date && r.item === itemDef.name && r.name === st.name);
-            const savedVal = record ? record.value : "";
-
-            let inputHtml = '';
+        // [수정] 모바일 커스텀 리스트 렌더링 (로딩 텍스트 중복 수정)
+        async function renderMobileCustomList() {
+            const idx = document.getElementById('mobCustomSelect').value;
+            const container = document.getElementById('mobCustomList');
             
-            // 3. 타입별로 기존 값(savedVal) 반영하여 태그 생성
-            if (itemDef.type === 'check') {
-                const isChecked = savedVal === 'O' ? 'checked' : '';
-                inputHtml = `<input type="checkbox" class="mob-cust-val" style="width:20px; height:20px; margin:0;" ${isChecked}>`;
-            } 
-            else if (itemDef.type === 'switch') {
-                const isChecked = savedVal === 'ON' ? 'checked' : '';
-                inputHtml = `<label class="switch"><input type="checkbox" class="mob-cust-val" ${isChecked}><span class="slider"></span></label>`;
-            } 
-            else if (itemDef.type === 'select') {
-                inputHtml = `<select class="mob-cust-val" style="margin:0;">
-                    <option value="">-</option>
-                    <option ${savedVal === '상' ? 'selected' : ''}>상</option>
-                    <option ${savedVal === '중' ? 'selected' : ''}>중</option>
-                    <option ${savedVal === '하' ? 'selected' : ''}>하</option>
-                </select>`;
+            // 선택된 항목이 없으면 중단
+            if (idx === null || idx === undefined || idx === "") {
+                container.innerHTML = '<div style="text-align:center; padding:50px; color:#ccc;">항목을 선택해주세요</div>';
+                return;
             }
 
-            row.innerHTML = `<div class="st-name" style="width:80px; font-weight:bold;">${st.name}</div><div style="flex:1;"></div>${inputHtml}`;
-            container.appendChild(row);
-        });
-    }
+            // [수정] 로딩 텍스트 깔끔하게 (애니메이션만 나오도록 점 제거)
+            container.innerHTML = '<div style="text-align:center; padding:15px; color:#888;">데이터 불러오는 중 <span class="loading-anim"></span></div>';
 
+            // 1. 최신 데이터 가져오기
+            const allData = await sendRequest('custom_record', {mode: 'get'});
+            customRecordCache = allData || [];
+
+            // UI 초기화
+            container.innerHTML = '';
+            const itemDef = customItems[idx];
+            const date = document.getElementById('mobDate').value;
+
+            studentList.forEach(st => {
+                const row = document.createElement('div');
+                row.className = 'student-row';
+
+                // 2. 현재 날짜/항목/학생에 맞는 기록 찾기
+                const record = customRecordCache.find(r => r.date === date && r.item === itemDef.name && r.name === st.name);
+                const savedVal = record ? record.value : "";
+
+                let inputHtml = '';
+                
+                // 3. 타입별로 기존 값(savedVal) 반영하여 태그 생성
+                if (itemDef.type === 'check') {
+                    const isChecked = savedVal === 'O' ? 'checked' : '';
+                    inputHtml = `<input type="checkbox" class="mob-cust-val" style="width:24px; height:24px; margin:0;" ${isChecked}>`;
+                } 
+                else if (itemDef.type === 'switch') {
+                    const isChecked = savedVal === 'ON' ? 'checked' : '';
+                    inputHtml = `<label class="switch"><input type="checkbox" class="mob-cust-val" ${isChecked}><span class="slider"></span></label>`;
+                } 
+                else if (itemDef.type === 'select') {
+                    inputHtml = `<select class="mob-cust-val" style="margin:0;">
+                        <option value="">-</option>
+                        <option ${savedVal === '상' ? 'selected' : ''}>상</option>
+                        <option ${savedVal === '중' ? 'selected' : ''}>중</option>
+                        <option ${savedVal === '하' ? 'selected' : ''}>하</option>
+                    </select>`;
+                }
+
+                row.innerHTML = `<div class="st-name" style="width:80px; font-weight:bold;">${st.name}</div><div style="flex:1;"></div>${inputHtml}`;
+                container.appendChild(row);
+            });
+        }
+
+        // [수정] 모바일 커스텀 저장 (저장 후 즉시 반영하여 체크 풀림 방지)
         async function saveMobileCustom() {
              const idx = document.getElementById('mobCustomSelect').value;
-             if(idx === null) return;
+             if(idx === null || idx === "") return; // 선택 안했으면 저장 안함
+             
              const itemDef = customItems[idx];
              const rows = document.querySelectorAll('#mobCustomList .student-row');
              const data = [];
@@ -1503,18 +1485,32 @@ function toggleFloatMenu() {
                  const name = row.querySelector('.st-name').innerText;
                  const el = row.querySelector('.mob-cust-val');
                  let val = "";
+                 
                  if(itemDef.type === 'select') val = el.value;
-            
-                 else val = el.checked ? (itemDef.type==='check'?'O':'ON') : '';
+                 else val = el.checked ? (itemDef.type==='check'?'O':'ON') : ''; // 체크/스위치 값 확인
+                 
                  if(val) data.push({date: date, item: itemDef.name, name: name, value: val});
              });
+             
              if(data.length > 0) {
+                 const btn = document.querySelector('#mobViewCustom .btn-primary'); // 저장 버튼 찾기
+                 setLoading(btn, "저장 중...");
+                 
                  await sendRequest('custom_record', {mode:'save', data: data});
-                 showToast("저장 완료");
-                 document.querySelectorAll('.mob-cust-val').forEach(e => {
-                     if(e.type === 'checkbox') e.checked = false;
-                 });
-             } else { showToast("선택된 내용 없음"); }
+                 
+                 // [핵심 수정] 저장 후 서버 데이터를 다시 불러와서 화면에 '확정'시킴
+                 // 이렇게 해야 저장된 상태가 UI에 확실히 반영되어 체크가 유지됨
+                 await renderMobileCustomList(); 
+                 
+                 showToast("저장 및 적용 완료! ✅");
+                 clearLoading(btn);
+             } else { 
+                 showToast("선택된 내용 없음"); 
+                 
+                 // 내용이 없어서(모두 체크 해제 등) 저장할 게 없는 경우에도
+                 // 화면을 갱신해주는 것이 안전함 (선택사항이지만 추천)
+                 // await sendRequest('custom_record', {mode:'save', data: []}); // 빈 데이터 전송이 필요하다면 로직 추가
+             }
         }
 
         // [CUSTOM MODE LOGIC]
