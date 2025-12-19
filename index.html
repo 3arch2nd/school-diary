@@ -1022,8 +1022,12 @@
 
         window.onload = () => { checkLock(); document.getElementById('rDate').valueAsDate = new Date();
             document.getElementById('mobDate').valueAsDate = new Date(); initEnvironment(); };
-        function checkCaps(e) { const caps = e.getModifierState && e.getModifierState("CapsLock"); document.getElementById('lockMsg').innerText = caps ?
-            "💡 Caps Lock 켜짐" : "비밀번호 입력 (한/영 확인)"; if(e.keyCode===13) unlockApp();
+function checkCaps(e) { 
+            const caps = e.getModifierState && e.getModifierState("CapsLock"); 
+            // [수정] Caps Lock이 켜졌을 때만 문구 표시, 평소엔 빈칸
+            document.getElementById('lockMsg').innerText = caps ? "💡 Caps Lock 켜짐" : ""; 
+            
+            if(e.keyCode === 13) unlockApp();
         }
         function checkLock() { 
             let unlocked = false;
