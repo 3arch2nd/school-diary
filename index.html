@@ -1029,26 +1029,37 @@ function checkCaps(e) {
             
             if(e.keyCode === 13) unlockApp();
         }
+        // 1. 잠금 상태 확인 (페이지 로드 시)
         function checkLock() { 
             let unlocked = false;
-            try { unlocked = sessionStorage.getItem('isUnlocked') === 'true'; } catch(e) {}
-            if(unlocked) { document.getElementById('lockScreen').style.display='none';
-            loadAllData(); } 
+            // [수정] sessionStorage -> localStorage로 변경 (브라우저 닫아도 유지됨)
+            try { unlocked = localStorage.getItem('isUnlocked') === 'true'; } catch(e) {}
+            
+            if(unlocked) { 
+                document.getElementById('lockScreen').style.display = 'none';
+                loadAllData(); 
+            } 
         }
+
+        // 2. 잠금 해제 (로그인 성공 시)
         function unlockApp() { 
             const pw = document.getElementById('lockInput').value;
             if(pw === 'ekdms320') { 
-                try { sessionStorage.setItem('isUnlocked', 'true');
-                } catch(e) {}
-                document.getElementById('lockScreen').style.display='none'; 
+                // [수정] 로그인 성공 상태를 localStorage에 영구 저장
+                try { localStorage.setItem('isUnlocked', 'true'); } catch(e) {}
+                
+                document.getElementById('lockScreen').style.display = 'none'; 
                 loadAllData();
             } else { 
                 alert('비밀번호 오류');
-                document.getElementById('lockInput').value=''; 
+                document.getElementById('lockInput').value = ''; 
             } 
         }
+
+        // 3. 다시 잠그기 (자물쇠 버튼 클릭 시)
         function relockApp() {
-            try { sessionStorage.setItem('isUnlocked', 'false'); } catch(e) {}
+            // [수정] 사용자가 명시적으로 잠글 때만 저장소 값을 false로 변경
+            try { localStorage.setItem('isUnlocked', 'false'); } catch(e) {}
             location.reload();
         }
         async function loadAllData() { 
