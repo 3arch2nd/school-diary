@@ -999,6 +999,20 @@
         </div>
     </div>
 </div>
+        <div id="editEventModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-title" style="font-weight:bold; margin-bottom:15px;">일정 수정</div>
+            <input type="hidden" id="editEventId">
+            <label>내용</label>
+            <input type="text" id="editEventTitle" placeholder="일정 내용">
+            <label>날짜 이동</label>
+            <input type="date" id="editEventDate">
+            <div style="text-align:right; margin-top:15px;">
+                <button class="btn btn-outline" onclick="document.getElementById('editEventModal').classList.remove('open')">취소</button>
+                <button class="btn btn-primary" onclick="confirmEditEvent()">수정 완료</button>
+            </div>
+        </div>
+    </div>
     <div id="toast"></div>
     <div id="confirmModal" class="modal-overlay"><div class="modal-card"><div class="modal-msg" id="confirmMsg"></div><div style="text-align:center; display:flex; gap:10px;"><button class="btn btn-outline" style="flex:1" onclick="document.getElementById('confirmModal').classList.remove('open')">취소</button><button class="btn btn-primary" style="flex:1" id="btnConfirmYes">확인</button></div></div></div>
     <div id="subjectModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="font-weight:bold; margin-bottom:15px;">새 과목 추가</div><input type="text" id="newSubjectName" placeholder="과목명"><div style="text-align:right;"><button class="btn btn-outline" onclick="closeSubjectModal()">취소</button> <button id="confirmSubjectBtn" class="btn btn-primary" onclick="confirmAddSubject()">추가</button></div></div></div>
@@ -2057,6 +2071,7 @@ function toggleFloatMenu() {
         }
 
         // [수정] 일별 일정 보기 (수정/삭제 버튼 포함)
+        // [수정] 일별 일정 보기 (수정 버튼이 모달을 열도록 변경)
         async function showDailyView(day) { 
             document.getElementById('calDetailTitle').innerText = `${selectedDate} 일정`;
             const div = document.getElementById('dailyEvents'); 
@@ -2069,29 +2084,54 @@ function toggleFloatMenu() {
             } else {
                 evs.forEach(e => {
                     const row = document.createElement('div');
-                    row.className = 'cal-event-item'; // CSS에 이미 추가된 스타일 사용
+                    row.className = 'cal-event-item';
                     row.innerHTML = `
                         <span class="ce-title">• ${e.title}</span>
                         <div class="ce-btns">
-                            <button class="btn-icon" onclick="updateCalEvent('${e.id}', '${e.title}')">✏️</button>
+                            <button class="btn-icon" onclick="openEditEventModal('${e.id}', '${e.title}', '${selectedDate}')">✏️</button>
                             <button class="btn-icon" style="color:var(--danger)" onclick="deleteCalEvent('${e.id}')">x</button>
                         </div>
                     `;
                     div.appendChild(row);
                 });
             }
-            loadAtt(); // 출석부 로드
+            loadAtt(); 
         }
-        // [추가] 캘린더 일정 수정 기능
-        async function updateCalEvent(id, oldTitle) {
-            const newTitle = prompt("일정 내용을 수정하세요:", oldTitle);
-            if(newTitle && newTitle !== oldTitle) {
-                showStatusBar("📅 일정 수정 중...");
-                await sendRequest('update_event', {id: id, title: newTitle});
-                hideStatusBar();
-                showToast("수정 완료");
-                loadGoogleEvents().then(() => showDailyView());
-            }
+        // [추가] 일정 수정 모달 열기
+        function openEditEventModal(id, title, date) {
+            document.getElementById('editEventId').value = id;
+            document.getElementById('editEventTitle').value = title;
+            document.getElementById('editEventDate').value = date; // 현재 날짜 자동 입력
+            document.getElementById('editEventModal').classList.add('open');
+        }
+
+        // [추가] 일정 수정 확정 (서버 전송)
+        async function confirmEditEvent() {
+            const id = document.getElementById('editEventId').value;
+            const title = document.getElementById('editEventTitle').value;
+            const newDate = document.getElementById('editEventDate').value;
+
+            if(!title) return;
+
+            showStatusBar("📅 일정 수정 중..."); // 백그라운드 작업 표시
+            
+            // 제목과 변경된 날짜를 함께 전송
+            await sendRequest('update_event', {
+                id: id, 
+                title: title, 
+                newDate: newDate 
+            });
+            
+            hideStatusBar();
+            showToast("일정이 수정되었습니다. ✨");
+            document.getElementById('editEventModal').classList.remove('open');
+            
+            // 날짜가 바뀌었을 수도 있으므로 전체 갱신
+            // 만약 날짜를 바꿨다면 현재 보고 있는 날짜에서는 사라지는 게 정상입니다.
+            loadGoogleEvents().then(() => {
+                renderCalendar(); // 달력 점 갱신
+                showDailyView();  // 리스트 갱신
+            });
         }
 
         // [추가] 캘린더 일정 삭제 기능
