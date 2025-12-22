@@ -2234,14 +2234,28 @@ function toggleFloatMenu() {
             showToast("일정이 수정되었습니다.");
         }
 
-        // [추가] 캘린더 일정 삭제 기능
+        // [수정] 캘린더 일정 삭제 (상태바 단계별 안내 및 갱신 대기)
         async function deleteCalEvent(id) {
             reqConfirm("이 일정을 삭제하시겠습니까?", async () => {
+                // 1. 상태바 표시 (1단계)
                 showStatusBar("🗑️ 일정 삭제 중...");
+
+                // 2. 서버에 삭제 요청
                 await sendRequest('delete_event', {id: id});
+
+                // 3. 상태바 멘트 변경 (2단계: 사용자에게 갱신 중임을 알림)
+                updateStatusText("🔄 달력에 반영 중...");
+
+                // 4. 전체 데이터 새로고침 (완료될 때까지 기다림)
+                await loadGoogleEvents();
+
+                // 5. 화면(달력 점, 리스트) 갱신
+                renderCalendar();
+                showDailyView();
+
+                // 6. 모든 작업 완료 후 상태바 숨김 및 토스트
                 hideStatusBar();
                 showToast("삭제 완료");
-                loadGoogleEvents().then(() => showDailyView());
             });
         }
         async function loadAtt() { const l=document.getElementById('attList'); l.innerHTML='로딩<span class="loading-anim"></span>'; const d=await sendRequest('get_attendance');
