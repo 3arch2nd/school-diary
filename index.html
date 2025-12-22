@@ -2257,17 +2257,31 @@ function toggleFloatMenu() {
             showToast("출석 저장 완료"); 
             loadAttendanceForDots().then(renderCalendar); 
         }
-        // [수정] 일정 등록 (상태바 연동)
+        // [수정] 일정 등록 (상태바 단계별 안내 및 갱신 대기)
         async function addEvent() { 
             const t = document.getElementById('newEvent').value; 
             if(t) { 
-                showStatusBar("📅 일정 등록 중..."); // [상태바 표시]
-                await sendRequest('save_event', {date: selectedDate, title: t}); 
-                hideStatusBar(); // [상태바 숨김]
+                // 1. 상태바 표시
+                showStatusBar("📅 일정 등록 중..."); 
                 
+                // 2. 서버에 저장 요청
+                await sendRequest('save_event', {date: selectedDate, title: t}); 
+                
+                // 3. 상태바 멘트 변경 (사용자에게 갱신 중임을 알림)
+                updateStatusText("🔄 달력에 반영 중...");
+                
+                // 4. 입력창 초기화
                 document.getElementById('newEvent').value = ''; 
-                showToast("일정이 등록되었습니다."); 
-                loadGoogleEvents().then(() => showDailyView()); 
+
+                // 5. 달력 데이터 새로고침 (완료될 때까지 기다림)
+                await loadGoogleEvents();
+                
+                // 6. 화면(리스트) 갱신
+                showDailyView(); 
+                
+                // 7. 모든 작업 완료 후 상태바 숨김
+                hideStatusBar();
+                showToast("일정이 등록되었습니다. ✨"); 
             } 
         }
         async function openMonthAttSummary() { 
