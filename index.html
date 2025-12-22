@@ -1249,32 +1249,30 @@ function toggleFloatMenu() {
             document.querySelector('.music-play-btn').innerText = '⏸'; 
             isMusicPlaying = true;
         }
-        // [추가] 재생/일시정지 토글 기능
+        // [수정] 재생/일시정지 토글 (토스트 메시지 정리)
         function togglePlayPause(e) {
             e.stopPropagation(); // 부모(리스트 열기) 클릭 이벤트 방지
 
             const iframe = document.getElementById('musicIframe');
             const btn = document.querySelector('.music-play-btn');
 
-            // 음악이 선택되지 않은 상태라면
-            if (!iframe.src || iframe.src === "about:blank" || iframe.src === "") {
+            // 1. 음악이 선택되지 않은 상태라면 -> 이때만 토스트 띄움
+            if (!iframe.src || iframe.src === "about:blank" || iframe.src === "" || iframe.src === location.href) {
                 showToast("🎵 재생할 음악을 먼저 목록에서 선택해주세요.");
                 toggleMusicPanel(); // 친절하게 목록을 열어줌
                 return;
             }
 
             if (isMusicPlaying) {
-                // 재생 중이면 -> 멈춤 명령 전송
+                // 2. 재생 중 -> 멈춤 (토스트 삭제)
                 iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
-                btn.innerText = '▶'; // 아이콘을 재생 모양으로
+                btn.innerText = '▶'; // 아이콘 변경으로 상태 표시
                 isMusicPlaying = false;
-                showToast("음악 일시정지 ⏸");
             } else {
-                // 멈춤 상태면 -> 재생 명령 전송
+                // 3. 멈춤 -> 재생 (토스트 삭제)
                 iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-                btn.innerText = '⏸'; // 아이콘을 일시정지 모양으로
+                btn.innerText = '⏸'; // 아이콘 변경으로 상태 표시
                 isMusicPlaying = true;
-                showToast("음악 재생 ▶");
             }
         }
         async function addMusic() {
