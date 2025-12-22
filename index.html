@@ -288,6 +288,14 @@
         .cal-dot { width: 6px; height: 6px; border-radius: 50%; }
         .cal-dot.event { background: var(--primary); }
         .cal-dot.att { background: var(--att-dot); }
+        /* [추가] 캘린더 일정 리스트 아이템 스타일 */
+        .cal-event-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 6px 0; border-bottom: 1px dashed #eee; font-size: 0.95rem;
+        }
+        .ce-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .ce-btns { flex-shrink: 0; display: flex; gap: 5px; opacity: 0.5; transition: 0.2s; }
+        .cal-event-item:hover .ce-btns { opacity: 1; }
         
         .memo-mini-item { padding: 10px 8px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 0.9rem; color: var(--text-main); display: block; width: 100%; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; height: 40px; line-height: 20px; }
         .memo-mini-item:hover { color: var(--primary); }
@@ -2131,22 +2139,32 @@ function toggleFloatMenu() {
 
         function renderMemoPreview() { const a=document.getElementById('memoDatePreview'); const t=memoList.filter(m=>m.date===selectedMemoDate); if(t.length===0){a.style.display='none';return;} a.style.display='block'; a.innerHTML='';
         t.forEach(m=>{const d=document.createElement('div');d.className='memo-mini-item'+(m.done?' done-memo':'');d.innerText=(m.pinned?'★ ':'')+m.content;d.onclick=()=>openMemoForm(m);a.appendChild(d);}); }
+// [수정] 메모 렌더링 (정렬: 중요 > 날짜최신 > 생성최신 순)
         function renderMemoList() { 
             const keyword = document.getElementById('memoSearchInput').value.toLowerCase();
-            const l=document.getElementById('memoListView'); l.innerHTML=''; 
+            const l = document.getElementById('memoListView'); 
+            l.innerHTML = ''; 
+            
             let filtered = memoList.filter(m => m.content.toLowerCase().includes(keyword));
             
-            // 중요(pinned) 우선, 그 다음 날짜 최신순 정렬
             filtered.sort((a,b) => {
+                // 1순위: 중요(Pinned) 여부
                 if (a.pinned !== b.pinned) return b.pinned ? 1 : -1; 
-                return new Date(b.date) - new Date(a.date);
+                
+                // 2순위: 날짜 (최신순)
+                const dateDiff = new Date(b.date) - new Date(a.date);
+                if (dateDiff !== 0) return dateDiff;
+                
+                // 3순위: 같은 날짜면 나중에 생성된 것(Row 번호가 큰 것)이 위로
+                return b.row - a.row; 
             });
 
-            filtered.forEach(m=>{
-                const d=document.createElement('div');d.className='memo-list-item'+(m.done?' done-memo':'');
+            filtered.forEach(m => {
+                const d = document.createElement('div');
+                d.className = 'memo-list-item' + (m.done ? ' done-memo' : '');
                 const pinIcon = m.pinned ? '<span class="memo-pinned-icon">★</span>' : '';
-                d.innerHTML=`<div class="memo-list-date"><span>${m.date}</span></div><div class="memo-list-content">${pinIcon}${m.content}</div>`;
-                d.onclick=()=>{selectedMemoDate=m.date;openMemoForm(m);};
+                d.innerHTML = `<div class="memo-list-date"><span>${m.date}</span></div><div class="memo-list-content">${pinIcon}${m.content}</div>`;
+                d.onclick = () => { selectedMemoDate = m.date; openMemoForm(m); };
                 l.appendChild(d);
             });
         }
