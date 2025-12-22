@@ -1928,7 +1928,30 @@ function toggleFloatMenu() {
         // [Student Manager]
         async function loadStudents() { studentList=await sendRequest('get_students')||[];
             renderRecordList(); renderStudentNav(); }
-        function renderStudentNav() { const l=document.getElementById('studentNavList'); l.innerHTML=''; studentList.forEach(s=>{const d=document.createElement('div');d.className='student-nav-item';d.innerHTML=`<span>${s.id}. <b>${s.name}</b></span><span>></span>`;d.onclick=()=>{selectedStudentName=s.name;loadHistory();};l.appendChild(d);});
+        // [수정] 학생 명단 렌더링 (클릭 시 하이라이트 효과 추가)
+        function renderStudentNav() { 
+            const l = document.getElementById('studentNavList'); 
+            l.innerHTML = ''; 
+            
+            studentList.forEach(s => {
+                const d = document.createElement('div');
+                d.className = 'student-nav-item';
+                // 이미 선택된 학생이 있다면 처음에 색칠해서 보여줌
+                if(selectedStudentName === s.name) d.classList.add('active');
+                
+                d.innerHTML = `<span>${s.id}. <b>${s.name}</b></span><span>></span>`;
+                
+                d.onclick = (e) => {
+                    // 1. 기존 하이라이트 제거
+                    document.querySelectorAll('.student-nav-item').forEach(el => el.classList.remove('active'));
+                    // 2. 현재 클릭한 버튼 하이라이트 (currentTarget 사용)
+                    e.currentTarget.classList.add('active');
+                    
+                    selectedStudentName = s.name;
+                    loadHistory();
+                };
+                l.appendChild(d);
+            });
         }
         function openStudentManageModal() { const c=document.getElementById('manageStudentRows'); c.innerHTML=''; if(studentList.length>0)studentList.forEach(s=>addStudentRow(s.id,s.name)); else for(i=0;i<3;i++)addStudentRow(); document.getElementById('manageStudentModal').classList.add('open');
         }
@@ -2357,9 +2380,16 @@ function toggleFloatMenu() {
         function viewTab(m) { viewTabMode=m;
             document.getElementById('viewSubBtn').className=m==='subject'?'btn-sm active':'btn-sm inactive'; document.getElementById('viewBehBtn').className=m==='behavior'?'btn-sm active':'btn-sm inactive'; document.getElementById('viewSubjectFilter').style.display=m==='subject'?'block':'none'; loadHistory(); }
         let subjectFilterPreserved = "";
+        // [수정] 기록 상세 불러오기 (제목에 'n번 이름' 표시 추가)
         async function loadHistory() { 
             if(!selectedStudentName) return; 
             
+            // [추가된 부분] 제목 업데이트: "기록 상세" -> "기록 상세 - 1번 김철수"
+            const currentSt = studentList.find(s => s.name === selectedStudentName);
+            if(currentSt) {
+                document.getElementById('viewerTitle').innerHTML = `기록 상세 <span style="color:var(--primary); font-size:0.9em; margin-left:5px;">- ${currentSt.id}번 ${currentSt.name}</span>`;
+            }
+
             const c = document.getElementById('historyViewer'); 
             c.innerHTML = '<div style="text-align:center; padding:20px;">로딩 중 <span class="loading-anim"></span></div>';
             
@@ -2380,20 +2410,15 @@ function toggleFloatMenu() {
             h.forEach(i => {
                 const d = document.createElement('div'); 
                 d.className = 'history-card';
-                
-                // [수정] 구조 변경: 체크박스 / 메타정보(날짜,평가) / 텍스트 / 버튼 분리
                 d.innerHTML = `
                     <div class="h-chk-wrap">
                         <input type="checkbox" class="hist-chk" value="${i.rowNum}" data-org-text="${i.txt}">
                     </div>
-                    
                     <div class="h-meta-col">
                         <span class="h-date">${i.date}</span>
                         ${i.check !== '없음' ? `<span class="h-badge">${i.check}</span>` : ''}
                     </div>
-                    
                     <textarea class="h-text" id="hist_txt_${i.rowNum}" oninput="markEdited(this, ${i.rowNum})">${i.txt}</textarea>
-                    
                     <div class="h-btn-area">
                         <button class="btn-icon" onclick="copyText('hist_txt_${i.rowNum}')">복사</button>
                     </div>
