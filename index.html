@@ -2105,7 +2105,7 @@ function toggleFloatMenu() {
             document.getElementById('editEventModal').classList.add('open');
         }
 
-        // [추가] 일정 수정 확정 (서버 전송)
+        // [수정] 일정 수정 확정 (UX 개선: 즉시 로딩 표시)
         async function confirmEditEvent() {
             const id = document.getElementById('editEventId').value;
             const title = document.getElementById('editEventTitle').value;
@@ -2113,9 +2113,15 @@ function toggleFloatMenu() {
 
             if(!title) return;
 
-            showStatusBar("📅 일정 수정 중..."); // 백그라운드 작업 표시
+            // 1. 모달을 먼저 닫아줍니다 (답답함 해소)
+            document.getElementById('editEventModal').classList.remove('open');
+
+            // 2. 리스트 영역에 '반영 중' 애니메이션 표시
+            document.getElementById('dailyEvents').innerHTML = '<div style="text-align:center; padding:20px; color:#888;">내용 반영 중 <span class="loading-anim"></span></div>';
             
-            // 제목과 변경된 날짜를 함께 전송
+            showStatusBar("📅 일정 수정 중..."); // 하단 상태바도 같이 표시
+
+            // 3. 서버에 데이터 전송
             await sendRequest('update_event', {
                 id: id, 
                 title: title, 
@@ -2123,14 +2129,12 @@ function toggleFloatMenu() {
             });
             
             hideStatusBar();
-            showToast("일정이 수정되었습니다. ✨");
-            document.getElementById('editEventModal').classList.remove('open');
+            showToast("일정이 수정되었습니다");
             
-            // 날짜가 바뀌었을 수도 있으므로 전체 갱신
-            // 만약 날짜를 바꿨다면 현재 보고 있는 날짜에서는 사라지는 게 정상입니다.
+            // 4. 전체 데이터 갱신 (완료되면 리스트가 다시 그려짐)
             loadGoogleEvents().then(() => {
                 renderCalendar(); // 달력 점 갱신
-                showDailyView();  // 리스트 갱신
+                showDailyView();  // 리스트 갱신 (이때 로딩 문구가 사라지고 새 일정이 뜸)
             });
         }
 
