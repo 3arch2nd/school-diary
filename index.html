@@ -2347,16 +2347,28 @@ function toggleFloatMenu() {
             loadMemos(); 
         }
 
-        // [수정] 메모 삭제 (상태바 연동)
-        async function deleteMemo() { 
-            reqConfirm('삭제하시겠습니까?', async() => { 
-                showStatusBar("🗑️ 메모 삭제 중..."); // [상태바 표시]
-                await sendRequest('delete_memo', {row: parseInt(document.getElementById('memoEditRow').value)}); 
-                hideStatusBar(); // [상태바 숨김]
-                loadMemos(); 
-            }); 
-        }
-        async function deleteMemo() { reqConfirm('삭제하시겠습니까?', async()=>{ await sendRequest('delete_memo',{row:parseInt(document.getElementById('memoEditRow').value)}); loadMemos(); });
+// [수정] 메모 삭제 (상태바 연동 및 목록 갱신 대기)
+        async function deleteMemo() {
+            reqConfirm('삭제하시겠습니까?', async () => {
+                // 1. 상태바 표시
+                showStatusBar("🗑️ 메모 삭제 중...");
+
+                // 2. 서버에 삭제 요청
+                await sendRequest('delete_memo', { row: parseInt(document.getElementById('memoEditRow').value) });
+
+                // 3. 상태바 멘트 변경 (사용자에게 갱신 중임을 알림)
+                updateStatusText("🔄 목록에 반영 중...");
+
+                // 4. 입력창 비우기 (삭제된 내용이 남아있지 않게)
+                clearMemoInput();
+
+                // 5. 메모 목록 새로고침 (완료될 때까지 기다림)
+                await loadMemos();
+
+                // 6. 모든 작업 완료 후 상태바 숨김
+                hideStatusBar();
+                showToast("삭제 완료");
+            });
         }
 
         // [누락된 UI 헬퍼 함수들 추가]
