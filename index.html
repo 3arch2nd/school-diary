@@ -1084,13 +1084,30 @@ function checkCaps(e) {
             try { localStorage.setItem('isUnlocked', 'false'); } catch(e) {}
             location.reload();
         }
+        // [수정] 전체 데이터 로드 (초기 로딩 상태바 표시)
         async function loadAllData() { 
+            showStatusBar("초기 데이터 불러오는 중..."); // [시작] 상태바 알림
+            
+            // 각 섹션에 로딩 애니메이션 미리 심어두기 (빈 화면 방지)
+            document.getElementById('quickLinkGrid').innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:20px; color:#888;">로딩 중 <span class="loading-anim"></span></div>';
+            
             loadStudents();
-            renderSubjectTags(); renderBmTags(); loadFiles(); loadHomeData(); loadMusicData(); loadCustomItems();
+            renderSubjectTags(); 
+            renderBmTags(); 
+            loadFiles(); 
+            loadHomeData(); // 내부에서 quickLinkGrid 갱신
+            loadMusicData(); 
+            loadCustomItems();
+            
             await Promise.all([loadGoogleEvents(), loadAttendanceForDots()]);
-            renderHomeToDo(); renderCalendar(); showDailyView(new Date().getDate());
+            
+            renderHomeToDo(); 
+            renderCalendar(); 
+            showDailyView(new Date().getDate());
+            
+            hideStatusBar(); // [끝] 상태바 숨김
+            showToast("모든 준비 완료!");
         }
-
         // Global Overlay Logic
 function closeAllOverlays() {
             const m = document.getElementById('floatMenu');
