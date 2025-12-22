@@ -2056,8 +2056,53 @@ function toggleFloatMenu() {
             } 
         }
 
-        async function showDailyView(day) { document.getElementById('calDetailTitle').innerText=`${selectedDate} 일정`;
-            const div=document.getElementById('dailyEvents'); div.innerHTML=''; const evs=calendarEvents.filter(e=>e.date===selectedDate); if(evs.length===0)div.innerHTML='<div style="color:#999">일정 없음</div>'; else evs.forEach(e=>div.innerHTML+=`<div>• ${e.title}</div>`); loadAtt();
+        // [수정] 일별 일정 보기 (수정/삭제 버튼 포함)
+        async function showDailyView(day) { 
+            document.getElementById('calDetailTitle').innerText = `${selectedDate} 일정`;
+            const div = document.getElementById('dailyEvents'); 
+            div.innerHTML = ''; 
+            
+            const evs = calendarEvents.filter(e => e.date === selectedDate); 
+            
+            if(evs.length === 0) {
+                div.innerHTML = '<div style="color:#999; padding:10px;">일정 없음</div>'; 
+            } else {
+                evs.forEach(e => {
+                    const row = document.createElement('div');
+                    row.className = 'cal-event-item'; // CSS에 이미 추가된 스타일 사용
+                    row.innerHTML = `
+                        <span class="ce-title">• ${e.title}</span>
+                        <div class="ce-btns">
+                            <button class="btn-icon" onclick="updateCalEvent('${e.id}', '${e.title}')">✏️</button>
+                            <button class="btn-icon" style="color:var(--danger)" onclick="deleteCalEvent('${e.id}')">x</button>
+                        </div>
+                    `;
+                    div.appendChild(row);
+                });
+            }
+            loadAtt(); // 출석부 로드
+        }
+        // [추가] 캘린더 일정 수정 기능
+        async function updateCalEvent(id, oldTitle) {
+            const newTitle = prompt("일정 내용을 수정하세요:", oldTitle);
+            if(newTitle && newTitle !== oldTitle) {
+                showStatusBar("📅 일정 수정 중...");
+                await sendRequest('update_event', {id: id, title: newTitle});
+                hideStatusBar();
+                showToast("수정 완료");
+                loadGoogleEvents().then(() => showDailyView());
+            }
+        }
+
+        // [추가] 캘린더 일정 삭제 기능
+        async function deleteCalEvent(id) {
+            reqConfirm("이 일정을 삭제하시겠습니까?", async () => {
+                showStatusBar("🗑️ 일정 삭제 중...");
+                await sendRequest('delete_event', {id: id});
+                hideStatusBar();
+                showToast("삭제 완료");
+                loadGoogleEvents().then(() => showDailyView());
+            });
         }
         async function loadAtt() { const l=document.getElementById('attList'); l.innerHTML='로딩<span class="loading-anim"></span>'; const d=await sendRequest('get_attendance');
             attendanceCache = d || []; const t=d?d.filter(a=>a.date===selectedDate):[]; l.innerHTML=''; studentList.forEach(s=>{const e=t.find(a=>a.name===s.name); const row=document.createElement('div');row.className='att-row';row.innerHTML=`<span class="att-name">${s.name}</span><select class="att-status att-sel" data-name="${s.name}"><option ${e?.status==='출석'?'selected':''}>출석</option><option ${e?.status==='결석'?'selected':''}>결석</option><option ${e?.status==='지각'?'selected':''}>지각</option><option ${e?.status==='조퇴'?'selected':''}>조퇴</option><option ${e?.status==='결과'?'selected':''}>결과</option><option ${e?.status==='체험'?'selected':''}>체험</option></select><input type="text" class="att-memo" value="${e?.memo||''}" placeholder="비고">`;l.appendChild(row);});
