@@ -2078,8 +2078,19 @@ function toggleFloatMenu() {
             showToast("출석 저장 완료"); 
             loadAttendanceForDots().then(renderCalendar); 
         }
-        async function addEvent() { const t=document.getElementById('newEvent').value;
-            if(t) { await sendRequest('save_event',{date:selectedDate,title:t}); document.getElementById('newEvent').value=''; loadGoogleEvents().then(()=>showDailyView()); } }
+        // [수정] 일정 등록 (상태바 연동)
+        async function addEvent() { 
+            const t = document.getElementById('newEvent').value; 
+            if(t) { 
+                showStatusBar("📅 일정 등록 중..."); // [상태바 표시]
+                await sendRequest('save_event', {date: selectedDate, title: t}); 
+                hideStatusBar(); // [상태바 숨김]
+                
+                document.getElementById('newEvent').value = ''; 
+                showToast("일정이 등록되었습니다."); 
+                loadGoogleEvents().then(() => showDailyView()); 
+            } 
+        }
         async function openMonthAttSummary() { 
             document.getElementById('monthAttModal').classList.add('open');
             document.getElementById('monthAttBody').innerHTML='로딩<span class="loading-anim"></span>'; 
