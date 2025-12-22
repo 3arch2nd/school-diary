@@ -606,9 +606,9 @@
         <div class="mp-list" id="musicList"></div>
     </div>
 
-    <div class="music-capsule" id="musicBtn" onclick="toggleMusicPanel()">
-        <div class="music-info" id="musicCurrentTitle">🎵 음악을 선택하세요</div>
-        <div class="music-play-btn">▶</div>
+    <div class="music-capsule" id="musicBtn">
+        <div class="music-info" id="musicCurrentTitle" onclick="toggleMusicPanel()">🎵 음악을 선택하세요</div>
+        <div class="music-play-btn" onclick="togglePlayPause(event)">▶</div>
     </div>
 
     <div id="lockScreen"><div id="lockCard"><h2 style="color:var(--primary-dark); margin-bottom:20px;">쫑알수첩 Pro</h2><p style="margin-bottom:10px; color:var(--text-sub);">관리자 인증이 필요합니다.</p><input type="password" id="lockInput" placeholder="Password" onkeyup="checkCaps(event)"><div id="lockMsg" class="lock-msg"></div><button class="btn btn-primary" onclick="unlockApp()" style="width:100%;">접속</button></div></div>
@@ -1237,9 +1237,45 @@ function toggleFloatMenu() {
         }
         // ------------------------------------
 
+        // [수정] 음악 재생 (제어 API 활성화 추가)
+        let isMusicPlaying = false; // 재생 상태 추적 변수
+
         function playMusic(id, name) { 
-            document.getElementById('musicIframe').src = `https://www.youtube.com/embed/${id}?autoplay=1`;
+            // enablejsapi=1 파라미터가 있어야 외부에서 정지/재생 명령이 먹힙니다.
+            document.getElementById('musicIframe').src = `https://www.youtube.com/embed/${id}?autoplay=1&enablejsapi=1`;
             document.getElementById('musicCurrentTitle').innerText = "🎵 " + name;
+            
+            // 재생 시작되면 아이콘을 '일시정지(II)' 모양으로 변경
+            document.querySelector('.music-play-btn').innerText = '⏸'; 
+            isMusicPlaying = true;
+        }
+        // [추가] 재생/일시정지 토글 기능
+        function togglePlayPause(e) {
+            e.stopPropagation(); // 부모(리스트 열기) 클릭 이벤트 방지
+
+            const iframe = document.getElementById('musicIframe');
+            const btn = document.querySelector('.music-play-btn');
+
+            // 음악이 선택되지 않은 상태라면
+            if (!iframe.src || iframe.src === "about:blank" || iframe.src === "") {
+                showToast("🎵 재생할 음악을 먼저 목록에서 선택해주세요.");
+                toggleMusicPanel(); // 친절하게 목록을 열어줌
+                return;
+            }
+
+            if (isMusicPlaying) {
+                // 재생 중이면 -> 멈춤 명령 전송
+                iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+                btn.innerText = '▶'; // 아이콘을 재생 모양으로
+                isMusicPlaying = false;
+                showToast("음악 일시정지 ⏸");
+            } else {
+                // 멈춤 상태면 -> 재생 명령 전송
+                iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+                btn.innerText = '⏸'; // 아이콘을 일시정지 모양으로
+                isMusicPlaying = true;
+                showToast("음악 재생 ▶");
+            }
         }
         async function addMusic() {
             const url = document.getElementById('newMusicUrl').value;
