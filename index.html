@@ -1319,7 +1319,7 @@ function toggleFloatMenu() {
                             key: "MainImage",
                             value: res.url
                         });
-                        showToast("✅ 이미지 저장 완료!");
+                        showToast("이미지 저장 완료!");
                         console.log("Server URL:", res.url); // 확인용 로그
                     }
                 } catch (err) {
@@ -2154,7 +2154,32 @@ function toggleFloatMenu() {
         }
         function clearMemoInput() { document.getElementById('memoContent').value='';document.getElementById('memoPinned').checked=false;document.getElementById('memoDone').checked=false;document.getElementById('memoEditRow').value='';document.getElementById('btnDelMemo').style.display='none';
         }
-        async function saveMemo() { const c=document.getElementById('memoContent').value; if(!c)return; await sendRequest('save_memo',{row:document.getElementById('memoEditRow').value||null,content:c,pinned:document.getElementById('memoPinned').checked,done:document.getElementById('memoDone').checked}); showToast("메모 저장"); loadMemos();
+        // [수정] 메모 저장 (상태바 연동)
+        async function saveMemo() { 
+            const c = document.getElementById('memoContent').value; 
+            if(!c) return; 
+            
+            showStatusBar("💾 메모 저장 중..."); // [상태바 표시]
+            await sendRequest('save_memo', {
+                row: document.getElementById('memoEditRow').value || null,
+                content: c,
+                pinned: document.getElementById('memoPinned').checked,
+                done: document.getElementById('memoDone').checked
+            }); 
+            hideStatusBar(); // [상태바 숨김]
+            
+            showToast("메모 저장 완료"); 
+            loadMemos(); 
+        }
+
+        // [수정] 메모 삭제 (상태바 연동)
+        async function deleteMemo() { 
+            reqConfirm('삭제하시겠습니까?', async() => { 
+                showStatusBar("🗑️ 메모 삭제 중..."); // [상태바 표시]
+                await sendRequest('delete_memo', {row: parseInt(document.getElementById('memoEditRow').value)}); 
+                hideStatusBar(); // [상태바 숨김]
+                loadMemos(); 
+            }); 
         }
         async function deleteMemo() { reqConfirm('삭제하시겠습니까?', async()=>{ await sendRequest('delete_memo',{row:parseInt(document.getElementById('memoEditRow').value)}); loadMemos(); });
         }
