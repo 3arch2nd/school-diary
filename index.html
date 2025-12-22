@@ -51,17 +51,16 @@
 
         hr { border: 0; border-top: 1px solid var(--border-color); margin: 20px 0; }
 
-        /* [수정] PC 버전 호버 효과 통일 (모든 버튼 동일한 비율로 확대) */
+        /* [수정] PC 버전 호버 효과 (플로팅 버튼 깜빡임 해결) */
         @media (min-width: 769px) {
-            /* 1. 모든 인터랙티브 요소에 부드러운 전환 효과 적용 */
+            /* 1. 공통: 부드러운 전환 효과 */
             .btn, .btn-sm, .nav-item, .float-btn, .lock-float-btn, .dark-float-btn,
             .music-play-btn, .custom-item-row, .student-nav-item, .quick-link-item, 
             .float-menu-item, .btn-icon, .tag, .check-circle {
                 transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background-color 0.2s;
             }
 
-            /* 2. 마우스 올렸을 때(Hover) 통일된 확대(Scale) 효과 적용 */
-            /* 기존에 .inactive를 제외하던 코드를 삭제하여 모든 버튼이 반응하도록 함 */
+            /* 2. 공통: 마우스 올렸을 때 1.03배 확대 (모든 요소 통일) */
             .btn:hover, 
             .btn-sm:hover, 
             .nav-item:hover, 
@@ -75,17 +74,35 @@
             .btn-icon:hover,
             .tag:hover,
             .check-circle:hover {
-                transform: scale(1.03); /* 모든 요소를 1.03배로 통일 */
-                z-index: 5; /* 커졌을 때 다른 요소 위에 보이도록 */
+                transform: scale(1.03); 
             }
 
-            /* 3. 예외: 바로가기 박스만 살짝 그림자 추가 (기존 스타일 유지) */
+            /* 3. [핵심 수정] 일반 요소들만 z-index를 5로 올림 (플로팅 버튼 제외!) */
+            .btn:hover, 
+            .btn-sm:hover, 
+            .nav-item:hover, 
+            .custom-item-row:hover, 
+            .student-nav-item:hover, 
+            .float-menu-item:hover,
+            .btn-icon:hover,
+            .tag:hover,
+            .check-circle:hover {
+                z-index: 5; 
+            }
+            
+            /* 4. [추가] 플로팅 버튼들은 원래의 높은 z-index 유지 (깜빡임 방지) */
+            .float-btn:hover, .lock-float-btn:hover, .dark-float-btn:hover, .music-play-btn:hover {
+                /* z-index 변경 없음 (기본값 유지) */
+                box-shadow: 0 6px 15px rgba(0,0,0,0.15); /* 띄워지는 느낌 강조 */
+            }
+
+            /* 5. 기타 예외 스타일 */
             .quick-link-item:hover {
                 box-shadow: 0 4px 12px rgba(0,0,0,0.1);
                 border-color: var(--primary);
+                z-index: 5;
             }
             
-            /* 4. 예외: 네비게이션과 리스트 아이템은 배경색 변경 병행 */
             .nav-item:hover, .float-menu-item:hover, .student-nav-item:hover {
                 background-color: #eaf6fc;
             }
