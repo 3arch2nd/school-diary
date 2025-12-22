@@ -2329,22 +2329,31 @@ function toggleFloatMenu() {
         }
         function clearMemoInput() { document.getElementById('memoContent').value='';document.getElementById('memoPinned').checked=false;document.getElementById('memoDone').checked=false;document.getElementById('memoEditRow').value='';document.getElementById('btnDelMemo').style.display='none';
         }
-        // [수정] 메모 저장 (상태바 연동)
+        // [수정] 메모 저장 (상태바 연동 및 목록 갱신 대기)
         async function saveMemo() { 
             const c = document.getElementById('memoContent').value; 
             if(!c) return; 
             
-            showStatusBar("💾 메모 저장 중..."); // [상태바 표시]
+            // 1. 상태바 표시
+            showStatusBar("💾 메모 저장 중..."); 
+            
+            // 2. 서버에 저장 요청
             await sendRequest('save_memo', {
                 row: document.getElementById('memoEditRow').value || null,
                 content: c,
                 pinned: document.getElementById('memoPinned').checked,
                 done: document.getElementById('memoDone').checked
             }); 
-            hideStatusBar(); // [상태바 숨김]
             
+            // 3. 상태바 멘트 변경 (사용자에게 갱신 중임을 알림)
+            updateStatusText("목록에 반영 중...");
+
+            // 4. 메모 목록 새로고침 (완료될 때까지 기다림)
+            await loadMemos();
+            
+            // 5. 모든 작업 완료 후 상태바 숨김 및 토스트
+            hideStatusBar(); 
             showToast("메모 저장 완료"); 
-            loadMemos(); 
         }
 
 // [수정] 메모 삭제 (상태바 연동 및 목록 갱신 대기)
@@ -2357,7 +2366,7 @@ function toggleFloatMenu() {
                 await sendRequest('delete_memo', { row: parseInt(document.getElementById('memoEditRow').value) });
 
                 // 3. 상태바 멘트 변경 (사용자에게 갱신 중임을 알림)
-                updateStatusText("🔄 목록에 반영 중...");
+                updateStatusText("목록에 반영 중...");
 
                 // 4. 입력창 비우기 (삭제된 내용이 남아있지 않게)
                 clearMemoInput();
