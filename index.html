@@ -1570,7 +1570,7 @@ function toggleFloatMenu() {
             }
 
             // [수정] 로딩 텍스트 깔끔하게 (애니메이션만 나오도록 점 제거)
-            container.innerHTML = '<div style="text-align:center; padding:15px; color:#888;">데이터 불러오는 중 <span class="loading-anim"></span></div>';
+            container.innerHTML = '<div style="text-align:center; padding:15px; color:#888;">불러오는 중<span class="loading-anim"></span></div>';
 
             // 1. 최신 데이터 가져오기
             const allData = await sendRequest('custom_record', {mode: 'get'});
@@ -2155,7 +2155,7 @@ function toggleFloatMenu() {
         async function loadBookmarks() {
             const listDiv = document.getElementById('bmList');
             // 문구가 길어서 잘리는 문제 해결 -> 짧게 수정
-            listDiv.innerHTML = '<div style="text-align:center; padding:30px; color:#888;">불러오는 중... <span class="loading-anim"></span></div>';
+            listDiv.innerHTML = '<div style="text-align:center; padding:30px; color:#888;">불러오는 중<span class="loading-anim"></span></div>';
             
             bmList = await sendRequest('get_bookmarks') || [];
             renderBookmarkListItems();
@@ -2501,7 +2501,7 @@ function toggleFloatMenu() {
             const select = document.getElementById('attMonthSelect');
             const body = document.getElementById('monthAttBody');
             
-            body.innerHTML = '<div style="text-align:center; padding:20px;">데이터 불러오는 중 <span class="loading-anim"></span></div>';
+            body.innerHTML = '<div style="text-align:center; padding:20px;">불러오는 중<span class="loading-anim"></span></div>';
             
             // 1. 최신 데이터 확보
             attendanceCache = await sendRequest('get_attendance') || [];
@@ -2588,9 +2588,9 @@ function toggleFloatMenu() {
         async function loadMemos() { 
             // 현재 모드에 따라 로딩 위치 결정
             if (memoMode === 'cal') {
-                document.getElementById('memoCalGrid').innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:50px; color:#888;">달력 불러오는 중 <span class="loading-anim"></span></div>';
+                document.getElementById('memoCalGrid').innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:50px; color:#888;">불러오는 중<span class="loading-anim"></span></div>';
             } else {
-                document.getElementById('memoListView').innerHTML = '<div style="text-align:center; padding:30px; color:#888;">목록 불러오는 중 <span class="loading-anim"></span></div>';
+                document.getElementById('memoListView').innerHTML = '<div style="text-align:center; padding:30px; color:#888;">불러오는 중<span class="loading-anim"></span></div>';
             }
 
             memoList = await sendRequest('get_memos') || []; 
