@@ -2165,18 +2165,30 @@ function toggleFloatMenu() {
             renderBookmarkListItems();
         }
 
-        // [수정] 북마크 리스트 그리기 (디자인 개편 반영)
+        // [수정] 북마크 리스트 그리기 (정렬: 중요 > 이름순[특수/영/한])
         function renderBookmarkListItems() {
             const listDiv = document.getElementById('bmList');
             listDiv.innerHTML = '';
 
-            // 필터링 적용
+            // 1. 필터링 적용
             let filtered = currentBmFilter ? bmList.filter(b => b.tags && b.tags.includes(currentBmFilter)) : bmList;
             
-            // 정렬: 중요(별) > 최신순(row 역순)
-            filtered.sort((a,b) => {
-                if (a.starred !== b.starred) return (b.starred === true) - (a.starred === true);
-                return b.row - a.row; 
+            // 2. 정렬 로직 적용
+            filtered.sort((a, b) => {
+                // (1) 중요(★) 여부 확인 (true가 위로)
+                const starA = (a.starred === true || a.starred === 'true');
+                const starB = (b.starred === true || b.starred === 'true');
+                
+                if (starA !== starB) {
+                    return starB - starA; // 중요 표시된 게 먼저 옴
+                }
+
+                // (2) 제목 순서 정렬 (특수문자 < 숫자 < 영어 < 한글 순)
+                // localeCompare는 언어에 맞는 자연스러운 정렬을 제공합니다.
+                const titleA = a.title ? a.title.toString() : "";
+                const titleB = b.title ? b.title.toString() : "";
+                
+                return titleA.localeCompare(titleB); 
             });
 
             if(filtered.length === 0) {
@@ -2191,7 +2203,7 @@ function toggleFloatMenu() {
                 // 박스 전체 클릭 시 이동
                 d.onclick = () => window.open(item.url, '_blank');
                 
-                // 태그 HTML 생성 (콤마로 분리해서 각각 알약으로 만듦)
+                // 태그 HTML 생성
                 let tagsHtml = '';
                 if(item.tags) {
                     item.tags.split(',').forEach(t => {
