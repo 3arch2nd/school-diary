@@ -2059,54 +2059,103 @@ function toggleFloatMenu() {
         async function saveStudentManagement() { const ids=document.querySelectorAll('.st-add-id'); const nms=document.querySelectorAll('.st-add-name'); let l=[]; for(let i=0;i<ids.length;i++)if(ids[i].value&&nms[i].value)l.push({id:parseInt(ids[i].value),name:nms[i].value.trim()});
             await sendRequest('sync_student_list',{students:l}); closeStudentManageModal(); loadStudents(); }
 
-        // [Bookmarks]
+        // [Bookmarks] - 통합 수정 버전
+        
+        // 1. 태그 렌더링 및 필터링
         function renderBmTags() { 
-            const c=document.getElementById('bmTagArea');
+            const c = document.getElementById('bmTagArea');
             c.innerHTML=''; 
-            bmTags.forEach(t=>{const b=document.createElement('div');b.className='tag';b.innerHTML=`${t} <span class="x-btn" onclick="removeBmTag('${t}', event)">x</span>`;if(selectedBmTags.includes(t))b.classList.add('selected');b.onclick=(e)=>{if(e.target.classList.contains('x-btn'))return;if(selectedBmTags.includes(t))selectedBmTags=selectedBmTags.filter(x=>x!==t);else selectedBmTags.push(t);renderBmTags();};c.appendChild(b);});
             
-            const fc = document.getElementById('bmFilterContainer'); fc.innerHTML = '';
-            const allBtn = document.createElement('div');
-            allBtn.className = `bm-filter-tag ${currentBmFilter===null?'active':''}`; allBtn.innerText = "전체"; allBtn.onclick = () => filterBookmark(null);
-            fc.appendChild(allBtn);
+            // 입력창 태그 목록 (저장용)
             bmTags.forEach(t => {
-                const btn = document.createElement('div'); btn.className = `bm-filter-tag ${currentBmFilter===t?'active':''}`; btn.innerText = t;
+                const b = document.createElement('div');
+                b.className = 'tag';
+                b.innerHTML = `${t} <span class="x-btn" onclick="removeBmTag('${t}', event)">x</span>`;
+                if(selectedBmTags.includes(t)) b.classList.add('selected');
+                b.onclick = (e) => {
+                    if(e.target.classList.contains('x-btn')) return;
+                    if(selectedBmTags.includes(t)) selectedBmTags = selectedBmTags.filter(x => x !== t);
+                    else selectedBmTags.push(t);
+                    renderBmTags();
+                };
+                c.appendChild(b);
+            });
+            
+            // 목록 상단 필터 태그 (조회용)
+            const fc = document.getElementById('bmFilterContainer'); 
+            fc.innerHTML = '';
+            const allBtn = document.createElement('div');
+            allBtn.className = `bm-filter-tag ${currentBmFilter===null?'active':''}`; 
+            allBtn.innerText = "전체"; 
+            allBtn.onclick = () => filterBookmark(null);
+            fc.appendChild(allBtn);
+            
+            bmTags.forEach(t => {
+                const btn = document.createElement('div'); 
+                btn.className = `bm-filter-tag ${currentBmFilter===t?'active':''}`; 
+                btn.innerText = t;
                 btn.onclick = () => filterBookmark(currentBmFilter === t ? null : t);
                 fc.appendChild(btn);
             });
         }
-        function removeBmTag(t,e) { e.stopPropagation(); reqConfirm('태그를 삭제하시겠습니까?', ()=>{ bmTags=bmTags.filter(x=>x!==t); renderBmTags(); });
+
+        function removeBmTag(t,e) { 
+            e.stopPropagation(); 
+            reqConfirm('태그를 삭제하시겠습니까?', () => { 
+                bmTags = bmTags.filter(x => x !== t); 
+                renderBmTags(); 
+            });
         }
-        // [수정] 북마크 목록 로드 (로딩 표시 + 전체 영역 클릭)
+
+        function filterBookmark(t) { 
+            currentBmFilter = t; 
+            renderBmTags(); 
+            renderBookmarkListItems(); // 필터 변경 시 목록만 다시 그림
+        }
+
+        // 2. 북마크 데이터 불러오기 (로딩 표시 포함)
         async function loadBookmarks() {
-            const listDiv = document.getElementById('bookmarkList');
-            // 1. 로딩 애니메이션 표시
+            const listDiv = document.getElementById('bmList'); // [수정] ID를 bmList로 통일
+            
+            // 로딩 애니메이션 표시
             listDiv.innerHTML = '<div style="text-align:center; padding:30px; color:#888;">북마크 불러오는 중 <span class="loading-anim"></span></div>';
             
-            const list = await sendRequest('get_bookmarks') || [];
-            
+            bmList = await sendRequest('get_bookmarks') || [];
+            renderBookmarkListItems();
+        }
+
+        // 3. 실제 리스트 그리기 (화면 렌더링 전용)
+        function renderBookmarkListItems() {
+            const listDiv = document.getElementById('bmList');
             listDiv.innerHTML = '';
-            if(list.length === 0) {
-                listDiv.innerHTML = '<div style="color:#999; padding:20px; text-align:center;">저장된 북마크가 없습니다.</div>';
+
+            // 필터링 적용
+            let filtered = currentBmFilter ? bmList.filter(b => b.tags && b.tags.includes(currentBmFilter)) : bmList;
+            
+            // 중요도(별) 순 정렬
+            filtered.sort((a,b) => (b.starred === true) - (a.starred === true));
+
+            if(filtered.length === 0) {
+                listDiv.innerHTML = '<div style="color:#999; padding:20px; text-align:center;">표시할 북마크가 없습니다.</div>';
                 return;
             }
 
-            list.forEach(item => {
+            filtered.forEach(item => {
                 const d = document.createElement('div');
-                d.className = 'bookmark-item'; // CSS 호버 효과 적용됨
+                d.className = 'bookmark-item'; // CSS 호버 효과 클래스 적용
                 
-                // 2. 박스 전체 클릭 시 URL 이동
+                // [핵심] 박스 전체 클릭 시 이동
                 d.onclick = () => window.open(item.url, '_blank');
                 
                 d.innerHTML = `
                     <div class="bm-content">
                         <div class="bm-title">
-                            ${item.starred ? '<span style="color:#f1c40f; margin-right:5px;">★</span>' : ''}
+                            <span class="bm-star ${item.starred ? 'active' : ''}" style="margin-right:5px; color:${item.starred?'#f1c40f':'#ddd'}; font-size:1.1rem;" onclick="toggleBmStar(${item.row}, ${!item.starred}, event)">★</span>
                             ${item.title}
                         </div>
                         <div class="bm-meta">
-                            <span class="bm-tag">${item.tags}</span>
-                            ${item.memo ? `<span style="margin-left:8px; color:#999;">${item.memo}</span>` : ''}
+                            <span class="bm-tag">${item.tags || ''}</span>
+                            ${item.memo ? `<span style="margin-left:8px; color:#999; font-size:0.8rem;">${item.memo}</span>` : ''}
                         </div>
                     </div>
                     <div class="bm-btns">
@@ -2118,77 +2167,87 @@ function toggleFloatMenu() {
             });
         }
 
-        // [수정] 북마크 저장 (상태바 단계별 안내)
+        // 4. 별표 토글 (즉시 반영)
+        async function toggleBmStar(r, v, e) { 
+            e.stopPropagation(); 
+            const i = bmList.find(b => b.row === r);
+            if(i) {
+                i.starred = v;
+                renderBookmarkListItems(); // 화면 즉시 갱신
+                await sendRequest('save_bookmark', {row:r, tags:i.tags, title:i.title, url:i.url, memo:i.memo, starred:v});
+            } 
+        }
+
+        // 5. 수정 모달 열기 (데이터 채우기)
+        function openBookmarkModal(row, title, url, tags, memo, starred) {
+            document.getElementById('bmEditRow').value = row;
+            document.getElementById('bmTitle').value = title;
+            document.getElementById('bmUrl').value = url;
+            document.getElementById('bmMemo').value = (memo === 'undefined' || !memo) ? '' : memo;
+            document.getElementById('bmStarred').checked = (starred === true || starred === 'true');
+            
+            // 태그 선택 상태 복원
+            selectedBmTags = tags ? tags.split(',').map(s => s.trim()).filter(s => s) : [];
+            renderBmTags();
+            
+            // (모달이 따로 없고 좌측 입력창을 사용하는 구조이므로 입력창으로 포커스 이동)
+            // 만약 모달을 쓰시려면 bookmarkModal 관련 코드를 쓰시면 되지만, 
+            // 현재 HTML 구조상 좌측 패널이 입력폼이므로 거기에 값을 채워줍니다.
+            document.getElementById('btnSaveBm').innerText = "수정 저장";
+        }
+
+        // 6. 입력창 초기화
+        function clearBmInput() { 
+            document.getElementById('bmUrl').value='';
+            document.getElementById('bmTitle').value='';
+            document.getElementById('bmMemo').value='';
+            document.getElementById('bmEditRow').value='';
+            document.getElementById('bmStarred').checked = false;
+            document.getElementById('btnSaveBm').innerText = "저장";
+            selectedBmTags=[];
+            renderBmTags();
+        }
+
+        // 7. 북마크 저장 (상태바 연동)
         async function saveBookmark() {
-            const row = document.getElementById('bmRow').value;
+            const row = document.getElementById('bmEditRow').value;
             const title = document.getElementById('bmTitle').value;
             const url = document.getElementById('bmUrl').value;
-            const tags = document.getElementById('bmTags').value;
             const memo = document.getElementById('bmMemo').value;
             const starred = document.getElementById('bmStarred').checked;
 
             if(!title || !url) { showToast("제목과 URL은 필수입니다."); return; }
 
-            // 1. 모달 닫기 & 상태바 시작
-            document.getElementById('bookmarkModal').classList.remove('open');
             showStatusBar("💾 북마크 저장 중...");
 
-            // 2. 서버 요청
             await sendRequest('save_bookmark', {
                 row: row ? parseInt(row) : null,
-                title: title, url: url, tags: tags, memo: memo, starred: starred
+                title: title, url: url, 
+                tags: selectedBmTags.join(','), 
+                memo: memo, starred: starred
             });
 
-            // 3. 갱신 대기 알림
             updateStatusText("목록에 반영 중...");
+            await loadBookmarks(); // 목록 새로고침
 
-            // 4. 목록 새로고침 (완료 대기)
-            await loadBookmarks();
-
-            // 5. 완료 처리
             hideStatusBar();
-            showToast("북마크가 저장되었습니다.");
+            showToast("북마크가 저장되었습니다. 📚");
+            clearBmInput();
         }
 
-        // [수정] 북마크 삭제 (상태바 단계별 안내)
+        // 8. 북마크 삭제 (상태바 연동)
         async function deleteBookmark(row) {
             reqConfirm("정말 삭제하시겠습니까?", async () => {
-                // 1. 상태바 시작
                 showStatusBar("🗑️ 북마크 삭제 중...");
-
-                // 2. 서버 요청
                 await sendRequest('delete_bookmark', { row: parseInt(row) });
-
-                // 3. 갱신 대기 알림
+                
                 updateStatusText("목록에 반영 중...");
-
-                // 4. 목록 새로고침 (완료 대기)
                 await loadBookmarks();
-
-                // 5. 완료 처리
+                
                 hideStatusBar();
                 showToast("삭제되었습니다.");
             });
         }
-        async function loadBookmarks() { bmList=await sendRequest('get_bookmarks')||[]; renderBmList();
-        }
-        function renderBmList() { const l=document.getElementById('bmList'); l.innerHTML=''; let f=currentBmFilter?bmList.filter(b=>b.tags&&b.tags.includes(currentBmFilter)):bmList; f.sort((a,b)=>(b.starred===true)-(a.starred===true));
-            f.forEach(b=>{const d=document.createElement('div');d.className='bm-card';d.innerHTML=`<div class="bm-star ${b.starred?'active':''}" onclick="toggleBmStar(${b.row},${!b.starred},event)">★</div><div style="padding-right:20px"><a href="${b.url}" target="_blank" class="bm-link">${b.title}</a><div style="font-size:0.8rem;color:#666">${b.memo}</div></div><div style="margin-top:10px;text-align:right"><button class="btn-icon" onclick="editBookmark(${b.row})">수정</button> <button class="btn-icon" style="color:var(--danger)" onclick="deleteBookmark(${b.row})">삭제</button></div>`;l.appendChild(d);});
-        }
-        async function toggleBmStar(r,v,e) { e.stopPropagation(); const i=bmList.find(b=>b.row===r);
-            if(i){i.starred=v;renderBmList();await sendRequest('save_bookmark',{row:r,tags:i.tags,title:i.title,url:i.url,memo:i.memo,starred:v});} }
-        function editBookmark(r) { const item=bmList.find(b=>b.row===r); if(!item)return; document.getElementById('bmUrl').value=item.url; document.getElementById('bmTitle').value=item.title; document.getElementById('bmMemo').value=item.memo; document.getElementById('bmEditRow').value=item.row;
-            selectedBmTags=item.tags?item.tags.split(',').map(s=>s.trim()):[]; renderBmTags(); }
-        async function saveBookmark() { const r = document.getElementById('bmEditRow').value;
-            let star = false; if(r) { const ex = bmList.find(b=>b.row==r); if(ex) star=ex.starred; } await sendRequest('save_bookmark',{row:r||null, tags:selectedBmTags.join(','), title:document.getElementById('bmTitle').value, url:document.getElementById('bmUrl').value, memo:document.getElementById('bmMemo').value, starred:star});
-            clearBmInput(); loadBookmarks(); }
-        function clearBmInput() { document.getElementById('bmUrl').value='';document.getElementById('bmTitle').value='';document.getElementById('bmMemo').value='';document.getElementById('bmEditRow').value='';selectedBmTags=[];renderBmTags();
-        }
-        async function deleteBookmark(r) { reqConfirm('삭제하시겠습니까?', async()=>{ await sendRequest('delete_bookmark',{row:r}); loadBookmarks(); });
-        }
-        function filterBookmark(t) { currentBmFilter=t; renderBmTags(); renderBmList();
-        }
-
         // [Calendar & Memo]
         async function loadGoogleEvents() { calendarEvents=await sendRequest('get_events')||[];
             updateTodayScheduleInCal(); }
