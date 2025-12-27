@@ -51,31 +51,34 @@
 
         hr { border: 0; border-top: 1px solid var(--border-color); margin: 20px 0; }
 
-        /* [수정] PC 버전 호버 효과 */
+/* [수정] PC 버전 호버 효과 (북마크 얌전하게 수정) */
         @media (min-width: 769px) {
             /* 1. 공통: 부드러운 전환 효과 */
             .btn, .btn-sm, .nav-item, .float-btn, .lock-float-btn, .dark-float-btn,
             .music-play-btn, .custom-item-row, .student-nav-item, .quick-link-item, 
             .float-menu-item, .btn-icon, .tag, .check-circle,
             .bookmark-item { 
-                transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background-color 0.2s;
+                transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background-color 0.2s, border-color 0.2s;
             }
 
-            /* 2. 공통: 마우스 올렸을 때 1.03배 확대 */
+            /* 2. 일반 버튼들: 마우스 올렸을 때 1.03배 확대 (기존 유지) */
+            /* 주의: 여기서 .bookmark-item을 뺐습니다! */
             .btn:hover, .btn-sm:hover, .nav-item:hover, .float-btn:hover, 
             .lock-float-btn:hover, .dark-float-btn:hover, .music-play-btn:hover,
             .custom-item-row:hover, .student-nav-item:hover, .float-menu-item:hover,
             .btn-icon:hover, .tag:hover, .check-circle:hover,
-            .bookmark-item:hover { 
+            .quick-link-item:hover { 
                 transform: scale(1.03); 
+                z-index: 5;
             }
 
-            /* 3. 일반 요소 z-index 상승 */
-            .btn:hover, .btn-sm:hover, .nav-item:hover, .custom-item-row:hover, 
-            .student-nav-item:hover, .float-menu-item:hover, .btn-icon:hover,
-            .tag:hover, .check-circle:hover,
-            .bookmark-item:hover { 
-                z-index: 5; 
+            /* 3. [핵심 수정] 북마크 박스 전용 호버 효과 */
+            /* 크기는 커지지 않고(scale X), 살짝 위로 뜨면서 그림자만 진해짐 */
+            .bookmark-item:hover {
+                transform: translateY(-3px); /* 위로 3px 살짝 뜸 */
+                box-shadow: 0 6px 12px rgba(0,0,0,0.1); /* 그림자 부드럽게 */
+                border-color: var(--primary); /* 테두리 포인트 컬러 */
+                z-index: 5;
             }
             
             /* 4. 플로팅 버튼 z-index 유지 (깜빡임 방지) */
@@ -85,16 +88,9 @@
             .quick-link-item:hover {
                 box-shadow: 0 4px 12px rgba(0,0,0,0.1);
                 border-color: var(--primary);
-                z-index: 5;
             }
             .nav-item:hover, .float-menu-item:hover, .student-nav-item:hover {
                 background-color: #eaf6fc;
-            }
-            
-            /* [추가] 북마크 아이템 호버 시 스타일 */
-            .bookmark-item:hover {
-                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-                border-color: var(--primary);
             }
         }
         
