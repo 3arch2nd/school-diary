@@ -51,7 +51,7 @@
 
         hr { border: 0; border-top: 1px solid var(--border-color); margin: 20px 0; }
 
-/* [수정] PC 버전 호버 효과 (북마크 얌전하게 수정) */
+/* [수정] PC 버전 호버 효과 (z-index 충돌 완벽 해결) */
         @media (min-width: 769px) {
             /* 1. 공통: 부드러운 전환 효과 */
             .btn, .btn-sm, .nav-item, .float-btn, .lock-float-btn, .dark-float-btn,
@@ -61,34 +61,39 @@
                 transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background-color 0.2s, border-color 0.2s;
             }
 
-            /* 2. 일반 버튼들: 마우스 올렸을 때 1.03배 확대 (기존 유지) */
-            /* 주의: 여기서 .bookmark-item을 뺐습니다! */
+            /* 2. [확대 효과] 적용 그룹 (플로팅 버튼 포함) */
+            /* 여기서는 크기만 키웁니다 */
             .btn:hover, .btn-sm:hover, .nav-item:hover, .float-btn:hover, 
             .lock-float-btn:hover, .dark-float-btn:hover, .music-play-btn:hover,
             .custom-item-row:hover, .student-nav-item:hover, .float-menu-item:hover,
             .btn-icon:hover, .tag:hover, .check-circle:hover,
             .quick-link-item:hover { 
                 transform: scale(1.03); 
-                z-index: 5;
             }
 
-            /* 3. [핵심 수정] 북마크 박스 전용 호버 효과 */
-            /* 크기는 커지지 않고(scale X), 살짝 위로 뜨면서 그림자만 진해짐 */
+            /* 3. [z-index 상승] 적용 그룹 (일반 문서 흐름에 있는 요소들만!) */
+            /* ★★★ 핵심 수정: 여기서 플로팅 버튼(.float-btn 등)은 뺐습니다! ★★★ */
+            .btn:hover, .btn-sm:hover, .nav-item:hover, 
+            .custom-item-row:hover, .student-nav-item:hover, .float-menu-item:hover,
+            .btn-icon:hover, .tag:hover, .check-circle:hover,
+            .quick-link-item:hover { 
+                z-index: 5; 
+            }
+
+            /* 4. [북마크 박스 전용] (확대 X, 위로 떠오름 O) */
             .bookmark-item:hover {
-                transform: translateY(-3px); /* 위로 3px 살짝 뜸 */
-                box-shadow: 0 6px 12px rgba(0,0,0,0.1); /* 그림자 부드럽게 */
-                border-color: var(--primary); /* 테두리 포인트 컬러 */
+                transform: translateY(-3px); 
+                box-shadow: 0 6px 12px rgba(0,0,0,0.1); 
+                border-color: var(--primary); 
                 z-index: 5;
             }
             
-            /* 4. 플로팅 버튼 z-index 유지 (깜빡임 방지) */
+            /* 5. [플로팅 버튼 전용] 그림자만 진하게 (z-index 변경 없음 - 원래 높은 값 유지) */
             .float-btn:hover, .lock-float-btn:hover, .dark-float-btn:hover, .music-play-btn:hover {
-                box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+                box-shadow: 0 6px 15px rgba(0,0,0,0.25); 
             }
-            .quick-link-item:hover {
-                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-                border-color: var(--primary);
-            }
+            
+            /* 6. 배경색 변경 효과 */
             .nav-item:hover, .float-menu-item:hover, .student-nav-item:hover {
                 background-color: #eaf6fc;
             }
