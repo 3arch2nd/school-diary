@@ -1052,7 +1052,19 @@
     <div id="deleteSubjectModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="color:var(--danger)">과목 삭제</div><p>기록이 영구 삭제됩니다.</p><div style="text-align:right;"><button class="btn btn-outline" onclick="document.getElementById('deleteSubjectModal').classList.remove('open')">취소</button> <button class="btn btn-danger" onclick="confirmDeleteSubject()">삭제</button></div></div></div>
     <div id="manageStudentModal" class="modal-overlay"><div class="modal-card" style="width:500px;"><div class="modal-title" style="font-weight:bold; margin-bottom:15px;">학생 명단 관리</div><div id="manageStudentRows" style="max-height:300px; overflow-y:auto; margin-bottom:15px;"></div><button class="btn-sm active" onclick="addStudentRow()">+ 행 추가</button><div style="text-align:right; margin-top:15px;"><button class="btn btn-outline" onclick="closeStudentManageModal()">취소</button> <button class="btn btn-primary" id="btnManageStSave" onclick="saveStudentManagement()">전체 저장</button></div></div></div>
     <div id="addLinkModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="font-weight:bold; margin-bottom:15px;">바로가기 추가</div><label>이모지</label><input type="text" id="qlEmoji" placeholder="🏫"><label>이름 (짧게)</label><input type="text" id="qlName" placeholder="나이스"><label>URL</label><input type="text" id="qlUrl" placeholder="https://..."><div style="text-align:right;"><button class="btn btn-outline" onclick="document.getElementById('addLinkModal').classList.remove('open')">취소</button> <button class="btn btn-primary" onclick="confirmAddLink()">추가</button></div></div></div>
-    <div id="monthAttModal" class="modal-overlay"><div class="modal-card" style="width:600px;"><div class="modal-title" style="font-weight:bold; margin-bottom:15px;">월별 출석 현황</div><div class="modal-body" id="monthAttBody" style="max-height:400px; overflow-y:auto; margin-bottom:15px;"></div><div style="text-align:right;"><button class="btn btn-outline" onclick="document.getElementById('monthAttModal').classList.remove('open')">닫기</button></div></div></div>
+    <div id="monthAttModal" class="modal-overlay">
+        <div class="modal-card" style="width:600px;">
+            <div class="modal-title" style="font-weight:bold; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
+                <span>월별 출석 현황</span>
+                <select id="attMonthSelect" style="width:140px; margin:0; padding:5px; font-size:0.9rem;" onchange="renderMonthAttStats()">
+                </select>
+            </div>
+            <div class="modal-body" id="monthAttBody" style="max-height:400px; overflow-y:auto; margin-bottom:15px;"></div>
+            <div style="text-align:right;">
+                <button class="btn btn-outline" onclick="document.getElementById('monthAttModal').classList.remove('open')">닫기</button>
+            </div>
+        </div>
+    </div>
     <div id="customItemModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="font-weight:bold; margin-bottom:15px;">항목 생성</div><label>항목 이름</label><input type="text" id="ciName" placeholder="예: 우유 당번"><label>척도 타입</label><select id="ciType"><option value="check">체크리스트 (O/X)</option><option value="switch">스위치 (ON/OFF)</option><option value="select">선택 (상/중/하)</option></select><div style="text-align:right; margin-top:10px;"><button class="btn btn-outline" onclick="document.getElementById('customItemModal').classList.remove('open')">취소</button> <button class="btn btn-primary" onclick="addCustomItem()">추가</button></div></div></div>
 
     <script>
@@ -2321,16 +2333,83 @@ function toggleFloatMenu() {
                 showToast("일정이 등록되었습니다."); 
             } 
         }
-        async function openMonthAttSummary() { 
+        // [수정] 월별 통계 모달 열기 (학기 기준 드롭다운 생성)
+        async function openMonthAttSummary() {
             document.getElementById('monthAttModal').classList.add('open');
-            document.getElementById('monthAttBody').innerHTML='로딩<span class="loading-anim"></span>'; 
-            const d=await sendRequest('get_attendance'); const m=`${curYear}-${String(curMonth+1).padStart(2,'0')}`; 
-            const t=d.filter(a=>a.date.startsWith(m)&&a.status!=='출석'); 
-            let h='<table style="width:100%;border-collapse:collapse;font-size:0.9rem"><thead><tr style="background:#eee"><th style="border:1px solid #ddd;padding:5px">날짜</th><th>이름</th><th>상태</th><th>비고</th></tr></thead><tbody>'; 
-            if(t.length===0)h='<div style="padding:20px;text-align:center">특이사항 없음</div>';
-            else t.forEach(r=>{h+=`<tr><td style="border:1px solid #ddd;padding:4px">${r.date.substr(5)}</td><td style="border:1px solid #ddd;text-align:center">${r.name}</td><td style="border:1px solid #ddd;text-align:center;color:red;">${r.status}</td><td style="border:1px solid #ddd;padding:4px">${r.memo}</td></tr>`;}); 
-            if(t.length>0)h+='</tbody></table>'; 
-            document.getElementById('monthAttBody').innerHTML=h;
+            const select = document.getElementById('attMonthSelect');
+            const body = document.getElementById('monthAttBody');
+            
+            body.innerHTML = '<div style="text-align:center; padding:20px;">데이터 불러오는 중 <span class="loading-anim"></span></div>';
+            
+            // 1. 최신 데이터 확보
+            attendanceCache = await sendRequest('get_attendance') || [];
+
+            // 2. 학기 기준 연도 계산 (1, 2월은 이전 연도 학기에 포함)
+            const now = new Date();
+            let currentMonth = now.getMonth() + 1;
+            let academicYear = currentMonth < 3 ? now.getFullYear() - 1 : now.getFullYear();
+
+            // 3. 드롭다운 옵션 생성 (3월 ~ 다음해 2월)
+            select.innerHTML = "";
+            let defaultVal = formatDateYMD(now).substring(0, 7); // YYYY-MM
+
+            for (let i = 3; i <= 14; i++) {
+                let m = i > 12 ? i - 12 : i;
+                let y = i > 12 ? academicYear + 1 : academicYear;
+                let val = `${y}-${String(m).padStart(2, '0')}`;
+                let label = `${y}년 ${m}월`;
+                
+                const opt = document.createElement('option');
+                opt.value = val;
+                opt.innerText = label;
+                if (val === defaultVal) opt.selected = true;
+                select.appendChild(opt);
+            }
+
+            // 4. 초기 렌더링
+            renderMonthAttStats();
+        }
+
+        // [추가] 선택된 월의 통계 그리기 (색상 구분 적용)
+        function renderMonthAttStats() {
+            const selectedMonth = document.getElementById('attMonthSelect').value; // YYYY-MM
+            const body = document.getElementById('monthAttBody');
+            
+            // 해당 월의 데이터이면서 '출석'이 아닌 것 필터링
+            const list = attendanceCache.filter(a => a.date.startsWith(selectedMonth) && a.status !== '출석');
+            
+            // 날짜순 정렬
+            list.sort((a, b) => a.date.localeCompare(b.date));
+
+            // [핵심] 상태별 색상 매핑
+            const colorMap = {
+                '결석': '#e74c3c', // 빨강 (Danger)
+                '지각': '#f39c12', // 주황 (Warning)
+                '조퇴': '#f39c12',
+                '결과': '#f39c12',
+                '체험': '#27ae60'  // 초록 (Success)
+            };
+
+            let h = '<table style="width:100%; border-collapse:collapse; font-size:0.9rem;"><thead><tr style="background:#f9f9f9; color:#555;"><th style="border:1px solid #eee; padding:8px;">날짜</th><th style="border:1px solid #eee;">이름</th><th style="border:1px solid #eee;">상태</th><th style="border:1px solid #eee;">비고</th></tr></thead><tbody>';
+            
+            if (list.length === 0) {
+                h = '<div style="padding:40px; text-align:center; color:#999;">특이사항(결석/지각 등)이 없습니다. 👍</div>';
+            } else {
+                list.forEach(r => {
+                    const color = colorMap[r.status] || '#333'; // 지정 안 된 상태는 검정
+                    h += `
+                        <tr style="border-bottom:1px solid #eee;">
+                            <td style="padding:8px; text-align:center; color:#666;">${r.date.substr(5)}</td>
+                            <td style="padding:8px; text-align:center; font-weight:bold;">${r.name}</td>
+                            <td style="padding:8px; text-align:center;">
+                                <span style="background:${color}; color:white; padding:3px 8px; border-radius:12px; font-size:0.8rem;">${r.status}</span>
+                            </td>
+                            <td style="padding:8px; color:#555;">${r.memo}</td>
+                        </tr>`;
+                });
+                h += '</tbody></table>';
+            }
+            body.innerHTML = h;
         }
 
         // Memo
