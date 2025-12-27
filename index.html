@@ -926,11 +926,16 @@
                             <hr style="margin: 20px 0;">
 
                             <div id="btnGroupSubject">
-                                <button class="btn btn-primary" style="width:100%;" onclick="startSubjectGeneration()">
-                                    ✨ 과목 세특 일괄 생성
-                                </button>
+                                <div style="display:flex; gap:10px;">
+                                    <button class="btn btn-outline" style="flex:1;" onclick="openStudentSelection()">
+                                        선택 생성
+                                    </button>
+                                    <button class="btn btn-primary" style="flex:1;" onclick="startSubjectGeneration()">
+                                        일괄 생성
+                                    </button>
+                                </div>
                                 <div style="font-size:0.85rem; color:#888; text-align:center; margin-top:5px;">
-                                    기존 기록을 바탕으로 바로 작성합니다.
+                                    기존 기록을 바탕으로 작성합니다.
                                 </div>
                             </div>
 
@@ -1096,7 +1101,24 @@
         </div>
     </div>
     <div id="customItemModal" class="modal-overlay"><div class="modal-card"><div class="modal-title" style="font-weight:bold; margin-bottom:15px;">항목 생성</div><label>항목 이름</label><input type="text" id="ciName" placeholder="예: 우유 당번"><label>척도 타입</label><select id="ciType"><option value="check">체크리스트 (O/X)</option><option value="switch">스위치 (ON/OFF)</option><option value="select">선택 (상/중/하)</option></select><div style="text-align:right; margin-top:10px;"><button class="btn btn-outline" onclick="document.getElementById('customItemModal').classList.remove('open')">취소</button> <button class="btn btn-primary" onclick="addCustomItem()">추가</button></div></div></div>
+<div id="selectStudentModal" class="modal-overlay">
+        <div class="modal-card" style="width:400px; max-height:80vh; display:flex; flex-direction:column;">
+            <div class="modal-title" style="font-weight:bold; margin-bottom:15px; flex-shrink:0;">
+                생성할 학생 선택
+                <label style="float:right; font-size:0.9rem; font-weight:normal; display:flex; align-items:center; margin:0;">
+                    <input type="checkbox" id="selAllSt" onchange="toggleAllStudents(this)" style="width:18px; height:18px; margin:0 5px 0 0;"> 전체
+                </label>
+            </div>
+            
+            <div id="studentSelectionList" style="flex:1; overflow-y:auto; border:1px solid #eee; padding:10px; border-radius:8px; margin-bottom:15px;">
+                </div>
 
+            <div style="text-align:right; flex-shrink:0;">
+                <button class="btn btn-outline" onclick="document.getElementById('selectStudentModal').classList.remove('open')">취소</button>
+                <button class="btn btn-primary" onclick="confirmStudentSelection()">생성 시작</button>
+            </div>
+        </div>
+    </div>
     <script>
         const PRO_BACKEND_URL = "https://script.google.com/macros/s/AKfycbxn2nB0ZNXwXSdfx4-XVUWTD3Z_GCb_L2_SkhLyiKu5qrZrpwGTLM9Y4BhQRbveIk4o8Q/exec"; 
         const IS_GAS_ENV = window.location.hostname.includes('script.google.com');
@@ -2882,15 +2904,23 @@ function toggleFloatMenu() {
         // ===========================================
         // [CASE 1] 과목별 세특 (일괄 자동 생성)
         // ===========================================
-        async function startSubjectGeneration() {
+// [수정] 과목별 세특 생성 (일괄/선택 공용)
+        async function startSubjectGeneration(targetIds = null) {
             const container = document.getElementById('neisResultList');
-            if(studentList.length === 0) { showToast("학생 명단이 없습니다."); return; }
             
-            // 1. 화면 초기화 및 카드 뼈대 만들기
+            // 1. 대상 설정 (targetIds가 있으면 그것만, 없으면 전체)
+            let targets = studentList;
+            if (targetIds && Array.isArray(targetIds)) {
+                targets = studentList.filter(s => targetIds.includes(s.id));
+            }
+
+            if(targets.length === 0) { showToast("생성할 학생이 없습니다."); return; }
+            
+            // 2. 화면 초기화 및 카드 뼈대 만들기
             container.innerHTML = "";
             const targetLen = document.getElementById('neisLen').value;
             
-            studentList.forEach(st => {
+            targets.forEach(st => {
                 const card = document.createElement('div');
                 card.className = 'card'; card.style.marginBottom = '15px'; card.id = `neis_card_${st.id}`;
                 card.innerHTML = `
@@ -2901,15 +2931,69 @@ function toggleFloatMenu() {
                 container.appendChild(card);
             });
 
-            // 2. 순차적 생성 시작
-            const btn = document.querySelector('#btnGroupSubject button');
-            setLoading(btn, "전체 생성 중...");
+            // 3. 순차적 생성 시작
+            // (상황에 따라 버튼 로딩 표시를 다르게 함)
+            let btnSelector = targetIds ? '#selectStudentModal .btn-primary' : '#btnGroupSubject .btn-primary';
+            const btn = document.querySelector(btnSelector);
             
-            for(const st of studentList) {
+            if(targetIds) {
+                // 모달 닫기 (선택 생성일 경우)
+                document.getElementById('selectStudentModal').classList.remove('open');
+                showToast(`${targets.length}명의 세특을 생성합니다.`);
+            } else {
+                setLoading(btn, "전체 생성 중...");
+            }
+            
+            for(const st of targets) {
                 await generateSingleStudent(st.id, st.name, 'subject', ""); // 키워드 없이 호출
             }
-            clearLoading(btn);
+
+            if(!targetIds) clearLoading(btn); // 일괄 생성 버튼 원상복구
             showToast("과목 세특 생성 완료! 🎉");
+        }
+
+        // [추가] 학생 선택 모달 열기
+        function openStudentSelection() {
+            const listDiv = document.getElementById('studentSelectionList');
+            listDiv.innerHTML = '';
+            document.getElementById('selAllSt').checked = false; // 전체 체크 해제
+
+            studentList.forEach(st => {
+                const div = document.createElement('div');
+                div.style.padding = "8px";
+                div.style.borderBottom = "1px solid #f9f9f9";
+                div.innerHTML = `
+                    <label style="display:flex; align-items:center; cursor:pointer; margin:0; width:100%;">
+                        <input type="checkbox" class="sel-st-chk" value="${st.id}" style="width:18px; height:18px; margin:0 10px 0 0;">
+                        <span style="font-weight:bold; width:30px;">${st.id}</span>
+                        <span>${st.name}</span>
+                    </label>
+                `;
+                listDiv.appendChild(div);
+            });
+
+            document.getElementById('selectStudentModal').classList.add('open');
+        }
+
+        // [추가] 전체 선택 토글
+        function toggleAllStudents(source) {
+            const checkboxes = document.querySelectorAll('.sel-st-chk');
+            checkboxes.forEach(chk => chk.checked = source.checked);
+        }
+
+        // [추가] 선택 완료 후 생성 시작
+        function confirmStudentSelection() {
+            const checked = document.querySelectorAll('.sel-st-chk:checked');
+            if (checked.length === 0) {
+                showToast("선택된 학생이 없습니다.");
+                return;
+            }
+            
+            // 선택된 ID 목록 추출
+            const ids = Array.from(checked).map(chk => parseInt(chk.value));
+            
+            // 핵심: ID 목록을 인자로 넘겨주며 생성 함수 호출
+            startSubjectGeneration(ids);
         }
         
         // ===========================================
