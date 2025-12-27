@@ -51,62 +51,49 @@
 
         hr { border: 0; border-top: 1px solid var(--border-color); margin: 20px 0; }
 
-        /* [수정] PC 버전 호버 효과 (플로팅 버튼 깜빡임 해결) */
+/* [수정] PC 버전 호버 효과 (북마크 아이템 추가) */
         @media (min-width: 769px) {
             /* 1. 공통: 부드러운 전환 효과 */
             .btn, .btn-sm, .nav-item, .float-btn, .lock-float-btn, .dark-float-btn,
             .music-play-btn, .custom-item-row, .student-nav-item, .quick-link-item, 
-            .float-menu-item, .btn-icon, .tag, .check-circle {
+            .float-menu-item, .btn-icon, .tag, .check-circle,
+            .bookmark-item { /* <-- 여기에 추가됨 */
                 transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background-color 0.2s;
             }
 
-            /* 2. 공통: 마우스 올렸을 때 1.03배 확대 (모든 요소 통일) */
-            .btn:hover, 
-            .btn-sm:hover, 
-            .nav-item:hover, 
-            .float-btn:hover, 
-            .lock-float-btn:hover,
-            .dark-float-btn:hover, 
-            .music-play-btn:hover,
-            .custom-item-row:hover, 
-            .student-nav-item:hover, 
-            .float-menu-item:hover,
-            .btn-icon:hover,
-            .tag:hover,
-            .check-circle:hover {
+            /* 2. 공통: 마우스 올렸을 때 1.03배 확대 */
+            .btn:hover, .btn-sm:hover, .nav-item:hover, .float-btn:hover, 
+            .lock-float-btn:hover, .dark-float-btn:hover, .music-play-btn:hover,
+            .custom-item-row:hover, .student-nav-item:hover, .float-menu-item:hover,
+            .btn-icon:hover, .tag:hover, .check-circle:hover,
+            .bookmark-item:hover { /* <-- 여기에 추가됨 */
                 transform: scale(1.03); 
             }
 
-            /* 3. [핵심 수정] 일반 요소들만 z-index를 5로 올림 (플로팅 버튼 제외!) */
-            .btn:hover, 
-            .btn-sm:hover, 
-            .nav-item:hover, 
-            .custom-item-row:hover, 
-            .student-nav-item:hover, 
-            .float-menu-item:hover,
-            .btn-icon:hover,
-            .tag:hover,
-            .check-circle:hover {
+            /* 3. 일반 요소 z-index 상승 */
+            .btn:hover, .btn-sm:hover, .nav-item:hover, .custom-item-row:hover, 
+            .student-nav-item:hover, .float-menu-item:hover, .btn-icon:hover,
+            .tag:hover, .check-circle:hover,
+            .bookmark-item:hover { /* <-- 여기에 추가됨 */
                 z-index: 5; 
             }
             
-            /* 4. [추가] 플로팅 버튼들은 원래의 높은 z-index 유지 (깜빡임 방지) */
+            /* 4. 플로팅 버튼 z-index 유지 (깜빡임 방지) */
             .float-btn:hover, .lock-float-btn:hover, .dark-float-btn:hover, .music-play-btn:hover {
-                /* z-index 변경 없음 (기본값 유지) */
-                box-shadow: 0 6px 15px rgba(0,0,0,0.15); /* 띄워지는 느낌 강조 */
+                box-shadow: 0 6px 15px rgba(0,0,0,0.15);
             }
-
-            /* 5. 기타 예외 스타일 */
             .quick-link-item:hover {
                 box-shadow: 0 4px 12px rgba(0,0,0,0.1);
                 border-color: var(--primary);
                 z-index: 5;
             }
-            
             .nav-item:hover, .float-menu-item:hover, .student-nav-item:hover {
                 background-color: #eaf6fc;
             }
         }
+        
+        /* [추가] 북마크 아이템 클릭 커서 (CSS 맨 아래나 적당한 곳에 추가) */
+        .bookmark-item { cursor: pointer; }
 
         .loading-anim::after {
             content: ''; animation: dots 1.5s steps(4, end) infinite;
@@ -2090,45 +2077,97 @@ function toggleFloatMenu() {
         }
         function removeBmTag(t,e) { e.stopPropagation(); reqConfirm('태그를 삭제하시겠습니까?', ()=>{ bmTags=bmTags.filter(x=>x!==t); renderBmTags(); });
         }
-        // [수정] 북마크 불러오기 (로딩 애니메이션 추가)
-        async function loadBookmarks() { 
-            const l = document.getElementById('bmList');
-            // 로딩 중 표시 (애니메이션 포함)
-            l.innerHTML = '<div style="text-align:center; padding:30px; color:#888;">북마크 불러오는 중 <span class="loading-anim"></span></div>';
+        // [수정] 북마크 목록 로드 (로딩 표시 + 전체 영역 클릭)
+        async function loadBookmarks() {
+            const listDiv = document.getElementById('bookmarkList');
+            // 1. 로딩 애니메이션 표시
+            listDiv.innerHTML = '<div style="text-align:center; padding:30px; color:#888;">북마크 불러오는 중 <span class="loading-anim"></span></div>';
             
-            bmList = await sendRequest('get_bookmarks') || []; 
-            renderBmList(); 
-        }
+            const list = await sendRequest('get_bookmarks') || [];
+            
+            listDiv.innerHTML = '';
+            if(list.length === 0) {
+                listDiv.innerHTML = '<div style="color:#999; padding:20px; text-align:center;">저장된 북마크가 없습니다.</div>';
+                return;
+            }
 
-        // [수정] 북마크 저장 (상태바 연동)
-        async function saveBookmark() { 
-            const r = document.getElementById('bmEditRow').value;
-            let star = false; 
-            if(r) { const ex = bmList.find(b => b.row == r); if(ex) star = ex.starred; } 
-            
-            showStatusBar("💾 북마크 저장 중..."); // [상태바 표시]
-            
-            await sendRequest('save_bookmark', {
-                row: r || null, 
-                tags: selectedBmTags.join(','), 
-                title: document.getElementById('bmTitle').value, 
-                url: document.getElementById('bmUrl').value, 
-                memo: document.getElementById('bmMemo').value, 
-                starred: star
+            list.forEach(item => {
+                const d = document.createElement('div');
+                d.className = 'bookmark-item'; // CSS 호버 효과 적용됨
+                
+                // 2. 박스 전체 클릭 시 URL 이동
+                d.onclick = () => window.open(item.url, '_blank');
+                
+                d.innerHTML = `
+                    <div class="bm-content">
+                        <div class="bm-title">
+                            ${item.starred ? '<span style="color:#f1c40f; margin-right:5px;">★</span>' : ''}
+                            ${item.title}
+                        </div>
+                        <div class="bm-meta">
+                            <span class="bm-tag">${item.tags}</span>
+                            ${item.memo ? `<span style="margin-left:8px; color:#999;">${item.memo}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="bm-btns">
+                        <button class="btn-icon" onclick="event.stopPropagation(); openBookmarkModal('${item.row}', '${item.title}', '${item.url}', '${item.tags}', '${item.memo}', ${item.starred})">✏️</button>
+                        <button class="btn-icon" style="color:var(--danger)" onclick="event.stopPropagation(); deleteBookmark('${item.row}')">x</button>
+                    </div>
+                `;
+                listDiv.appendChild(d);
             });
-            
-            hideStatusBar(); // [상태바 숨김]
-            clearBmInput(); 
-            loadBookmarks(); 
         }
 
-        // [수정] 북마크 삭제 (상태바 연동)
-        async function deleteBookmark(r) { 
-            reqConfirm('삭제하시겠습니까?', async() => { 
-                showStatusBar("🗑️ 북마크 삭제 중..."); // [상태바 표시]
-                await sendRequest('delete_bookmark', {row: r}); 
-                hideStatusBar(); // [상태바 숨김]
-                loadBookmarks(); 
+        // [수정] 북마크 저장 (상태바 단계별 안내)
+        async function saveBookmark() {
+            const row = document.getElementById('bmRow').value;
+            const title = document.getElementById('bmTitle').value;
+            const url = document.getElementById('bmUrl').value;
+            const tags = document.getElementById('bmTags').value;
+            const memo = document.getElementById('bmMemo').value;
+            const starred = document.getElementById('bmStarred').checked;
+
+            if(!title || !url) { showToast("제목과 URL은 필수입니다."); return; }
+
+            // 1. 모달 닫기 & 상태바 시작
+            document.getElementById('bookmarkModal').classList.remove('open');
+            showStatusBar("💾 북마크 저장 중...");
+
+            // 2. 서버 요청
+            await sendRequest('save_bookmark', {
+                row: row ? parseInt(row) : null,
+                title: title, url: url, tags: tags, memo: memo, starred: starred
+            });
+
+            // 3. 갱신 대기 알림
+            updateStatusText("목록에 반영 중...");
+
+            // 4. 목록 새로고침 (완료 대기)
+            await loadBookmarks();
+
+            // 5. 완료 처리
+            hideStatusBar();
+            showToast("북마크가 저장되었습니다.");
+        }
+
+        // [수정] 북마크 삭제 (상태바 단계별 안내)
+        async function deleteBookmark(row) {
+            reqConfirm("정말 삭제하시겠습니까?", async () => {
+                // 1. 상태바 시작
+                showStatusBar("🗑️ 북마크 삭제 중...");
+
+                // 2. 서버 요청
+                await sendRequest('delete_bookmark', { row: parseInt(row) });
+
+                // 3. 갱신 대기 알림
+                updateStatusText("목록에 반영 중...");
+
+                // 4. 목록 새로고침 (완료 대기)
+                await loadBookmarks();
+
+                // 5. 완료 처리
+                hideStatusBar();
+                showToast("삭제되었습니다.");
             });
         }
         async function loadBookmarks() { bmList=await sendRequest('get_bookmarks')||[]; renderBmList();
