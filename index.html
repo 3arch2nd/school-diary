@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>쫑알수첩 Pro (Final v21.10)</title>
     <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
-    <style>
+<style>
         :root {
             --bg-main: #f2f8fc;
             --card-bg: #FFFFFF;
@@ -51,13 +51,13 @@
 
         hr { border: 0; border-top: 1px solid var(--border-color); margin: 20px 0; }
 
-/* [수정] PC 버전 호버 효과 (북마크 아이템 추가) */
+        /* [수정] PC 버전 호버 효과 */
         @media (min-width: 769px) {
             /* 1. 공통: 부드러운 전환 효과 */
             .btn, .btn-sm, .nav-item, .float-btn, .lock-float-btn, .dark-float-btn,
             .music-play-btn, .custom-item-row, .student-nav-item, .quick-link-item, 
             .float-menu-item, .btn-icon, .tag, .check-circle,
-            .bookmark-item { /* <-- 여기에 추가됨 */
+            .bookmark-item { 
                 transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background-color 0.2s;
             }
 
@@ -66,7 +66,7 @@
             .lock-float-btn:hover, .dark-float-btn:hover, .music-play-btn:hover,
             .custom-item-row:hover, .student-nav-item:hover, .float-menu-item:hover,
             .btn-icon:hover, .tag:hover, .check-circle:hover,
-            .bookmark-item:hover { /* <-- 여기에 추가됨 */
+            .bookmark-item:hover { 
                 transform: scale(1.03); 
             }
 
@@ -74,7 +74,7 @@
             .btn:hover, .btn-sm:hover, .nav-item:hover, .custom-item-row:hover, 
             .student-nav-item:hover, .float-menu-item:hover, .btn-icon:hover,
             .tag:hover, .check-circle:hover,
-            .bookmark-item:hover { /* <-- 여기에 추가됨 */
+            .bookmark-item:hover { 
                 z-index: 5; 
             }
             
@@ -90,11 +90,14 @@
             .nav-item:hover, .float-menu-item:hover, .student-nav-item:hover {
                 background-color: #eaf6fc;
             }
+            
+            /* [추가] 북마크 아이템 호버 시 스타일 */
+            .bookmark-item:hover {
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                border-color: var(--primary);
+            }
         }
         
-        /* [추가] 북마크 아이템 클릭 커서 (CSS 맨 아래나 적당한 곳에 추가) */
-        .bookmark-item { cursor: pointer; }
-
         .loading-anim::after {
             content: ''; animation: dots 1.5s steps(4, end) infinite;
         }
@@ -288,14 +291,41 @@
         .ql-emoji { font-size: 2rem; margin-bottom: 5px; }
         .ql-name { font-size: 0.85rem; color: var(--text-main); font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
 
+        /* [수정] 북마크 리스트 그리드 */
         #bmList { display: grid; gap: 15px; padding-right: 5px; }
         @media (min-width: 1200px) { #bmList { grid-template-columns: repeat(3, 1fr); } }
         @media (min-width: 800px) and (max-width: 1199px) { #bmList { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 799px) { #bmList { grid-template-columns: 1fr; } }
-        .bm-card { background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between; position: relative; }
-        .bm-star { position: absolute; top: 10px; right: 10px; font-size: 1.2rem; cursor: pointer; color: #ddd; transition: 0.2s; }
-        .bm-star.active { color: #f1c40f; }
-        .bm-link { font-weight: bold; color: var(--primary-dark); text-decoration: none; font-size: 1.05rem; display: block; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* [수정] 북마크 카드 디자인 리뉴얼 */
+        .bookmark-item {
+            position: relative;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            min-height: 120px; /* 높이 약간 확보 */
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+        }
+        /* 호버 효과는 상단 @media (min-width: 769px) 블록에서 처리됨 */
+
+        .bm-top-row { padding-right: 25px; margin-bottom: 5px; }
+        .bm-title { font-weight: bold; font-size: 1.05rem; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+
+        .bm-star-fixed { position: absolute; top: 12px; right: 12px; font-size: 1.2rem; color: #ddd; cursor: pointer; z-index: 2; line-height: 1; }
+        .bm-star-fixed.active { color: #f1c40f; }
+
+        .bm-memo-text { font-size: 0.9rem; color: #888; margin-bottom: 15px; flex-grow: 1; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        .bm-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto; }
+        .bm-pill-container { display: flex; flex-wrap: wrap; gap: 4px; max-width: 70%; }
+        .bm-pill { background-color: #f1f3f5; color: #555; font-size: 0.75rem; padding: 3px 8px; border-radius: 12px; white-space: nowrap; }
+        .bm-action-btns { display: flex; gap: 5px; }
+
+        /* 필터 태그 스타일 유지 */
         .bm-filter-tag { padding: 5px 12px; background: #fff; border: 1px solid #ddd; border-radius: 15px; font-size: 0.85rem; cursor: pointer; color: #666; transition: 0.2s; }
         .bm-filter-tag.active { background: var(--primary); color: white; border-color: var(--primary); }
 
@@ -453,15 +483,15 @@
 
             /* [수정 4] 잠금 버튼 위치 하단으로 이동 */
             .lock-float-btn {
-                top: auto !important;     /* 위쪽 고정 해제 */
+                top: auto !important;      /* 위쪽 고정 해제 */
                 bottom: 35px !important;  /* 아래쪽으로 이동 (+버튼 높이 중앙 정렬) */
-                right: 30px !important;   /* 평소엔 +버튼 뒤에 숨어있음 */
+                right: 30px !important;    /* 평소엔 +버튼 뒤에 숨어있음 */
                 transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* 부드러운 애니메이션 */
             }
 
             /* 메뉴가 열렸을 때 위치 (왼쪽으로 튀어나옴) */
             .lock-float-btn.show {
-                right: 90px !important;   /* +버튼 왼쪽 옆에 위치 */
+                right: 90px !important;    /* +버튼 왼쪽 옆에 위치 */
                 opacity: 1 !important;
                 pointer-events: auto !important;
             }
@@ -514,7 +544,7 @@
         body.dark-mode textarea,
         body.dark-mode .quick-link-item, 
         body.dark-mode .music-play-btn,  
-        body.dark-mode .tag-add,         
+        body.dark-mode .tag-add,          
         body.dark-mode .btn-outline,
         body.dark-mode .float-menu-item, 
         body.dark-mode .check-circle,    
@@ -606,6 +636,18 @@
 
         body.dark-mode .tag { background-color: #333; color: #ddd; }
         body.dark-mode .tag.selected { background-color: var(--primary); color: #1a1f2c; }
+
+        /* [추가] 북마크 아이템 다크모드 대응 */
+        body.dark-mode .bookmark-item {
+            background-color: var(--card-bg) !important;
+            border-color: var(--border-color) !important;
+        }
+        body.dark-mode .bm-title { color: var(--text-main) !important; }
+        body.dark-mode .bm-memo-text { color: var(--text-sub) !important; }
+        body.dark-mode .bm-pill {
+            background-color: #353f52 !important;
+            color: #ccc !important;
+        }
 
         @media (max-width: 768px) {
             .dark-float-btn {
@@ -2113,18 +2155,17 @@ function toggleFloatMenu() {
             renderBookmarkListItems(); // 필터 변경 시 목록만 다시 그림
         }
 
-        // 2. 북마크 데이터 불러오기 (로딩 표시 포함)
+        // [수정] 북마크 불러오기 (로딩 문구 단축)
         async function loadBookmarks() {
-            const listDiv = document.getElementById('bmList'); // [수정] ID를 bmList로 통일
-            
-            // 로딩 애니메이션 표시
-            listDiv.innerHTML = '<div style="text-align:center; padding:30px; color:#888;">북마크 불러오는 중 <span class="loading-anim"></span></div>';
+            const listDiv = document.getElementById('bmList');
+            // 문구가 길어서 잘리는 문제 해결 -> 짧게 수정
+            listDiv.innerHTML = '<div style="text-align:center; padding:30px; color:#888;">불러오는 중... <span class="loading-anim"></span></div>';
             
             bmList = await sendRequest('get_bookmarks') || [];
             renderBookmarkListItems();
         }
 
-        // 3. 실제 리스트 그리기 (화면 렌더링 전용)
+        // [수정] 북마크 리스트 그리기 (디자인 개편 반영)
         function renderBookmarkListItems() {
             const listDiv = document.getElementById('bmList');
             listDiv.innerHTML = '';
@@ -2132,35 +2173,50 @@ function toggleFloatMenu() {
             // 필터링 적용
             let filtered = currentBmFilter ? bmList.filter(b => b.tags && b.tags.includes(currentBmFilter)) : bmList;
             
-            // 중요도(별) 순 정렬
-            filtered.sort((a,b) => (b.starred === true) - (a.starred === true));
+            // 정렬: 중요(별) > 최신순(row 역순)
+            filtered.sort((a,b) => {
+                if (a.starred !== b.starred) return (b.starred === true) - (a.starred === true);
+                return b.row - a.row; 
+            });
 
             if(filtered.length === 0) {
-                listDiv.innerHTML = '<div style="color:#999; padding:20px; text-align:center;">표시할 북마크가 없습니다.</div>';
+                listDiv.innerHTML = '<div style="color:#999; padding:20px; text-align:center;">북마크가 없습니다.</div>';
                 return;
             }
 
             filtered.forEach(item => {
                 const d = document.createElement('div');
-                d.className = 'bookmark-item'; // CSS 호버 효과 클래스 적용
+                d.className = 'bookmark-item'; 
                 
-                // [핵심] 박스 전체 클릭 시 이동
+                // 박스 전체 클릭 시 이동
                 d.onclick = () => window.open(item.url, '_blank');
                 
+                // 태그 HTML 생성 (콤마로 분리해서 각각 알약으로 만듦)
+                let tagsHtml = '';
+                if(item.tags) {
+                    item.tags.split(',').forEach(t => {
+                        if(t.trim()) tagsHtml += `<span class="bm-pill">${t.trim()}</span>`;
+                    });
+                }
+
                 d.innerHTML = `
-                    <div class="bm-content">
-                        <div class="bm-title">
-                            <span class="bm-star ${item.starred ? 'active' : ''}" style="margin-right:5px; color:${item.starred?'#f1c40f':'#ddd'}; font-size:1.1rem;" onclick="toggleBmStar(${item.row}, ${!item.starred}, event)">★</span>
-                            ${item.title}
-                        </div>
-                        <div class="bm-meta">
-                            <span class="bm-tag">${item.tags || ''}</span>
-                            ${item.memo ? `<span style="margin-left:8px; color:#999; font-size:0.8rem;">${item.memo}</span>` : ''}
-                        </div>
+                    <div class="bm-star-fixed ${item.starred ? 'active' : ''}" 
+                         onclick="toggleBmStar(${item.row}, ${!item.starred}, event)">★</div>
+
+                    <div class="bm-top-row">
+                        <span class="bm-title">${item.title}</span>
                     </div>
-                    <div class="bm-btns">
-                        <button class="btn-icon" onclick="event.stopPropagation(); openBookmarkModal('${item.row}', '${item.title}', '${item.url}', '${item.tags}', '${item.memo}', ${item.starred})">✏️</button>
-                        <button class="btn-icon" style="color:var(--danger)" onclick="event.stopPropagation(); deleteBookmark('${item.row}')">x</button>
+
+                    <div class="bm-memo-text">${item.memo || ''}</div>
+
+                    <div class="bm-footer">
+                        <div class="bm-pill-container">
+                            ${tagsHtml}
+                        </div>
+                        <div class="bm-action-btns">
+                            <button class="btn-icon" onclick="event.stopPropagation(); openBookmarkModal('${item.row}', '${item.title}', '${item.url}', '${item.tags}', '${item.memo}', ${item.starred})">✏️</button>
+                            <button class="btn-icon" style="color:var(--danger)" onclick="event.stopPropagation(); deleteBookmark('${item.row}')">x</button>
+                        </div>
                     </div>
                 `;
                 listDiv.appendChild(d);
