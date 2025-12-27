@@ -1686,15 +1686,77 @@ function toggleFloatMenu() {
         // [CUSTOM MODE LOGIC]
         async function loadCustomItems() { customItems = await sendRequest('manage_custom_items', {mode:'get'}) ||
             []; }
+        // [수정] 나만의 항목 렌더링 (수정/삭제 버튼 추가)
         function renderCustomItems() {
             const list = document.getElementById('customItemsList');
             list.innerHTML = '';
+            
+            if (customItems.length === 0) {
+                list.innerHTML = '<div style="color:#aaa; text-align:center; padding:10px;">등록된 항목이 없습니다.</div>';
+                return;
+            }
+
             customItems.forEach((item, idx) => {
-                const div = document.createElement('div'); div.className = `custom-item-row ${currentCustomItem===idx ? 'active':''}`;
-                div.innerText = item.name;
-                div.onclick = () => { currentCustomItem = idx; renderCustomItems(); refreshCustomView(); };
+                const div = document.createElement('div');
+                div.className = `custom-item-row ${currentCustomItem === idx ? 'active' : ''}`;
+                
+                // 클릭 시 해당 항목 선택 (기존 기능)
+                div.onclick = () => { 
+                    currentCustomItem = idx; 
+                    renderCustomItems(); 
+                    refreshCustomView(); 
+                };
+
+                div.innerHTML = `
+                    <div style="flex:1; font-weight:bold; display:flex; align-items:center;">
+                        <span style="margin-right:5px;">${item.name}</span>
+                        <span style="font-size:0.8rem; color:#888; font-weight:normal;">(${item.type})</span>
+                    </div>
+                    <div class="ci-btns">
+                        <button class="btn-icon" onclick="event.stopPropagation(); editCustomItem(${idx})">✏️</button>
+                        <button class="btn-icon" style="color:var(--danger)" onclick="event.stopPropagation(); deleteCustomItem(${idx})">x</button>
+                    </div>
+                `;
                 list.appendChild(div);
-        
+            });
+        }
+
+        // [추가] 항목 이름 수정
+        async function editCustomItem(idx) {
+            const item = customItems[idx];
+            const newName = prompt("수정할 이름을 입력하세요:", item.name);
+            
+            if (newName && newName.trim() !== "" && newName !== item.name) {
+                // 1. 이름 변경
+                item.name = newName.trim();
+                renderCustomItems(); // 화면 즉시 갱신
+                
+                // 2. 서버 저장
+                await sendRequest('manage_custom_items', {mode: 'save', items: customItems});
+                showToast("이름이 수정되었습니다.");
+            }
+        }
+
+        // [추가] 항목 삭제
+        async function deleteCustomItem(idx) {
+            reqConfirm(`'${customItems[idx].name}' 항목을 정말 삭제하시겠습니까?\n(기존 기록은 보존되지만 항목 목록에서만 사라집니다.)`, async () => {
+                // 1. 배열에서 삭제
+                customItems.splice(idx, 1);
+                
+                // 2. 현재 선택된 항목 인덱스 보정
+                if (currentCustomItem === idx) {
+                    currentCustomItem = null; // 선택된 걸 지웠으면 선택 해제
+                    document.getElementById('customCheckList').innerHTML = ''; // 뷰 클리어
+                    document.getElementById('customStatsChart').innerHTML = '';
+                } else if (currentCustomItem > idx) {
+                    currentCustomItem--; // 앞쪽이 지워졌으면 인덱스 당기기
+                }
+
+                renderCustomItems(); // 화면 즉시 갱신
+
+                // 3. 서버 저장
+                await sendRequest('manage_custom_items', {mode: 'save', items: customItems});
+                showToast("삭제되었습니다.");
             });
         }
         function openCustomItemModal() { document.getElementById('customItemModal').classList.add('open');
